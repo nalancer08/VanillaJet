@@ -1,0 +1,32 @@
+{
+  "name": "FWWA",
+  "version": "0.0.1",
+  "description": "NodeJS for WebApps with Ladybug and Vue",
+  "homepage": "",
+  "keywords": [
+    "nodejs",
+    "webapp",
+    "ladybug",
+    "vue"
+  ],
+  "author": "biohzrdmx <http://github.com/nalancer08>",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/nalancer08/dragonfly-node.git"
+  },
+  "main": "index.js",
+  "dependencies": {
+    "blueimp-md5": "^2.8.0",
+    "jwt-simple": "^0.5.0",
+    "moment": "^2.15.2",
+    "underscore": ">= 1.6.x"
+  },
+  "scripts": {},
+  "license": "MIT",
+  "files": [
+    "lib/request.js",
+    "lib/response.js",
+    "lib/server.js",
+    "index.js"
+  ]
+}
