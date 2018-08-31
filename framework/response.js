@@ -78,6 +78,13 @@ Response.prototype.respond = function() {
 	obj.res.end(obj.body);
 }
 
+Response.prototype.renderPage = function(template, data) {
+
+	var obj = this,
+		template = 'pages/' + template;
+	obj.render(template, data);
+}
+
 Response.prototype.render = function(template, data) {
 
 	var obj = this,
@@ -86,8 +93,7 @@ Response.prototype.render = function(template, data) {
 		fs = require("fs")
 		nunjucks = require('nunjucks');
 
-	var filename = path.join(process.cwd(), '');
-
+	var filename = path.join(process.cwd(), 'assets/');
 	fs.exists(filename, function(exists) {
     	
     	if (!exists) {
@@ -99,7 +105,10 @@ Response.prototype.render = function(template, data) {
     	}
 
     	if (fs.statSync(filename).isDirectory()) filename += template;
+    	console.log(filename);
+    	console.log(template);
 		fs.readFile(filename, "binary", function(err, file) {
+	  		
 	  		if(err) {        
 		        
 		        obj.res.writeHead(500, {"Content-Type": "text/plain"});
@@ -108,9 +117,10 @@ Response.prototype.render = function(template, data) {
 		        return;
 	  		}
 
-	  		var compiled = nunjucks.renderString(file, data);
+	  		var r = global.render.render(template, data);
+
 	      	obj.res.writeHead(200);
-	      	obj.res.write(compiled, "binary");
+	      	obj.res.write(r, "binary");
 	      	obj.res.end();
 	  	});
 	});
