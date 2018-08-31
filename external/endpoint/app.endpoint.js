@@ -17,7 +17,7 @@ function EndpointApp(server) {
 EndpointApp.prototype.home = function(request, response, server) {
 
 	var obj = this;
-	response.render('/assets/test.html', { username: 'Erick' });
+	response.renderPage('home.html', { username: 'Erick' });
 }
 
 module.exports = EndpointApp;
