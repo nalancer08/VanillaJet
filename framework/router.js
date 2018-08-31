@@ -69,7 +69,7 @@ Router.prototype.onRequest = function(req, res) {
 	var request = new Request(req, {
 		onDataReceived: function() {
 
-			console.log(request.path);
+			//console.log(request.path);
 			if (request.path == obj.server.options.base_url) {
 				request.path = obj.server.options.base_url + obj.defaultRoute;
 			}
