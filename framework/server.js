@@ -11,6 +11,8 @@ var https = require('https');
 var url = require('url') ;
 var crypto = require('crypto');
 var fs = require('fs');
+var nunjucks = require('nunjucks');
+var path = require('path');
 
 var Request  = require('./request.js');
 var Response = require('./response.js');
@@ -98,6 +100,9 @@ Server.prototype.start = function() {
 	obj.log('__________________  Dragonfly server started  ___________________');
 	obj.log(' >           Listening on ' + obj.options.site_url + ':' + obj.options.port + obj.options.base_url + '         < ');
 	obj.log('-----------------------------------------------------------------');
+
+	// Render
+	global.render = nunjucks.configure(path.join(process.cwd(), 'assets'), { autoescape: false, noCache: true });
 }
 
 Server.prototype.log = function(value) {
