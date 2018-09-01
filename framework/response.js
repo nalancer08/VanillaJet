@@ -105,11 +105,9 @@ Response.prototype.render = function(template, data) {
     	}
 
     	if (fs.statSync(filename).isDirectory()) filename += template;
-    	console.log(filename);
-    	console.log(template);
 		fs.readFile(filename, "binary", function(err, file) {
 	  		
-	  		if(err) {        
+	  		if (err) {        
 		        
 		        obj.res.writeHead(500, {"Content-Type": "text/plain"});
 		        obj.res.write(err + "\n");
@@ -117,10 +115,11 @@ Response.prototype.render = function(template, data) {
 		        return;
 	  		}
 
-	  		var r = global.render.render(template, data);
+	  		data['app'] = global.dipper;
+	  		var render = global.render.render(template, data);
 
 	      	obj.res.writeHead(200);
-	      	obj.res.write(r, "binary");
+	      	obj.res.write(render, "binary");
 	      	obj.res.end();
 	  	});
 	});

@@ -41,6 +41,11 @@ const settings = {
 	},
 	'shared': {
 
+		'site_name': 'Dipper App',
+		'description': 'Dipper App Example instance'
+	},
+	'security': {
+
 		'pass_salt': 'M0f4Ukm=}ob%5S)FTZP#.<G$1[fLkzT6d!G"B+iz.i"9p4M`8y0G9JS}TXfQX,6O',
 		'token_salt': '2f2J[SiwEV[PGI<9E4A0d&g-o$w~91cP_OjYcRb<[6EJbh!<0F7V*u?hQ^UF?hsY',
 		'key': 'privkey.pem',

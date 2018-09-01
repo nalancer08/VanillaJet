@@ -17,6 +17,7 @@ var path = require('path');
 var Request  = require('./request.js');
 var Response = require('./response.js');
 var Router = require('./router.js');
+var Dipper = require('./dipper.js');
 var Functions = require('../external/functions.js');
 
 function Server(options) {
@@ -25,6 +26,7 @@ function Server(options) {
 	this.verbose = true;
 	this.router = null;
 	this.functions = null;
+	this.dipper = null;
 	// Call initialization callback
 	this.init(options);
 }
@@ -34,7 +36,8 @@ Server.prototype.init = function(options) {
 	var obj = this,
 		settings = options.settings,
 		opts = settings[options.profile] || {},
-		security = settings['shared'] || {};
+		shared = settings['shared'] || {},
+		security = settings['security'] || {};
 
 	_.defaults(opts, {
 		base_url: '',
@@ -50,6 +53,9 @@ Server.prototype.init = function(options) {
 		version: '1.0'
 	});
 	obj.security = security;
+
+	// Setting Dipper instance
+	global.dipper = new Dipper(shared);
 
 	// Cheking for http or https
 	if (/^((http):\/\/)/.test(obj.options.site_url) || /^((localhost))/.test(obj.options.site_url)) {

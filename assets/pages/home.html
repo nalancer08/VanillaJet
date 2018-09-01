@@ -1,3 +1,7 @@
-{% include "partials/header.html" %}
+{% extends "partials/header.html" %}
 
-HOla {{ username }}
+{% block body %}
+
+<p>Hola {{ username }}</p>
+
+{% endblock %}

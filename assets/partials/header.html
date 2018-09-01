@@ -1,9 +1,9 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-	<title><?php echo $site->getPageTitle(); ?></title>
+	<title> {{ app.getPageTitle() }} </title>
 
-	<?php $site->metaTags(); ?>
+	{{ app.metaTags() }}
 
 	<link rel="shortcut icon" href="<?php $site->img('favicon.ico'); ?>">
 	<link rel="icon" href="<?php $site->img('favicon.png'); ?>" type="image/png">
@@ -22,3 +22,6 @@
 	<?php $site->includeScriptVars(); ?>
 </head>
 <body class="<?php $site->bodyClass() ?>">
+
+	{% block body %}
+    {% endblock %}
