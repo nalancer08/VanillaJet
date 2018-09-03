@@ -88,7 +88,6 @@ Dipper.prototype.metaTags = function() {
 	var _ = require('underscore');
 	var stringMeta = '';
 
-	//console.log(obj.metas);
 	var keys = Object.keys(obj.metas);
 	_.each(keys, function(key) {
 
@@ -108,6 +107,15 @@ Dipper.prototype.img = function(filename) {
 
 	var obj = this,
 		dir = this.getDir('images', false);
+		ret = this.urlTo(dir + filename);
+		console.log(ret);
+	return ret;
+}
+
+Dipper.prototype.script = function(filename) {
+
+	var obj = this,
+		dir = this.getDir('scripts', false),
 		ret = this.urlTo(dir + filename);
 		console.log(ret);
 	return ret;
@@ -304,6 +312,46 @@ Dipper.prototype.getScripts = function() {
 	
 	var obj = this;
 	return obj.scripts;
+}
+
+// -- Methods for single-page and web progresive apps
+
+Dipper.prototype.template = function(template, id, templates_dir, params) {
+
+	var obj = this,
+		fs = require('fs'),
+		path = require('path'),
+		templates_dir = (templates_dir == undefined) ? 'assets/templates/' : templates_dir,
+		params = params || [],
+		dir = path.join(process.cwd(), templates_dir),
+		templateString = '<script type=\"text/template\" id=\"' + id + '\">';
+
+	fs.exists(dir, function(exists) {
+
+    	if (exists) {
+
+    		var tempTemplate = template + '.html';
+    		if (fs.statSync(dir).isDirectory()) dir += tempTemplate;
+			fs.readFile(dir, "binary", function(err, file) {
+
+		  		if (err) {
+		  			
+		  			templateString += '<script type=\"text/template\" id=\"' + id + '\"><pre>Template ' + id + ' not found</pre></script>';
+		  			return templateString;
+		  		}
+
+		  		if (file) {        
+			        
+	  				templateString += '\n';
+	  				templateString += file;
+	  				templateString += '\n\t';
+	  				templateString += '</script>';
+	  				templateString += '\n\n';
+	  				return templateString;
+		  		}
+		  	});
+    	}
+	});
 }
 
 module.exports = Dipper;

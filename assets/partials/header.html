@@ -1,3 +1,4 @@
+{% block page %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -5,12 +6,16 @@
 
 	{{ app.metaTags() }}
 
-	<link rel="shortcut icon" href="{{ app.img('erick.ico') }}">
-	<link rel="icon" href="{{ app.img('erick.ico') }}" type="image/png">
+	<link rel="shortcut icon" href="{{ app.img('favicon.png') }}">
+	<link rel="icon" href="{{ app.img('favicon.png') }}" type="image/png">
 	{{ app.includeStyles() }}
-	
+	{{ app.includeScript('modernizr') }}
+	{{ app.includeScript('respond') }}
+
 </head>
-<body class="<?php $site->bodyClass() ?>">
+<body class="">
 
 	{% block body %}
     {% endblock %}
+
+{% endblock %}

@@ -113,13 +113,53 @@ Router.prototype.onRequest = function(req, res) {
 				});
 			}
 
-			// Not handled? Well, at this point we call 404
+			// No route catched, maybe it's a static content
+			// or not handled? Well, at this point we call 404
 			if (handled == false && isMatch == false ) {
 
-				if(req.url.match("\.png$") || req.url.match("\.ico$")) {
+				var path = require('path'),
+					ext = path.extname(req.url),
+					extHandled = false,
+					extHeader = {};
 
-					var path = require('path'),
-						fs = require('fs'),
+				//ext = (req.url.match("\.ico$")) ? '.ico' : ext;
+				console.log(ext);
+
+				switch(ext) {
+
+					case '.png':
+
+						extHandled = true;
+						extHeader = {"Content-Type": "image/png"};
+
+					break;
+
+					case '.jpg':
+
+						extHandled = true;
+						extHeader = {"Content-Type": "image/png"};
+						
+					break;
+
+					case '.css':
+
+						extHandled = true;
+						extHeader = {"Content-Type": "text/css"};
+						
+					break;
+
+					case '.js':
+
+						extHandled = true;
+						extHeader = {"Content-Type": "text/javascript"};
+						
+					break;
+				}
+
+				// Check if pass
+				if (extHandled) {
+
+					var fs = require('fs'),
 						rep = __dirname.replace('framework', ''),
 						route = request.path.replace(obj.server.options.base_url, ''),
 			       		filename = path.join(rep, route);
@@ -129,7 +169,7 @@ Router.prototype.onRequest = function(req, res) {
 			       		if (exists) {
 
 			       			var fileStream = fs.createReadStream(filename);
-				       		res.writeHead(200, {"Content-Type": "image/png"});
+				       		res.writeHead(200, extHeader);
 				        	fileStream.pipe(res);
 				        	return;
 
@@ -139,13 +179,15 @@ Router.prototype.onRequest = function(req, res) {
 			   				obj.onNotFound(response);
 			       		}
 			       	});
-			    }
+				}
 			}
 		}
 	}),
 	handled = false;
 	isMatch = false;
 }
+
+Router.prototype.validateExtension = function(route) {}
 
 Router.prototype.validateCallback = function(clazz, method) {
 

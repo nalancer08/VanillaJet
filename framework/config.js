@@ -41,7 +41,7 @@ const settings = {
 	},
 	'shared': {
 
-		'site_name': 'Dipper App',
+		'site_name': 'Dipper',
 		'description': 'Dipper App Example instance',
 		'fbAppId' : ''
 	},

@@ -2,6 +2,12 @@
 
 {% block body %}
 
-<p>Hola {{ username }}</p>
+	<p class="tst">Hola {{ username }}</p>
+	<div id="ladybug-root" class="ladybug-app"></div>
+
+	{% include "templates/pum.html" %}
+	{{ app.template('pum', 'partial-header') }}
 
 {% endblock %}
+
+{% extends "partials/footer.html" %}
