@@ -10,21 +10,40 @@ function Dipper(options, shared) {
 	this.description = shared.description;
 	this.fbAppId = shared.fbAppId;
 
+	this.site_url = ((this.options.site_url == 'localhost')  ? 'http://localhost' : this.options.site_url) + ':' + this.options.port;
 	this.base_dir = path.join(process.cwd(), '/');
-	this.base_url = (this.options.site_url == 'localhost')  ? 'http://localhost' : this.options.site_url + 
-					':' + this.options.port + this.options.base_url;
-	console.log("Dipper instance");
-	console.log(this.base_dir);
-
+	this.base_url = this.site_url + this.options.base_url;
+	
 	// Dirs
 	this.dirs = {
 
-		'pages'   : '/aasets/pages',
-		'parts'   : '/aasets/parts',
-		'images'  : '/aasets/images',
-		'scripts' : '/aasets/scripts',
-		'styles'  : '/aasets/css'
+		'pages'   : '/assets/pages/',
+		'parts'   : '/assets/parts/',
+		'images'  : '/assets/images/',
+		'scripts' : '/assets/scripts/',
+		'styles'  : '/assets/css/'
 	}
+
+	// -- Static content
+	this.scripts = [];
+	this.styles = [];
+	this.enqueued_scripts = [];
+	this.enqueued_styles = [];
+
+	// Register base styles
+	this.registerStyle('twitter-bootstrap', '//cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.2.0/css/bootstrap.min.css');
+	this.registerStyle('magnific-popup', '//cdnjs.cloudflare.com/ajax/libs/magnific-popup.js/0.9.9/magnific-popup.css');
+	
+	// Register base scripts
+	this.registerScript('modernizr', '//cdnjs.cloudflare.com/ajax/libs/modernizr/2.8.2/modernizr.min.js');
+	this.registerScript('respond', '//cdnjs.cloudflare.com/ajax/libs/respond.js/1.4.2/respond.js');
+	this.registerScript('jquery', '//cdnjs.cloudflare.com/ajax/libs/jquery/1.11.0/jquery.min.js');
+	this.registerScript('jquery.form', '//cdnjs.cloudflare.com/ajax/libs/jquery.form/3.50/jquery.form.min.js', ['jquery']);
+	this.registerScript('jquery.cycle', '//cdnjs.cloudflare.com/ajax/libs/jquery.cycle/3.03/jquery.cycle.all.min.js', ['jquery']);
+	this.registerScript('magnific-popup', '//cdnjs.cloudflare.com/ajax/libs/magnific-popup.js/0.9.9/jquery.magnific-popup.min.js', ['jquery']);
+	this.registerScript('twitter-bootstrap', '//cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.2.0/js/bootstrap.min.js', ['jquery']);
+	this.registerScript('underscore', '//cdnjs.cloudflare.com/ajax/libs/underscore.js/1.6.0/underscore-min.js');
+	this.registerScript('backbone', '//cdnjs.cloudflare.com/ajax/libs/backbone.js/1.1.2/backbone-min.js', ['underscore']);
 }
 
 Dipper.prototype.getPageTitle = function() {
@@ -90,16 +109,17 @@ Dipper.prototype.img = function(filename) {
 	var obj = this,
 		dir = this.getDir('images', false);
 		ret = this.urlTo(dir + filename);
+		console.log(ret);
 	return ret;
 }
 
 Dipper.prototype.getDir = function(dir, full) {
 	
 	var obj = this,
-		full = full || true;
+		full = (full == undefined) ? true : full;
 
 	if ( obj.dirs[dir] != undefined ) {
-		return (full ? obj.baseDir(obj.dirs[dir]) : obj.dirs[dir]);
+		return (full == true ? obj.baseDir(obj.dirs[dir]) : obj.dirs[dir]);
 	}
 	return false;
 }
@@ -123,37 +143,167 @@ Dipper.prototype.isSecureRequest = function() {
 	}
 }
 
-Dipper.prototype.baseUrl = function(path, protocol) {
-	
-	var obj = this,
-		path = path || '',
-		protocol = protocol || undefined,
-		base_url = obj.base_url.replace(new RegExp("[" + '\\/' + "]*$"), '');
-
-	if (protocol == undefined && obj.isSecureRequest() ) {
-
-		base_url = base_url.replace('http://', 'https://');
-
-	} else if (protocol) {
-
-		protocol += protocol.lastIndexOf(':') > 0 ? '' : ':';
-		base_url = base_url.replace('http:', protocol);
-	}
-
-	if ( path != '' && path[0] != '/' ) {
-		path = '/' + path;
-	}
-
-	var ret = base_url + path;
-	return ret;
-}
-
 Dipper.prototype.urlTo = function(route, protocol) {
 
 	var obj = this,
 		protocol = protocol || undefined,
-		url = obj.baseUrl(route, protocol);
+		url = obj.base_url + route;
+		//url = obj.baseUrl(route, protocol);
 	return url;
+}
+
+Dipper.prototype.registerStyle = function(name, url, requires) {
+	
+	var obj = this;
+	obj.styles[name] = {
+		'resource' : url,
+		'requires' : requires
+	};
+}
+
+Dipper.prototype.registerScript = function(name, url, requires) {
+	
+	var obj = this;
+	obj.scripts[name] = {
+
+		'resource' : url,
+		'requires' : requires
+	};
+}
+
+Dipper.prototype.enqueueStyle = function(name) {
+
+	var obj = this,
+		_ = require('underscore');
+
+	if (obj.styles[name] != undefined) {
+		if (obj.enqueued_styles[name] == undefined) {
+			
+			var item = obj.styles[name];
+			_.each(item.requires, function(dep) {
+				obj.enqueueStyle(dep);
+			});
+			obj.enqueued_styles[name] = name;
+		}
+	}
+}
+
+Dipper.prototype.enqueueScript = function(name) {
+
+	var obj = this,
+		_ = require('underscore');
+
+	if (obj.scripts[name] != undefined) {
+		if (obj.enqueued_scripts[name] == undefined) {
+
+			var item = obj.scripts[name];
+			_.each(item.requires, function(dep) {
+				obj.enqueueScript(dep);
+			});
+			obj.enqueued_scripts[name] = name;
+		}
+	}
+}
+
+Dipper.prototype.dequeueStyle = function(name, dependencies) {
+
+	var obj = this,
+		_ = require('underscore')
+		dependencies = (dependencies == undefined) ? false : dependencies;
+
+	if (obj.styles[name] != undefined) {
+		if (obj.enqueued_styles[name] != undefined) {
+			var item = obj.styles[name];
+			if (dependencies != undefined) {
+				_.each(item.require, function(dep) {
+					obj.dequeueStyle(dep);
+				});
+			}
+			delete obj.enqueued_styles[name];
+		}
+	}
+}
+
+Dipper.prototype.dequeueScript = function(name, dependencies) {
+
+	var obj = this,
+		_ = require('underscore')
+		dependencies = (dependencies == undefined) ? false : dependencies;
+
+	if (obj.scripts[name] != undefined) {
+		if (obj.enqueued_scripts[name] != undefined) {
+			var item = obj.scripts[name];
+			if (dependencies != undefined) {
+				_.each(item.require, function(dep) {
+					obj.dequeueScript(dep);
+				});
+			}
+			delete obj.enqueued_scripts[name];
+		}
+	}
+}
+
+Dipper.prototype.includeStyle = function(style) {
+			
+	var obj = this;
+	if (obj.styles[style] != undefined) {
+
+		var item = obj.styles[style];
+		//output = site->executeHook('core.includeStyle', $item);
+		var output = '<link rel=\"stylesheet\" type=\"text/css\" href=\"' + item['resource'] + '\">';
+		return output + "\n";
+	}
+}
+
+Dipper.prototype.includeScript = function(script) {
+	
+	var obj = this;
+	if (obj.scripts[script]) {
+		var item = obj.scripts[script];
+		//$output = $site->executeHook('core.includeScript', $item);
+		var output = '<script type=\"text/javascript\" src=\"' + item['resource'] + '\"></script>';
+		return output + "\n";
+	}
+}
+
+Dipper.prototype.includeStyles = function() {
+	
+	var obj = this,
+		_ = require('underscore')
+		stylesString = '',
+		keys = Object.keys(obj.enqueued_styles);
+
+	_.each(keys, function(style) {
+		stylesString += obj.includeStyle(style);
+	});
+	//$site->executeHook('core.includeStyles');
+	return stylesString;
+}
+
+Dipper.prototype.includeScripts = function () {
+			
+	var obj = this,
+		_ = require('underscore')
+		scriptsString = '',
+		keys = Object.keys(obj.enqueued_scripts);
+
+	_.each(keys, function(script) {
+		scriptsString += obj.includeScript(script);
+	});
+	//$site->executeHook('core.includeScripts');
+	return scriptsString;
+}
+
+Dipper.prototype.getStyles = function() {
+
+	var obj = this;
+	return obj.styles;
+}
+
+Dipper.prototype.getScripts = function() {
+	
+	var obj = this;
+	return obj.scripts;
 }
 
 module.exports = Dipper;
