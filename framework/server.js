@@ -55,7 +55,7 @@ Server.prototype.init = function(options) {
 	obj.security = security;
 
 	// Setting Dipper instance
-	global.dipper = new Dipper(shared);
+	global.dipper = new Dipper(opts, shared);
 
 	// Cheking for http or https
 	if (/^((http):\/\/)/.test(obj.options.site_url) || /^((localhost))/.test(obj.options.site_url)) {
