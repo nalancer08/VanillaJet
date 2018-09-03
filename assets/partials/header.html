@@ -5,8 +5,8 @@
 
 	{{ app.metaTags() }}
 
-	<link rel="shortcut icon" href="<?php $site->img('favicon.ico'); ?>">
-	<link rel="icon" href="<?php $site->img('favicon.png'); ?>" type="image/png">
+	<link rel="shortcut icon" href="{{ app.img('favicon.png') }}">
+	<link rel="icon" href="{{ app.img('favicon.png') }}" type="image/png">
 	<script type="text/javascript">
 		var constants = {
 			siteUrl: '<?php $site->urlTo("", true); ?>',
