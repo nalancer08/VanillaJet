@@ -9,7 +9,7 @@ var Response = require('./response.js');
 var endpoints = require('../external/functions.js').endpoints;
 
 var _ = require('underscore');
-var url = require('url') ;
+var url = require('url');
 
 function Router(server) {
 
@@ -113,9 +113,34 @@ Router.prototype.onRequest = function(req, res) {
 				});
 			}
 
-			// Not handled? Well, at this point we call it 404
+			// Not handled? Well, at this point we call 404
 			if (handled == false && isMatch == false ) {
-				obj.onNotFound(request, response);
+
+				if(req.url.match("\.png$") || req.url.match("\.ico$")) {
+
+					var path = require('path'),
+						fs = require('fs'),
+						rep = __dirname.replace('framework', ''),
+			       		filename = path.join(rep, request.path);
+
+			       	fs.exists(filename, function(exists) {
+
+			       		if (exists) {
+
+			       			var fileStream = fs.createReadStream(filename);
+				       		res.writeHead(200, {"Content-Type": "image/png"});
+				        	fileStream.pipe(res);
+				        	return;
+
+			       		} else {
+
+			       			// Return 404
+			   				obj.onNotFound(request, response);
+			       		}
+			       	});
+			    }
+
+			    
 			}
 		}
 	}),
