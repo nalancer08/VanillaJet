@@ -5,21 +5,10 @@
 
 	{{ app.metaTags() }}
 
-	<link rel="shortcut icon" href="{{ app.img('favicon.png') }}">
-	<link rel="icon" href="{{ app.img('favicon.png') }}" type="image/png">
-	<script type="text/javascript">
-		var constants = {
-			siteUrl: '<?php $site->urlTo("", true); ?>',
-			ajaxUrl: '<?php $site->urlTo("/ajax", true); ?>',
-			slug: <?php echo json_encode( $site->getSlugs() ); ?>,
-			page: '<?php echo $site->getCurPage(); ?>',
-			fbAppId: '149978198930302'
-		};
-	</script>
-	<?php $site->includeStyles(); ?>
-	<?php $site->includeScript('modernizr'); ?>
-	<?php $site->includeScript('respond'); ?>
-	<?php $site->includeScriptVars(); ?>
+	<link rel="shortcut icon" href="{{ app.img('erick.ico') }}">
+	<link rel="icon" href="{{ app.img('erick.ico') }}" type="image/png">
+	{{ app.includeStyles() }}
+	
 </head>
 <body class="<?php $site->bodyClass() ?>">
 
