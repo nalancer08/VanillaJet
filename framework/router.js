@@ -121,7 +121,8 @@ Router.prototype.onRequest = function(req, res) {
 					var path = require('path'),
 						fs = require('fs'),
 						rep = __dirname.replace('framework', ''),
-			       		filename = path.join(rep, request.path);
+						route = request.path.replace(obj.server.options.base_url, ''),
+			       		filename = path.join(rep, route);
 
 			       	fs.exists(filename, function(exists) {
 
@@ -135,12 +136,10 @@ Router.prototype.onRequest = function(req, res) {
 			       		} else {
 
 			       			// Return 404
-			   				obj.onNotFound(request, response);
+			   				obj.onNotFound(response);
 			       		}
 			       	});
 			    }
-
-			    
 			}
 		}
 	}),
@@ -181,7 +180,7 @@ Router.prototype.getDefaultRoute = function() {
 	return (prev + obj.defaultRoute);
 }
 
-Router.prototype.onNotFound = function(request, response) {
+Router.prototype.onNotFound = function(response) {
 
 	response.setStatus(404);
 	response.respond(); // response.res.end();
