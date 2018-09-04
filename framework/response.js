@@ -116,11 +116,26 @@ Response.prototype.render = function(template, data) {
 	  		}
 
 	  		data['app'] = global.dipper;
-	  		var render = global.render.render(template, data);
+	  		global.render.render(template, data, function(err, render) {
 
-	      	obj.res.writeHead(200);
-	      	obj.res.write(render, "binary");
-	      	obj.res.end();
+	  			if (err) {
+
+	  				console.log(err);
+	  			}
+			   
+				if (render) {
+
+					obj.res.writeHead(200);
+	      			obj.res.write(render, "binary");
+	      			obj.res.end();
+			   	}
+			});
+
+	  		// var render = global.render.render(template, data);
+
+	    //   	obj.res.writeHead(200);
+	    //   	obj.res.write(render, "binary");
+	    //   	obj.res.end();
 	  	});
 	});
 }

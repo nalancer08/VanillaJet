@@ -123,7 +123,6 @@ Router.prototype.onRequest = function(req, res) {
 					extHeader = {};
 
 				//ext = (req.url.match("\.ico$")) ? '.ico' : ext;
-				console.log(ext);
 
 				switch(ext) {
 

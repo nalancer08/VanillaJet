@@ -54,6 +54,9 @@ Server.prototype.init = function(options) {
 	});
 	obj.security = security;
 
+	// Render
+	global.render = nunjucks.configure(path.join(process.cwd(), 'assets'), { autoescape: false, noCache: true, async : true });
+
 	// Setting Dipper instance
 	global.dipper = new Dipper(opts, shared);
 
@@ -106,9 +109,6 @@ Server.prototype.start = function() {
 	obj.log('__________________  Dragonfly server started  ___________________');
 	obj.log(' >           Listening on ' + obj.options.site_url + ':' + obj.options.port + obj.options.base_url + '         < ');
 	obj.log('-----------------------------------------------------------------');
-
-	// Render
-	global.render = nunjucks.configure(path.join(process.cwd(), 'assets'), { autoescape: false, noCache: true });
 }
 
 Server.prototype.log = function(value) {

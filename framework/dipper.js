@@ -1,6 +1,7 @@
 function Dipper(options, shared) {
 
-	var path = require('path');
+	var path = require('path'),
+		obj = this;
 
 	this.options = options;
 	this.shared = shared;
@@ -314,8 +315,6 @@ Dipper.prototype.getScripts = function() {
 	return obj.scripts;
 }
 
-// -- Methods for single-page and web progresive apps
-
 Dipper.prototype.template = function(template, id, templates_dir, params) {
 
 	var obj = this,
@@ -332,11 +331,12 @@ Dipper.prototype.template = function(template, id, templates_dir, params) {
 
     		var tempTemplate = template + '.html';
     		if (fs.statSync(dir).isDirectory()) dir += tempTemplate;
+			
 			fs.readFile(dir, "binary", function(err, file) {
 
 		  		if (err) {
 		  			
-		  			templateString += '<script type=\"text/template\" id=\"' + id + '\"><pre>Template ' + id + ' not found</pre></script>';
+		  			templateString = '<script type=\"text/template\" id=\"' + id + '\"><pre>Template ' + id + ' not found</pre></script>';
 		  			return templateString;
 		  		}
 
@@ -347,6 +347,7 @@ Dipper.prototype.template = function(template, id, templates_dir, params) {
 	  				templateString += '\n\t';
 	  				templateString += '</script>';
 	  				templateString += '\n\n';
+	  				console.log(templateString);
 	  				return templateString;
 		  		}
 		  	});

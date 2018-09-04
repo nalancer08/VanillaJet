@@ -1,13 +1,11 @@
-{% extends "partials/header.html" %}
-
-{% block body %}
+{% include "partials/header.html" %}
 
 	<p class="tst">Hola {{ username }}</p>
 	<div id="ladybug-root" class="ladybug-app"></div>
 
 	{% include "templates/pum.html" %}
-	{{ app.template('pum', 'partial-header') }}
+	{% include "templates/pum.html" %}
+	{% include "templates/pum.html" %}
+	{% include "templates/pum.html" %}
 
-{% endblock %}
-
-{% extends "partials/footer.html" %}
+{% include "partials/footer.html" %}
