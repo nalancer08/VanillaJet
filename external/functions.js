@@ -18,12 +18,15 @@ function Functions(server) {
 	dipper.enqueueStyle('magnific-popup');
 
 	// Adding scripts
+	dipper.registerScript('ladybug2', dipper.script('ladybug2.js'), ['jquery', 'underscore'] );
+	dipper.registerScript('scarlet', dipper.script('ladybug2.scarlet.js'), ['jquery, ladybug2']);
 	dipper.registerScript('chart', '//cdnjs.cloudflare.com/ajax/libs/Chart.js/2.6.0/Chart.min.js' );
+	dipper.registerScript('aes', dipper.script('aes.js'), ['jquery'] );
 	dipper.registerScript('velocity', 'https://cdnjs.cloudflare.com/ajax/libs/velocity/1.2.3/velocity.min.js', ['jquery'] );
 	dipper.registerScript('clipboard', 'https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/1.5.12/clipboard.min.js', ['jquery'] );
 	dipper.registerScript('velocity.ui', 'https://cdnjs.cloudflare.com/ajax/libs/velocity/1.2.3/velocity.ui.min.js', ['velocity'] );
 	dipper.registerScript('magnific-popup', '//cdnjs.cloudflare.com/ajax/libs/magnific-popup.js/1.1.0/jquery.magnific-popup.min.js', ['jquery'] );
-	dipper.registerScript('script', dipper.script('app.js'), ['jquery', 'velocity.ui', 'chart', 'magnific-popup', 'clipboard', 'jquery.form'] );
+	dipper.registerScript('script', dipper.script('app.js'), ['ladybug2', 'jquery', 'scarlet', 'velocity.ui', 'aes', 'chart', 'magnific-popup', 'clipboard', 'jquery.form'] );
 	dipper.enqueueScript('script');
 
 	// Adding endpoints

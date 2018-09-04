@@ -1,11 +1,16 @@
 {% include "partials/header.html" %}
 
-	<p class="tst">Hola {{ username }}</p>
-	<div id="ladybug-root" class="ladybug-app"></div>
+	<div class="app">
+        <header class="app-header"></header>
+        <section class="app-content"></section>
+        <nav class="app-nav-menu"></nav>
+        <footer class="app-footer"></footer>
+    </div>
 
-	{% include "templates/pum.html" %}
-	{% include "templates/pum.html" %}
-	{% include "templates/pum.html" %}
+	{% include "templates/footer.html" %}
+	{% include "templates/header.html" %}
+	{% include "templates/sidebar-menu.html" %}
+
 	{% include "templates/pum.html" %}
 
 {% include "partials/footer.html" %}
