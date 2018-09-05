@@ -114,6 +114,7 @@ Ladybug.Scarlet.Application = Ladybug.Class.extend({
 Ladybug.Scarlet.View = Ladybug.Class.extend({
 
 	templates: {},
+	target: '',
 	element: null,
 	init: function(options) {
 		var obj = this;

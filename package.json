@@ -1,7 +1,7 @@
 {
-  "name": "FWWA",
-  "version": "0.0.1",
-  "description": "NodeJS for WebApps with Ladybug and Vue",
+  "name": "Dipper",
+  "version": "1.0",
+  "description": "NodeJS for WebApps with Ladybuga and Scarlet",
   "homepage": "",
   "keywords": [
     "nodejs",
@@ -12,7 +12,7 @@
   "author": "biohzrdmx <http://github.com/nalancer08>",
   "repository": {
     "type": "git",
-    "url": "git://github.com/nalancer08/dragonfly-node.git"
+    "url": "git://github.com/nalancer08/dipper.git"
   },
   "main": "index.js",
   "dependencies": {
@@ -25,9 +25,6 @@
   "scripts": {},
   "license": "MIT",
   "files": [
-    "lib/request.js",
-    "lib/response.js",
-    "lib/server.js",
     "index.js"
   ]
 }

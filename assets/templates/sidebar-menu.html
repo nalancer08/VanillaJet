@@ -1,14 +1,8 @@
 <script type="text/template" id="partial-menu">
     <div class="menu-wrapper">
-        <img class="logo img-responsive" src="assets/images/logo-menu.png" alt="Todo Ofertas">
+        <!-- <img class="logo img-responsive" src="{{ app.img('favicon.png') }}" alt="Todo Ofertas"> -->
         <ul class="menu">
-            <li><a href="/session/#!/profile">Mi Perfil</a></li>
-            <!--<li><a href="#">Notificaciones</a></li>-->
-            <li><a href="#">Historial de Compras</a></li>
-            <li><a href="http://www.todoofertasapp.com" target="_blank">Ayuda</a></li>
-            <li><a href="http://www.todoofertasapp.com" target="_blank">Contacto</a></li>
-            <li><a href="http://www.todoofertasapp.com/tos" target="_blank">Legal</a></li>
-            <li><a href="/app/#!/logout">Cerrar Sesión</a></li>
+            <li><a href="{{ app.urlTo('/#!/app/hello') }}">Hello</a></li>
         </ul>
     </div>
 </script>
