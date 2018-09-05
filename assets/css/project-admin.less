@@ -1,0 +1,622 @@
+/* Colors */
+/* ---------------------------------------------------------------------------------------------- */
+
+@atr_green: #24BC7D;
+@menu_background: #00FFFF;
+
+@selected_background: #24BC7D;
+@greatfit_color: #00FFFF;
+@simsites_dark_color: #3F51B5;
+
+/* Generals */
+/* ---------------------------------------------------------------------------------------------- */
+
+abbr {
+
+	text-decoration: none;
+}
+
+/* Chimplate */
+/* ---------------------------------------------------------------------------------------------- */
+
+.button-primary { .button-style(@greatfit_color); }
+.button-primary { .button-style(@greatfit_color); }
+
+//.button-outline.button-outline-primary { .button-outline-style(@simsites_dark_color); }
+.button-outline.button-outline-primary { 
+
+	.button-outline-style(@greatfit_color);
+	color: #000 !important;
+}
+
+/* Login */
+/* ---------------------------------------------------------------------------------------------- */
+
+.admin-ui-login {
+
+	background: url('images/admin/login_background_2.jpg');
+	.background-size();
+
+	.button-primary {
+
+		color: #000000;
+	}
+}
+
+/* Magnific */
+/* ---------------------------------------------------------------------------------------------- */
+
+.white-popup-block {
+
+	background: white;
+	margin: 0 auto;
+	padding: @margin_default;
+	width: 90%;
+	max-width: 800px;
+}
+
+/**************************************************************************************************
+*											Generals											  *
+**************************************************************************************************/
+
+.admin-ui-sidebar {
+
+	box-shadow: 0 4px 5px 0 rgba(0, 0, 0, 0.14), 0 1px 10px 0 rgba(0, 0, 0, 0.12), 0 2px 4px -1px rgba(0, 0, 0, 0.2);
+}
+
+.admin-ui-metabox .metabox-heading h2 {
+
+	border-bottom: 2px solid #1DC6E7 !important;
+}
+
+.button-success {
+
+	background: #1DC6E7 !important;
+	border-color: #1DC6E7;
+}
+
+.admin-ui-menu.sidebar-menu {
+
+	margin-top: 20px;
+
+	.menu {
+		
+		.menu-item {
+
+			padding-top: 5px;
+			padding-bottom: 5px;
+
+			a {
+
+				color: #000000;
+				font-size: 1.4em;
+
+				svg {
+
+					font-size: 1.3em;
+				}
+			}
+		}
+
+		.menu-item.current-item {
+
+			background: #FFF;
+
+			a {
+				
+				color: #000000 !important;
+			}
+		}
+
+		.menu-divider-extras {
+		    
+		    border-top: 1.5px solid #FFF;
+		}
+	}
+}
+
+.admin-ui-sidebar .button-hamburger {
+
+	background: #E6535A !important;
+}
+
+.current-user-avatar {
+
+	width: 40px !important;
+	height: 40px !important;
+
+	@media (min-width: @breakpoint_desktop) {
+
+		width: 30px !important;
+		height: 30px !important;
+	}
+}
+
+.admin-ui-sidebar .admin-ui-logo {
+
+	max-width: 50% !important;
+
+	@media (min-width: @breakpoint_desktop) {
+
+		max-width: 80% !important;
+	}
+}
+
+.admin-ui-helpbar {
+
+	.notifications {
+
+		//background: #FFF;
+		float: right;
+		height: 100%;
+		width: 50px;
+
+		.notify-bubble {
+
+		    position: absolute;
+			top: 20px;
+			right: 7px;
+			padding: 2px 5px 2px 6px;
+			background-color: #C50038;
+			color: white;
+			font-size: 0.65em;
+			border-radius: 30%;
+			z-index: 999;
+		}
+
+		a {
+
+			font-size: 1.6em;
+			text-align: center;
+			vertical-align: middle;;
+			line-height: 40px;
+			padding-left: 12px;
+			color: #FFF;
+		}
+	}
+}
+
+.popup {
+
+	border-radius: 5px;
+	background-color: #FFFFFF;
+	margin: 20px auto;
+	max-width: 500px;
+
+	.the-content {
+
+		font-family: 'Open Sans';
+		line-height: 1.5;
+	}
+
+	.mfp-close {
+
+		position: absolute;
+		color: #C50038;
+		font-size: 3em;
+	}
+
+	.titulo-popup {
+
+		font-size: 24px;
+		margin: 30px 0;
+		color: #777777;
+		text-align: center;
+	}
+}
+
+.button-primary {
+	
+	color: #000 !important;
+}
+
+.button-black {
+
+	background: #000;
+	color: #FFF;
+}
+
+/* ---------------------------------------------------------------------------------------------- */
+/* Dashboard page */
+/* ---------------------------------------------------------------------------------------------- */
+
+.organization {
+
+	margin-top: 20px;
+
+	.organization-img {
+
+		max-width: 224px;
+		max-height: 224px;
+	}
+
+	.organization-img-wrap {
+		
+		position: relative;
+		height: 224px;
+		width: 224px;
+	}
+
+	.organization-img-wrap .img-description {
+
+		position: absolute;
+		top: 0;
+		bottom: 0;
+		left: 0;
+		right: 0;
+		background: rgba(29, 106, 154, 0.72);
+		color: #fff;
+		visibility: hidden;
+		opacity: 0;
+
+		/* transition effect. not necessary */
+		transition: opacity .2s, visibility .2s;
+	}
+	
+	.organization-img-wrap:hover .img-description {
+
+		visibility: visible;
+		opacity: 1;
+	}
+
+	.organization-details {
+
+		margin-top: 15px;
+		margin-left: 30px;
+
+		.organization-title {
+
+			font-size: 1.9em;
+		}
+
+		.organization-direction {
+
+			margin-top: 10px;
+			font-size: 1.2em;
+		}
+
+		.organization-created {
+
+			margin-top: 5px;
+			font-size: 1.2em;
+		}
+
+		.organization-active {
+
+			margin-top: 5px;
+			font-size: 1.2em;
+		}
+	}
+}
+
+.user {
+
+	margin-top: 20px;
+
+	.user-image {
+
+		min-width: 224px;
+		min-height: 224px;
+	}
+
+	.button-square {
+
+		border-radius: 5px;
+	}
+
+	.user-details {
+
+		margin-top: 15px;
+		margin-left: 30px;
+
+		.user-nicename {
+			
+			font-size: 1.7em;
+		}
+
+		.user-email {
+
+			margin-top: 10px;
+			font-size: 1.2em;
+		}
+
+		.user-active {
+
+			margin-top: 5px;
+			font-size: 1.2em;
+		}
+
+		.user-created {
+
+			margin-top: 5px;
+			font-size: 1.2em;
+		}
+
+		.user-modified {
+
+			margin-top: 5px;
+			font-size: 1.0em;
+		}
+
+		.button-change-image {
+
+			margin-top: 20px;
+			//background: #1DC6E7;
+			//border-color: #1DC6E7;
+		}
+	}
+}
+
+.license {
+
+	.license-date {
+
+		text-align: center;
+		font-size: 1.9em;
+	}
+}
+
+.section-box-alerts {
+
+	.alert-container {
+
+		padding-top: 5px;
+		padding-bottom: 5px;
+	}
+}
+
+/* ---------------------------------------------------------------------------------------------- */
+/* Activities new page */
+/* ---------------------------------------------------------------------------------------------- */
+
+.section-activitie-new {
+
+	.upload-image {
+
+		color: #000;
+	}
+}
+
+/* ---------------------------------------------------------------------------------------------- */
+/* Zones index */
+/* ---------------------------------------------------------------------------------------------- */
+
+.section-zones {
+
+	.zone {
+
+		.admin-ui-metabox {
+
+			border-radius: 10px;
+			border: 1px solid white;
+
+			.zone-content {
+
+				padding: 5px;
+				font-size: 1.5em;
+				margin-top: 15px;
+				
+				h2 {
+
+					text-align: left;
+					font-size: 0.85em;
+					color: #000;
+				}
+
+				a {
+
+					margin-top: 15px;
+					font-size: 0.8em;
+					border-radius: 10px;
+					border: 1px solid black;
+				}
+			}
+		}
+	}
+}
+
+/** Used for general zones **/
+.zones {
+
+	.drawing-zone {
+
+		p {
+
+			font-size: 1.3em;
+			margin-top: 10px;
+			margin-bottom: 10px;
+		}
+	}
+
+	.shape-layers {
+
+		overflow-y: scroll;
+
+		.shape {
+
+			border-bottom: 1px solid #E7E7E7;
+			padding: 5px 0;
+
+			p {
+
+				font-size: 1.2em;
+				color: #000;
+			}
+
+			.shape-layer-delete {
+
+				color: #D1281E;
+			}
+		}
+	}
+}
+
+/* ---------------------------------------------------------------------------------------------- */
+/* Clients index */
+/* ---------------------------------------------------------------------------------------------- */
+
+@import 'sections/section-client';
+
+/* ---------------------------------------------------------------------------------------------- */
+/* Trainers index */
+/* ---------------------------------------------------------------------------------------------- */
+
+.section-trainers {
+
+	.trainer {
+
+		.admin-ui-metabox {
+
+			border-radius: 10px;
+			border: 1px solid white;
+			min-height: 294px;
+			max-height: 294px !important;
+			height: 294px;
+		}
+
+		.trainer_avatar {
+
+			@media (min-width: @breakpoint_desktop) {
+
+				width: 150px !important;
+				height: 150px !important;
+			}
+		}
+
+		.zone-content {
+
+			font-size: 1.3em;
+			margin-top: 15px;
+			color: #000;
+
+			.trainer-nicename {
+
+				text-overflow: ellipsis;
+				/* Required for text-overflow to do anything */
+				white-space: nowrap;
+				overflow: hidden;
+			}
+
+			.button-edit-trainer {
+
+				margin-top: 15px;
+				background: #000 !important;
+				border: 1px solid black;
+				border-radius: 5px;
+				font-size: 0.8em;
+			}
+		}
+	}
+}
+
+/* ---------------------------------------------------------------------------------------------- */
+/* Activities index page */
+/* ---------------------------------------------------------------------------------------------- */
+
+.section-activities {
+
+	.activitie {
+
+		.admin-ui-metabox {
+
+			border-radius: 10px;
+		}
+
+		.activitie-header {
+
+			h2 {
+
+				position: absolute; 
+				top: 45%; 
+				left: 0; 
+				width: 100%;
+
+				
+
+				span { 
+					
+					color: white; 
+					/*font-family: reckoner;*/
+					font-size: 1.5em;
+					letter-spacing: 0px;  
+					background: rgb(0, 0, 0); /* fallback color */
+					background: rgba(0, 0, 0, 0.7);
+					padding: 20px;
+				}
+			}
+		}
+
+		.activity-content {
+
+			padding: 10px;
+			min-height: 50px;
+			max-height: 50px;
+		}
+
+		.activitie-actions {
+
+			padding: 15px;
+		}
+	}
+}
+
+/* ---------------------------------------------------------------------------------------------- */
+/* Medals index page */
+/* ---------------------------------------------------------------------------------------------- */
+
+.section-medals {
+
+	.medal {
+
+		.admin-ui-metabox {
+
+			border-radius: 10px;
+		}
+
+		.medal-header {}
+
+		.medal-content {
+
+			h2 {
+
+				font-size: 1.3em;
+				color: #000;
+				margin-top: 15px;
+			}
+
+			p {
+
+				color: #000;
+				font-size: 0.9em;
+				margin-top: 5px;
+			}
+
+			a {
+
+				margin-top: 10px;
+			}
+		}
+
+		.medal-actions {
+
+			padding: 15px;
+		}
+	}
+}
+
+/* ---------------------------------------------------------------------------------------------- */
+/* Prices index page */
+/* ---------------------------------------------------------------------------------------------- */
+
+.section-prices {
+
+	table.table > thead > tr > th, table.table > tfoot > tr > th {
+		
+	    text-align: center !important;
+	}
+
+	table {
+
+		text-align: center !important;
+	}
+}

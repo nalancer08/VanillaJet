@@ -1,0 +1,79 @@
+/* ╔═╗╦ ╦╦  ┬  ┌─┐┌─┐┬┌┐┌  ┌─┐┌─┐┌─┐┌─┐
+   ╠═╣║ ║║  │  │ ││ ┬││││  ├─┘├─┤│ ┬├┤
+   ╩ ╩╚═╝╩  ┴─┘└─┘└─┘┴┘└┘  ┴  ┴ ┴└─┘└─┘ */
+
+.admin-ui-login {
+
+	min-height: 100%;
+	height: 100%;
+
+	.login-box {
+
+		width: 400px;
+		max-width: 90%;
+		margin: @margin_double auto;
+
+		@media (min-height: 430px) {
+
+			margin: 0 auto;
+			.align-middle(-62%);
+		}
+
+		.login-logo {
+
+			display: block;
+			margin: 0 auto;
+			min-height: 100px;
+			min-width: 100px;
+			.text-center;
+			.margin-bottom;
+		}
+
+		.login-instructions {
+
+			.text-center;
+			.margin-bottom;
+		}
+
+		.login-user {
+
+			.input-group-addon { border-bottom-left-radius: 0; }
+			.form-control { border-bottom-right-radius: 0; }
+		}
+
+		.login-pass {
+
+			margin-top: -1px;
+			.input-group-addon { border-top-left-radius: 0; }
+			.form-control { border-top-right-radius: 0; }
+		}
+
+		.input-group {
+
+			input { position: relative; z-index: 1; }
+			input:focus { z-index: 2; }
+		}
+
+		.login-back {
+
+			.pull-left;
+			position: relative;
+			z-index: 2;
+		}
+	}
+
+	.forgot-password {
+
+		margin-bottom: @margin_default;
+	}
+
+	.remember-me {
+
+		text-align: right;
+
+		span {
+
+			.user-select();
+		}
+	}
+}

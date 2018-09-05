@@ -1,0 +1,308 @@
+@import 'loadzilla';
+
+/**
+ * jQuery Alert
+ * @author     biohzrdmx <github.com/biohzrdmx>
+ * @version    1.0.20131213
+ * @requires   jQuery 1.8+
+ * @license    MIT
+ */
+.alert-overlay {
+
+	background: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAIAAAACCAYAAABytg0kAAAAEElEQVQImWNgYGCYCcUQBgASAAJli5xnrQAAAABJRU5ErkJggg==') repeat;
+	background: rgba(0, 0, 0, 0.65);
+	position: fixed;
+	left: 0;
+	top: 0;
+	width: 100%;
+	height: 100%;
+	z-index: 1100;
+
+	.alert {
+
+		background: white;
+		width: auto;
+		max-width: 640px;
+		margin: @margin_quad auto 0;
+		position: relative;
+		padding: 1px;
+		border-radius: @default_radius;
+
+		.box-shadow(0 0 10px rgba(0, 0, 0, 0.45));
+
+		.alert-message {
+
+			padding: 20px;
+		}
+
+		.alert-buttons {
+
+			background: #F1F1F1;
+			padding: 10px 20px;
+			text-align: right;
+		}
+
+		@media (max-width: @breakpoint_tablet) {
+
+			& {
+
+				max-width: 90%;
+			}
+		}
+	}
+}
+
+/**
+* jQuery DatePicker
+* @author biohzrdmx <github.com/biohzrdmx>
+* @version 1.0
+* @requires jQuery 1.8+
+* @license MIT
+*/
+.datepicker {
+
+	position: absolute;
+	top: 18px;
+	left: 18px;
+	background: @metabox_background;
+	padding: 4px;
+	border: 1px solid @metabox_border;
+	font-size: 16px;
+	font-weight: 400;
+	z-index: 50;
+
+	.box-shadow(2px 2px 6px rgba(0, 0, 0, 0.15));
+
+	* {
+
+		.box-sizing();
+	}
+
+	.tip {
+
+		position: absolute;
+		left: 12px;
+		top: -12px;
+		z-index: 5;
+		width: 0;
+		height: 0;
+		border-left: 10px solid transparent;
+		border-right: 10px solid transparent;
+		border-bottom: 12px solid #CCC;
+
+		&:before {
+
+			content: ' ';
+			position: absolute;
+			left: -8px;
+			top: 2px;
+			z-index: 20;
+			width: 0;
+			height: 0;
+			border-left: 8px solid transparent;
+			border-right: 8px solid transparent;
+			border-bottom: 10px solid #FFF;
+		}
+	}
+
+	a {
+
+		text-decoration: none;
+		color: #000;
+	}
+
+	.row {
+
+		margin: 0;
+		padding: 0;
+		overflow: hidden;
+		width: 100%;
+
+		&.header {
+
+			text-align: center;
+			position: relative;
+			margin: 4px 0;
+
+			a {
+
+				margin: 0 3px;
+				cursor: pointer;
+			}
+
+			.prev {
+
+				display: block;
+				position: absolute;
+				left: 0;
+				top: 0;
+				margin: 0;
+				width: 10px;
+				height: 10px;
+				padding: 4px;
+
+				.arrow {
+
+					display: block;
+					width: 0;
+					height: 0;
+					border-top: 5px solid transparent;
+					border-right: 6px solid #000;
+					border-bottom: 5px solid transparent;
+					float: left;
+				}
+
+				&.disabled {
+
+					cursor: default;
+
+					.arrow {
+
+						border-right-color: #DDD;
+					}
+				}
+			}
+
+			.next {
+
+				display: block;
+				position: absolute;
+				right: 0;
+				top: 0;
+				margin: 0;
+				width: 10px;
+				height: 10px;
+				padding: 4px;
+
+				.arrow {
+
+					display: block;
+					width: 0;
+					height: 0;
+					border-top: 5px solid transparent;
+					border-left: 6px solid #000;
+					border-bottom: 5px solid transparent;
+					float: right;
+				}
+
+				&.disabled {
+
+					cursor: default;
+
+					.arrow {
+
+						border-left-color: #DDD;
+					}
+				}
+			}
+		}
+	}
+
+	.cell {
+
+		display: block;
+		float: left;
+		width: 27px;
+		height: 27px;
+		line-height: 25px;
+		text-align: center;
+		padding: 0 3px;
+		border: 1px solid transparent;
+
+		&.large {
+
+			width: 59px;
+			padding: 0;
+			height: 60px;
+			line-height: 60px;
+			cursor: pointer;
+
+			&.double {
+
+				line-height: 25px;
+				word-wrap: break-word;
+				text-align: left;
+			}
+		}
+
+		&.day {
+
+			color: #000;
+			cursor: pointer;
+			text-align: right;
+
+			&.today {
+
+				color: #000;
+				background: #D6EAFF;
+			}
+		}
+
+		&.day:hover,
+		&.month:hover,
+		&.year:hover,
+		&.decade:hover {
+
+			background: #3298FF;
+			color: #FFF;
+		}
+
+		&.blank,
+		&.blank:hover {
+
+			background: none;
+			color: inherit;
+			cursor: default;
+		}
+
+		&.day.selected,
+		&.month.selected,
+		&.year.selected,
+		&.decade.selected {
+
+			background: #0065CC;
+			color: #FFF;
+		}
+
+		&.grayed {
+
+			color: #CCC;
+		}
+	}
+
+	.days .cell {
+
+		color: #555;
+	}
+
+	.decades .cell span {
+
+
+		display: block;
+		padding: 5px 5px 0;
+	}
+
+	.calendar,
+	.decades,
+	.years,
+	.months {
+
+		position: relative;
+		float: left;
+		width: 100%;
+	}
+
+	.decades,
+	.years,
+	.months {
+
+		display: none;
+	}
+
+	.decades .header,
+	.years .header,
+	.months .header {
+
+		margin-bottom: 13px;
+	}
+}
