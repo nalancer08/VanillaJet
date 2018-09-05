@@ -122,6 +122,15 @@ Dipper.prototype.script = function(filename) {
 	return ret;
 }
 
+Dipper.prototype.style = function(filename) {
+
+	var obj = this,
+		dir = this.getDir('styles', false),
+		ret = this.urlTo(dir + filename);
+		console.log(ret);
+	return ret;
+}
+
 Dipper.prototype.getDir = function(dir, full) {
 	
 	var obj = this,
