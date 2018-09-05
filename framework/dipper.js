@@ -22,7 +22,7 @@ function Dipper(options, shared) {
 		'parts'   : '/assets/parts/',
 		'images'  : '/assets/images/',
 		'scripts' : '/assets/scripts/',
-		'styles'  : '/assets/css/'
+		'styles'  : '/assets/styles/'
 	}
 
 	// -- Static content
