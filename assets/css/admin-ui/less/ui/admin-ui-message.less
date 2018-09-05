@@ -1,0 +1,34 @@
+.admin-ui-message {
+
+	padding: @margin_default @margin_default;
+	margin-bottom: @margin_default;
+
+	a {
+
+		color: @highlight_color;
+	}
+
+	.message-close {
+
+		position: absolute;
+		right: @margin_half;
+		top: @margin_half;
+		font-size: @fa_font_size;
+		color: @highlight_color;
+	}
+
+	&.message-success { .message-box(#7AD03A); }
+	&.message-warning { .message-box(#FFBA00); }
+	&.message-error { .message-box(#DD3D36); }
+	&.message-info { .message-box(#00A0D2); }
+
+	@message-font-size: 13px;
+	.message-box(@color) {
+
+		background: @color;
+		border-radius: 5px;
+		color: @highlight_color;
+		font-size: @message-font-size;
+		.admin-ui-shadow();
+	}
+}

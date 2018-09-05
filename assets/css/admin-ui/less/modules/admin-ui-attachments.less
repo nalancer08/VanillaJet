@@ -1,0 +1,110 @@
+.admin-ui-droparea {
+
+	border: 4px dashed @default_border;
+	margin-bottom: @margin_default;
+	cursor: pointer;
+	transition: all 0.5s;
+
+	.placeholder {
+
+		font-family: @title_font;
+		font-size: 18px;
+		text-transform: uppercase;
+		text-align: center;
+		padding-top: 90px;
+		padding-bottom: 90px;
+		color: darken(@default_border, 15%);
+	}
+
+	&:hover {
+
+		border-color: darken(@default_border, 10%);
+	}
+
+}
+
+.admin-ui-droparea.over {
+
+	border-color: @selected_background;
+}
+
+.admin-ui-filelist {
+
+	.filelist-item {
+
+		border-bottom: 1px solid @default_border;
+		padding: @margin_half;
+		.cf;
+
+		.preview {
+
+			float: left;
+			width: 20px;
+			height: auto;
+			margin-right: @margin_half;
+		}
+
+		span {
+
+			display: block;
+			margin-right: @margin_half;
+
+			&.name {
+
+				margin-bottom: @margin_half;
+
+				.fa {
+
+					margin-left: @margin_third;
+				}
+			}
+
+			&.progress-bar {
+
+				height: 20px;
+				background: @inverted_color;
+
+				.progress {
+
+					height: 20px;
+					display: block;
+					background: @inverted_background;
+					transition: all 0.25s;
+				}
+			}
+
+			&.percent {
+
+				// color: @grayed_color;
+			}
+
+		}
+
+		&:last-child { border-bottom: none; }
+
+		@media (min-width: @breakpoint_desktop) {
+
+			span {
+
+				float: left;
+
+				&.name {
+
+					margin-bottom: 0;
+				}
+
+				&.progress-bar {
+
+					float: right;
+					width: 150px;
+				}
+
+				&.percent {
+
+					float: right;
+				}
+
+			}
+		}
+	}
+}

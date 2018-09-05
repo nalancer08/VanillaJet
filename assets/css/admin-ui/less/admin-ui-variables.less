@@ -1,0 +1,118 @@
+/* ╔═╗╦ ╦╦  ┬  ┬┌─┐┬─┐┬┌─┐┌┐ ┬  ┌─┐┌─┐
+   ╠═╣║ ║║  └┐┌┘├─┤├┬┘│├─┤├┴┐│  ├┤ └─┐
+   ╩ ╩╚═╝╩   └┘ ┴ ┴┴└─┴┴ ┴└─┘┴─┘└─┘└─┘ */
+
+/* Project */
+/* ---------------------------------------------------------------------------------------------- */
+
+/* Colors
+	 ----------------------------------------------------------------------------------------------
+	Color Rules apply the following way:
+	- For text color: 			@[name]_color
+	- For background color: 	@[name]_background
+	- For border color: 		@[name]_border
+
+	Almost always, the border will be a lighten or darken implementation of the background.
+*/
+
+/* DEFAULT */
+
+@default_color: #222;
+@default_border: darken(@default_background, 15%);
+
+/* BASE */
+
+@base_background: #333645;
+@base_color: #BBB;
+@base_border: lighten(@base_background, 5%);
+
+/* HOT */
+
+@hot_background: @base_background;
+@hot_color: #FFF;
+
+/* SELECTED */
+
+//@selected_background: #1990DB;
+@selected_background: #003E95;
+@selected_color: #FFF;
+
+/* HIGHLIGHT */
+
+@highlight_background: #57B6C9;
+@highlight_color: #FFF;
+
+/* EMPHASIS */
+
+@emphasis_background: #A48AD4;
+@emphasis_color: #FFF;
+
+/* INVERTED */
+
+//@inverted_background: #E6535A;
+@inverted_background: #003E95;
+@inverted_color: #FFF;
+
+
+/* Fonts and sizes */
+/* ---------------------------------------------------------------------------------------------- */
+
+@title_font: 'Raleway';
+@fa_font_size: 14px;
+
+/* ┌┬┐┌─┐┌┬┐┌─┐┬  ┌─┐┌┬┐┌─┐
+	│ ├┤ │││├─┘│  ├─┤ │ ├┤
+	┴ └─┘┴ ┴┴  ┴─┘┴ ┴ ┴ └─┘ */
+
+/* MENU */
+
+@menu_line_height: 40px;
+
+@menu_background: #2C343F;
+@menu_color: fade(@menu_hover_color, 70%);
+
+@menu_hover_color: white;
+
+@menu_selected_background: mix(@menu_background, @selected_background, 30%);
+
+@menu_font_size: 12px;
+
+/* SIDEBAR */
+
+@sidebar_width: 220px;
+@sidebar_background_black: #1F1F1F;
+@sidebar_background: @menu_background;
+@sidebar_color: @menu_color;
+@mobile_sidebar_height: 64px;
+
+/* HELPBAR */
+
+@mobile_helpbar_height: @mobile_sidebar_height;
+@helpbar_height: @menu_line_height;
+
+@helpbar_padding: 10px;
+@helpbar_background: @menu_background;
+@helpbar_color: @menu_color;
+
+
+/* ┌┬┐┌─┐┌┬┐┬ ┬┬  ┌─┐┌─┐
+   ││││ │ │││ ││  ├┤ └─┐
+   ┴ ┴└─┘─┴┘└─┘┴─┘└─┘└─┘  */
+
+/* METABOX */
+
+@metabox_color: #555;
+@metabox_background: #FFF;
+@metabox_border: #F0F0F0;
+
+
+/* TABS */
+
+@tabs_color: @metabox_color;
+@tabs_background: @metabox_background;
+@tabs_border: @metabox_border;
+
+/* PAGINATION */
+
+
+/* MESSAGES */

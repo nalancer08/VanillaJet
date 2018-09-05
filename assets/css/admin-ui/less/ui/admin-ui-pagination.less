@@ -1,0 +1,57 @@
+.admin-ui-pagination {
+	.pagination {
+
+		list-style: none;
+		text-align: center;
+
+		@media (min-width: @breakpoint_tablet) {
+
+			text-align: left;
+			float: right;
+		}
+
+		& > li {
+
+			list-style: none;
+			.inline-block();
+
+			& > a {
+
+				display: block;
+				padding: @margin_half @margin_default;
+				border-radius: 3px;
+
+				&:hover {
+
+					background: @highlight_background;
+					color: @highlight_color;
+				}
+			}
+
+			&.selected > a {
+
+				background: @selected_background;
+				color: @selected_color;
+			}
+		}
+	}
+}
+
+.admin-ui-actions {
+
+	.margin-bottom;
+
+	.actions-showing {
+
+		font-style: italic;
+
+		.margin-bottom;
+		.text-center;
+		.text-muted;
+
+		@media (min-width: @breakpoint_tablet) {
+
+			text-align: left;
+		}
+	}
+}

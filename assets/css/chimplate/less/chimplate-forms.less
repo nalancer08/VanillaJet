@@ -1,0 +1,167 @@
+/*				    ______
+   ▀▀▀▀▀▀▀▀▀	   / ____/___  _________ ___  _____
+ █ ▀▀▀▀ ▀▀▀▀ █	  / /_  / __ \/ ___/ __ `__ \/ ___/
+ ▀ █ ▀▀▀▀▀ █ ▀	 / __/ / /_/ / /  / / / / / (__  )
+   ▀▀▀▀▀▀▀▀▀	/_/    \____/_/  /_/ /_/ /_/____/
+													*/
+
+/**
+	=======================================
+	INDEX =================================
+	=======================================
+
+	+ Core
+	+ Form Group
+
+	=======================================
+**/
+
+/* Core */
+/*------------------------------------------------------------------------------------------------*/
+
+.form-control {
+
+	line-height: normal;
+	vertical-align: middle;
+	-webkit-user-drag: none;
+
+	/* Structure */
+	.inline-block();
+
+	&:disabled { cursor: not-allowed; }
+}
+
+/* Form Group */
+/* ---------------------------------------------------------------------------------------------- */
+
+.form-group {
+
+	margin-bottom: @form_margin;
+
+	.control-label {
+
+		display: block;
+		margin-bottom: @form_margin/2;
+	}
+
+	.form-control {
+
+		text-transform: none;
+		font-size: inherit;
+		font-family: inherit;
+		font-size: 100%;
+		*font-size: 90%; /*IE 6/7 - To reduce IE's oversized button text*/
+		*overflow: visible; /*IE 6/7 - Because of IE's overly large left/right padding on buttons */
+
+		vertical-align: middle;
+		background: @default_background;
+		color: @default_color;
+		border: 1px solid @default_border;
+		padding: 0.429em;
+		font-weight: 300;
+		height: 2.4em;
+
+		.box-sizing(border-box);
+
+		/* border-radius */
+		.border-radius(@form_radius);
+
+		&:disabled { background-color: @greyed_background; }
+		&[readonly] { background-color: mix(@greyed_background, @default_background, 50%); }
+		&:focus { border-color: darken(@default_border, 10%); }
+
+		&.form-control-xsmall { font-size: 70%; }
+		&.form-control-small { font-size: 85%; }
+		&.form-control-large { font-size: 125%; }
+		&.form-control-xlarge { font-size: 150%; }
+
+		&.input-block {
+
+			width: 100%;
+			display: block;
+		}
+	}
+
+	textarea.form-control { height: auto; }
+	input[type=file].form-control { height: auto; }
+	select.form-control { padding: 0.35em 0.429em; }
+
+	.input-file {
+
+		input {
+
+			position: absolute;
+			.opacity(0);
+			top: 0;
+			left: 0;
+			cursor: pointer;
+		}
+	}
+
+	.help-block,
+	.feedback-block {
+
+		display: block;
+		margin: @form_margin 0;
+		color: @greyed_color;
+	}
+
+	.required { color: @pomegranate; }
+
+	&.has-error .control-label,
+	&.has-error .form-control,
+	&.has-error .feedback-block {
+
+		color: @pomegranate;
+	}
+
+	&.has-success .control-label,
+	&.has-success .form-control,
+	&.has-success .feedback-block {
+
+		color: @nephritis;
+	}
+
+	&.has-error .form-control { border-color: @pomegranate; }
+	&.has-success .form-control { border-color: @nephritis; }
+}
+
+
+/*
+#TBD: Arreglar cosas de radios y check fucking boxes
+.form-group .radio {
+
+	padding-left: 16px;
+}
+
+.form-group .checkbox input[type=checkbox] {
+
+	float: left;
+	margin: 1px 0 0 -16px;
+}
+
+.form-group .radio input[type=radio] {
+
+	float: left;
+	margin: 1px 0 0 -16px;
+}
+
+.form-group .radio label,
+.form-group .checkbox label {
+
+	display: block;
+	padding-left: 18px;
+}
+
+.form-group.has-error .radio label,
+.form-group.has-error .checkbox label {
+
+	color: @pomegranate;
+}
+
+.form-group.has-success .radio label,
+.form-group.has-success .checkbox label {
+
+	color: @nephritis;
+}
+*/

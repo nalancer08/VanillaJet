@@ -1,0 +1,170 @@
+/*				    __  ____      _
+   ▀▀▀▀▀▀▀▀▀	   /  |/  (_)  __(_)___  _____
+ █ ▀▀▀▀ ▀▀▀▀ █	  / /|_/ / / |/_/ / __ \/ ___/
+ ▀ █ ▀▀▀▀▀ █ ▀	 / /  / / />  </ / / / (__  )
+   ▀▀▀▀▀▀▀▀▀	/_/  /_/_/_/|_/_/_/ /_/____/
+											   */
+
+/**
+	=======================================
+	INDEX =================================
+	=======================================
+
+	+ Vendor Prefixes
+	+ Helpers
+
+	=======================================
+**/
+
+/* Vendor Prefixes */
+/* ---------------------------------------------------------------------------------------------- */
+
+.box-shadow (...) {
+
+	-webkit-box-shadow: @arguments;
+	   -moz-box-shadow: @arguments;
+			box-shadow: @arguments;
+}
+
+.border-radius (@string) {
+
+	-webkit-border-radius: @string;
+	   -moz-border-radius: @string;
+			border-radius: @string;
+}
+
+.box-sizing (@type: border-box) {
+
+	-webkit-box-sizing: @type;
+	   -moz-box-sizing: @type;
+			box-sizing: @type;
+}
+
+.opacity (@opacity: 0.5) {
+
+	-webkit-opacity: @opacity;
+	   -moz-opacity: @opacity;
+			opacity: @opacity;
+}
+
+.transform (@string) {
+
+	-webkit-transform: @string;
+	   -moz-transform: @string;
+		-ms-transform: @string;
+		 -o-transform: @string;
+			transform: @string;
+}
+
+.filter (...) {
+
+	-webkit-filter: @arguments;
+		 -o-filter: @arguments;
+			filter: @arguments;
+}
+
+.transition (...) {
+
+	-webkit-transition: @arguments;
+	   -moz-transition: @arguments;
+		-ms-transition: @arguments;
+		 -o-transition: @arguments;
+			transition: @arguments;
+}
+
+.background-clip (@string) {
+
+	-webkit-background-clip: @string;
+	   -moz-background-clip: @string;
+			background-clip: @string;
+}
+
+.background-size (@string: cover) {
+
+	-webkit-background-size: @string;
+	   -moz-background-size: @string;
+			background-size: @string;
+}
+
+.gradient (@startColor: #eee, @endColor: white) {
+
+	background-color: @startColor;
+	background: -webkit-gradient(linear, left top, left bottom, from(@startColor), to(@endColor));
+	background: -webkit-linear-gradient(top, @startColor, @endColor);
+	background: -moz-linear-gradient(top, @startColor, @endColor);
+	background: -ms-linear-gradient(top, @startColor, @endColor);
+	background: -o-linear-gradient(top, @startColor, @endColor);
+}
+
+.user-select (@value: none) {
+
+	-webkit-user-select: @value;
+	 -khtml-user-select: @value;
+	   -moz-user-select: @value;
+			user-select: @value;
+}
+
+/* Helpers */
+/* ---------------------------------------------------------------------------------------------- */
+
+.block-center (@margin: 0) {
+
+	display: block;
+	margin: @margin auto;
+}
+
+.inline-block() {
+
+	display: inline-block;
+	*display: inline;
+	*zoom: 1;
+}
+
+.responsive-container(@proportion: 50%) {
+
+	position: relative;
+	padding-bottom: @proportion;
+	height: 0;
+	overflow: hidden;
+	max-width: 100%;
+}
+
+.overlay-element {
+
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+}
+
+/* Buttons */
+/* ---------------------------------------------------------------------------------------------- */
+
+.button-style (@button_color: @asbestos, @text_color: white) {
+
+	background-color: @button_color;
+	border-color: @button_color;
+	color: @text_color;
+
+	&:hover {
+
+		background-color: lighten(@button_color, 15%);
+		border-color: @button_color;
+		color: @text_color;
+	}
+}
+.button-outline-style (@button_color: @asbestos, @text_color: white) {
+
+	border-color: @button_color;
+	color: @button_color;
+	background-color: transparent !important;
+	border-width: 1px;
+	border-style: solid;
+
+	&:hover {
+
+		background-color: @button_color !important;
+		color: @text_color;
+	}
+}
