@@ -1,0 +1,43 @@
+<script type="text/template" id="login" charset="UTF-8">
+
+	<div class="ui-login js-section-current">
+		<div class="ui-metabox metabox-rounded login-box">
+			<section class="metabox-content">
+
+				<!-- <?php // $site->messages->show(); ?> -->
+
+				<div class="login-logo">
+					<img class="img-responsive" src="{{ app.img('logo_ohpthosmart.png') }}" alt="">
+				</div>
+
+				<h3 class="title-label text-center">Inicio de sesión</h3>
+
+				<form method="post" action="">
+					<div class="form-fields">
+						<div class="form-group">
+
+							<label for="user" class="control-label">Correo electrónico</label>
+							<input type="text" name="user" id="user" class="input-block form-control" data-validate="required">
+
+							<label for="password" class="control-label">Contraseña</label>
+							<input type="password" name="password" id="password" class="input-block form-control" data-validate="required">
+						</div>
+					</div>
+					<div class="form-actions">
+
+						<div class="row row-md row-sm text-center">
+							<div class="col col-md col-sm col-md-12 col-sm-12 col-12 forgot-password">
+								<p><a href="{{ app.urlTo('/#!/app/recover') }}">Olvidaste tu contraseña? Recuperala aquí</a></p>
+							</div>
+						</div>
+
+						<div class="form-controls text-center">
+							<a class="button button-primary button-login">Iniciar sesíon</a>
+						</div>
+					</div>
+				</form>
+			</section>
+		</div>
+	</div>
+
+</script>

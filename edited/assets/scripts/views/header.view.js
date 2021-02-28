@@ -1,0 +1,25 @@
+HeaderView = Ladybug.Scarlet.View.extend({
+
+	onInit: function() {
+		var obj = this;
+		obj.templates.base = Ladybug.Utils.compileTemplate('#partial-header');
+	},
+	onRender: function() {
+		var obj = this,
+			target = $('.app-header');
+		target.html( obj.templates.base() );
+
+		// - View lofics
+		$('.btn-close-session').on('click', function(e) {
+
+			e.preventDefault();
+			app.router.navigate('!/app/');
+		});
+	},
+	onRemove: function() {
+
+		var obj = this,
+			target = $('.app-header');
+		target.html('');
+	}
+});

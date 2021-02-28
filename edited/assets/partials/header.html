@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<title> {{ app.getPageTitle() }} </title>
+	
+	{{ app.metaTags() }}
+
+	<link rel="shortcut icon" href="{{ app.img('logo.png') }}">
+	<link rel="icon" href="{{ app.img('logo.png') }}" type="image/png">
+	{{ app.includeStyles() }}
+	{{ app.includeScript('modernizr') }}
+	{{ app.includeScript('respond') }}
+
+</head>
+<body class="">

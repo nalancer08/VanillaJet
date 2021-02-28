@@ -1,0 +1,39 @@
+/* 	   _____ __  _      __            ______            __
+	  / ___// /_(_)____/ /____  __   / ____/___  ____  / /____  _____
+	  \__ \/ __/ / ___/ //_/ / / /  / /_  / __ \/ __ \/ __/ _ \/ ___/
+	 ___/ / /_/ / /__/ ,< / /_/ /  / __/ / /_/ / /_/ / /_/  __/ /
+	/____/\__/_/\___/_/|_|\__, /  /_/    \____/\____/\__/\___/_/
+	                     /____/                                       */
+
+html, body {
+
+	height: 100%;
+}
+
+.wrapper {
+
+	min-height: 100%;
+	height: auto !important;
+	height: 100%;
+	margin: 0 auto -60px;
+}
+
+.site-footer, .push {
+
+	height: 60px;
+}
+
+
+@media screen and (min-width: 1000px) {
+
+	.wrapper {
+
+		margin-bottom: -70px;
+	}
+
+	.site-footer, .push {
+
+		height: 70px;
+	}
+
+}
