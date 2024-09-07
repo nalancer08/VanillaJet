@@ -1,30 +1,53 @@
 {
-  "name": "Dipper",
-  "version": "1.0",
-  "description": "NodeJS for WebApps with Ladybuga and Scarlet",
-  "homepage": "",
-  "keywords": [
-    "nodejs",
-    "webapp",
-    "ladybug",
-    "vue"
-  ],
-  "author": "biohzrdmx <http://github.com/nalancer08>",
+  "name": "vanilla-jet",
+  "version": "1.0.7",
+  "description": "VannilaJet framework",
+  "main": "index.js",
+  "scripts": {
+    "dev": "grunt --env=development & nodemon index.js --ignore '**/public/**'",
+    "build:qa": "grunt build --env=qa",
+    "build:prod": "grunt build --env=production",
+    "start": "pm2 start index.js -- --p production",
+    "test": "npm run test"
+  },
   "repository": {
     "type": "git",
-    "url": "git://github.com/nalancer08/dipper.git"
+    "url": "git+https://github.com/nalancer08/VanillaJet.git"
   },
-  "main": "index.js",
+  "keywords": [
+    "webapp",
+    "spa"
+  ],
+  "author": "Erick Sanchez",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/nalancer08/VanillaJet/issues"
+  },
+  "homepage": "https://github.com/nalancer08/VanillaJet#readme",
   "dependencies": {
-    "blueimp-md5": "^2.8.0",
-    "jwt-simple": "^0.5.0",
-    "moment": "^2.15.2",
-    "nunjucks": "^3.1.3",
-    "underscore": ">= 1.6.x"
+    "blueimp-md5": "2.8.0",
+    "html-minifier-terser": "7.2.0",
+    "js-beautify": "1.14.8",
+    "jsrsasign": "11.0.0",
+    "jwt-simple": "0.5.3",
+    "minimist": "1.2.6",
+    "nunjucks": "3.2.4",
+    "underscore": ">= 1.12.x",
+    "zlib": "1.0.5"
   },
-  "scripts": {},
-  "license": "MIT",
-  "files": [
-    "index.js"
-  ]
+  "devDependencies": {
+    "grunt": "1.6.1",
+    "grunt-cli": "1.4.3",
+    "grunt-contrib-clean": "2.0.1",
+    "grunt-contrib-compress": "2.0.0",
+    "grunt-contrib-concat": "2.1.0",
+    "grunt-contrib-cssmin": "5.0.0",
+    "grunt-contrib-less": "3.0.0",
+    "grunt-contrib-uglify": "5.0.1",
+    "grunt-contrib-watch": "1.1.0",
+    "grunt-run": "0.8.1",
+    "grunt-shell": "4.0.0",
+    "jit-grunt": "0.10.0",
+    "nodemon": "3.0.1"
+  }
 }

@@ -1,143 +1,96 @@
-/**
-	Version 3.5
-	Created by: nalancer08 <https://github.com/nalancer08>
-	Revised by: nalancer08 <https://github.com/nalancer08>
-**/
+const nunjucks = require('nunjucks');
+let _ = require('underscore');
 
-var _ = require('underscore');
+class Response {
 
-function Response(res) {
+	constructor(res) {
 
-	this.res = null;
-	this.body = '';
-	this.status = 200;
-	this.headers = [];
-	this.autoRespond = true;
-	// Call initialization callback
-	this.init(res);
-}
+		this.res = null;
+		this.body = '';
+		this.status = 200;
+		this.headers = [];
+		this.autoRespond = true;
+		// Call initialization callback
+		this.init(res);
+	}
 
-Response.prototype.init = function(res) {
+	init(res) {
 
-	var obj = this;
-	obj.res = res;
-}
+		var obj = this;
+		obj.res = res;
+	}
 
-Response.prototype.setBody = function(body) {
+	setBody(body) {
 
-	var obj = this;
-	obj.body = body;
-}
+		var obj = this;
+		obj.body = body;
+	}
 
-Response.prototype.setStatus = function(status) {
+	setStatus(status) {
 
-	var obj = this;
-	obj.status = status;
-}
+		var obj = this;
+		obj.status = status;
+	}
 
-Response.prototype.setHeader = function(name, value) {
+	setHeader(name, value) {
 
-	var obj = this;
-	obj.headers.push({
-		name: name,
-		value: value
-	});
-}
+		var obj = this;
+		obj.headers.push({
+			name: name,
+			value: value
+		});
+	}
 
-Response.prototype.getBody = function() {
+	getBody() {
 
-	var obj = this;
-	return obj.body;
-}
+		var obj = this;
+		return obj.body;
+	}
 
-Response.prototype.getStatus = function() {
+	getStatus() {
 
-	var obj = this;
-	return obj.status;
-}
+		var obj = this;
+		return obj.status;
+	}
 
-Response.prototype.getHeader = function(name) {
+	getHeader(name) {
 
-	var obj = this,
-		ret = null;
-	ret = _.find(obj.headers, function(header) {
-		return header.name == name;
-	});
-	return ret;
-}
+		var obj = this, ret = null;
+		ret = _.find(obj.headers, function (header) {
+			return header.name == name;
+		});
+		return ret;
+	}
 
-Response.prototype.respond = function() {
+	respond() {
 
-	var obj = this;
-	this.setHeader('Access-Control-Allow-Origin', '*');
+		var obj = this;
+		this.setHeader('Access-Control-Allow-Origin', '*');
 
-	_.each(obj.headers, function(header) {
-		obj.res.setHeader(header.name, header.value);
-	});
-	obj.res.writeHead(obj.status);
-	obj.res.end(obj.body);
-}
+		_.each(obj.headers, function (header) {
+			obj.res.setHeader(header.name, header.value);
+		});
+		obj.res.writeHead(obj.status);
+		obj.res.end(obj.body);
+	}
 
-Response.prototype.renderPage = function(template, data) {
+	error404() {
 
-	var obj = this,
-		template = 'pages/' + template;
-	obj.render(template, data);
-}
+		var obj = this;
+		obj.res.writeHead(404, { "Content-Type": "text/plain" });
+		obj.res.write("404 Not Found\n");
+		obj.res.end();
+	}
 
-Response.prototype.render = function(template, data) {
+	render(template) {
 
-	var obj = this,
-		url = require("url"),
-    	path = require("path"),
-		fs = require("fs")
-		nunjucks = require('nunjucks');
+		var obj = this, path = require("path"), fs = require("fs"), template = 'pages/' + template;
 
-	var filename = path.join(process.cwd(), 'assets/');
-	fs.exists(filename, function(exists) {
-    	
-    	if (!exists) {
-
-      		obj.res.writeHead(404, {"Content-Type": "text/plain"});
-      		obj.res.write("404 Not Found\n");
-      		obj.res.end();
-      		return;
-    	}
-
-    	if (fs.statSync(filename).isDirectory()) filename += template;
-		fs.readFile(filename, "binary", function(err, file) {
-	  		
-	  		if (err) {        
-		        
-		        obj.res.writeHead(500, {"Content-Type": "text/plain"});
-		        obj.res.write(err + "\n");
-		        obj.res.end();
-		        return;
-	  		}
-
-	  		data['app'] = global.dipper;
-	  		global.render.render(template, data, function(err, render) {
-
-	  			if (err) {
-
-	  				console.log(err);
-	  			}
-			   
-				if (render) {
-
-					obj.res.writeHead(200);
-	      			obj.res.write(render, "binary");
-	      			obj.res.end();
-			   	}
-			});
-
-	  		// var render = global.render.render(template, data);
-
-	    //   	obj.res.writeHead(200);
-	    //   	obj.res.write(render, "binary");
-	    //   	obj.res.end();
-	  	});
-	});
+		const filename = path.join(process.cwd(), 'public/' + template);
+		const fileStream = fs.createReadStream(filename);
+		obj.res.writeHead(200, { 'Content-Type': 'text/html' });
+		fileStream.pipe(obj.res);
+	}
 }
 
 module.exports = Response;

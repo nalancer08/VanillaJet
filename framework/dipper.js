@@ -1,7 +1,6 @@
 function Dipper(options, shared) {
 
-	var path = require('path'),
-		obj = this;
+	let path = require('path');
 
 	this.options = options;
 	this.shared = shared;
@@ -11,40 +10,33 @@ function Dipper(options, shared) {
 	this.description = shared.description;
 	this.fbAppId = shared.fbAppId;
 
-	this.site_url = ((this.options.site_url == 'localhost')  ? 'http://localhost' : this.options.site_url) + ':' + this.options.port;
+	this.site_url = ((this.options.site_url == 'localhost')  ? 
+		'http://localhost' : 
+		this.options.site_url) + ':' + this.options.port;
 	this.base_dir = path.join(process.cwd(), '/');
 	this.base_url = this.site_url + this.options.base_url;
 	
 	// Dirs
 	this.dirs = {
 
-		'pages'   : '/assets/pages/',
-		'parts'   : '/assets/parts/',
-		'images'  : '/assets/images/',
-		'scripts' : '/assets/scripts/',
-		'styles'  : '/assets/styles/'
+		'images'  : '/public/images/',
+		'scripts' : '/public/scripts/',
+		'styles'  : '/public/styles/',
+		'fonts'   : '/public/fonts/'
 	}
 
 	// -- Static content
 	this.scripts = [];
 	this.styles = [];
+	this.anims = [];
 	this.enqueued_scripts = [];
 	this.enqueued_styles = [];
 
-	// Register base styles
-	this.registerStyle('twitter-bootstrap', '//cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.2.0/css/bootstrap.min.css');
-	this.registerStyle('magnific-popup', '//cdnjs.cloudflare.com/ajax/libs/magnific-popup.js/0.9.9/magnific-popup.css');
-	
-	// Register base scripts
-	this.registerScript('modernizr', '//cdnjs.cloudflare.com/ajax/libs/modernizr/2.8.2/modernizr.min.js');
+	// -- Base
+	this.registerScript('modernizr', '//cdnjs.cloudflare.com/ajax/libs/modernizr/2.8.3/modernizr.min.js');
 	this.registerScript('respond', '//cdnjs.cloudflare.com/ajax/libs/respond.js/1.4.2/respond.js');
-	this.registerScript('jquery', '//cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js');
-	this.registerScript('jquery.form', '//cdnjs.cloudflare.com/ajax/libs/jquery.form/3.50/jquery.form.min.js', ['jquery']);
-	this.registerScript('jquery.cycle', '//cdnjs.cloudflare.com/ajax/libs/jquery.cycle/3.03/jquery.cycle.all.min.js', ['jquery']);
-	this.registerScript('magnific-popup', '//cdnjs.cloudflare.com/ajax/libs/magnific-popup.js/0.9.9/jquery.magnific-popup.min.js', ['jquery']);
-	this.registerScript('twitter-bootstrap', '//cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.2.0/js/bootstrap.min.js', ['jquery']);
-	this.registerScript('underscore', '//cdnjs.cloudflare.com/ajax/libs/underscore.js/1.6.0/underscore-min.js');
-	this.registerScript('backbone', '//cdnjs.cloudflare.com/ajax/libs/backbone.js/1.1.2/backbone-min.js', ['underscore']);
+	this.registerScript('jquery', '//cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js');
+	this.registerScript('underscore', '//cdnjs.cloudflare.com/ajax/libs/underscore.js/1.13.6/underscore-min.js');
 }
 
 Dipper.prototype.getPageTitle = function() {
@@ -91,7 +83,7 @@ Dipper.prototype.metaTags = function() {
 
 	var keys = Object.keys(obj.metas);
 	_.each(keys, function(key) {
-
+		
 		var name = obj.metas[key]['name'],
 			content = obj.metas[key]['content'],
 			attribute = obj.metas[key]['attribute'];
@@ -100,7 +92,6 @@ Dipper.prototype.metaTags = function() {
 			'<meta ' + attribute + '=\"' + name + '\" content=\"' + content + '\">\n\t' :
 			'<meta ' + attribute + '=\"' + name + '\">\n\t';
 	});
-
 	return stringMeta;			
 }
 
@@ -109,17 +100,23 @@ Dipper.prototype.img = function(filename) {
 	var obj = this,
 		dir = this.getDir('images', false);
 		ret = this.urlTo(dir + filename);
-		console.log(ret);
 	return ret;
 }
 
 Dipper.prototype.script = function(filename) {
 
 	var obj = this,
-		dir = this.getDir('scripts', false),
-		ret = this.urlTo(dir + filename);
-		console.log(ret);
-	return ret;
+		dir = this.getDir('scripts', false);
+
+	var filenameParts = filename.split('.'),
+		length = filenameParts.length;
+	if (length > 0) {
+
+		let position = length - 1;
+		filenameParts[position] = 'min.' + filenameParts[position];
+		filename = filenameParts.join('.');
+	}
+	return this.urlTo(dir + filename);
 }
 
 Dipper.prototype.style = function(filename) {
@@ -127,7 +124,15 @@ Dipper.prototype.style = function(filename) {
 	var obj = this,
 		dir = this.getDir('styles', false),
 		ret = this.urlTo(dir + filename);
-		console.log(ret);
+	return ret;
+}
+
+Dipper.prototype.pdf = function(filename) {
+
+	var obj = this,
+		dir = '/assets/pdf/'
+		ret = this.urlTo(dir + filename);
+		//console.log(ret);
 	return ret;
 }
 
@@ -153,7 +158,7 @@ Dipper.prototype.baseDir = function(path) {
 Dipper.prototype.isSecureRequest = function() {
 
 	var obj = this;
-		// Cheking for http or https
+	// Cheking for http or https
 	if (/^((http):\/\/)/.test(obj.options.site_url) || /^((localhost))/.test(obj.options.site_url)) {
 		return false;
 	} else if (/^((https):\/\/)/.test(obj.options.site_url)) {
@@ -170,22 +175,37 @@ Dipper.prototype.urlTo = function(route, protocol) {
 	return url;
 }
 
-Dipper.prototype.registerStyle = function(name, url, requires) {
+Dipper.prototype.registerStyle = function(
+	name, url, requires,
+	cdn = false, async = false,
+	origin = '', integrity = '') {
 	
 	var obj = this;
 	obj.styles[name] = {
 		'resource' : url,
-		'requires' : requires
+		'requires' : requires,
+		'cdn' : cdn,
+		'async' : async,
+		'origin' : origin,
+		'integrity' : integrity
 	};
 }
 
-Dipper.prototype.registerScript = function(name, url, requires) {
+Dipper.prototype.registerScript = function(
+	name, url, requires, 
+	cdn = false, async = false, defer = false,
+	origin = '', integrity = '') {
 	
 	var obj = this;
 	obj.scripts[name] = {
 
 		'resource' : url,
-		'requires' : requires
+		'requires' : requires,
+		'cdn' : cdn,
+		'async' : async,
+		'defer': defer,
+		'origin' : origin,
+		'integrity' : integrity
 	};
 }
 
@@ -264,11 +284,23 @@ Dipper.prototype.dequeueScript = function(name, dependencies) {
 Dipper.prototype.includeStyle = function(style) {
 			
 	var obj = this;
-	if (obj.styles[style] != undefined) {
+	if (obj.styles[style]) {
 
-		var item = obj.styles[style];
-		//output = site->executeHook('core.includeStyle', $item);
-		var output = '<link rel=\"stylesheet\" type=\"text/css\" href=\"' + item['resource'] + '\">';
+		var item = obj.styles[style],
+			output = '',
+			//type = item['cdn'] ? "" : 'type=\"text/javascript\"',
+			resource = item['resource'],
+			isAsync = item['async'] ? 'preload' : 'stylesheet',
+			origin = item['origin'] != '' ? ' crossorigin=\"' + item['origin'] + '\"' : '',
+			integrity = item['integrity'] != '' ? ' integrity=\"' + item['integrity'] + '\"' : '';
+		
+		if (item['async']) {
+
+			var a = " as=\"style\" onload=\"this.onload=null; this.rel='stylesheet'\"";
+			output = '<link rel=\"' + isAsync + '\" type=\"text/css\" href=\"' + resource + '\"' + a + integrity + origin + ">";
+		} else {
+			output = '<link rel=\"' + isAsync + '\" type=\"text/css\" href=\"' + resource + '\"' + integrity + origin + ">";
+		}
 		return output + "\n";
 	}
 }
@@ -277,9 +309,18 @@ Dipper.prototype.includeScript = function(script) {
 	
 	var obj = this;
 	if (obj.scripts[script]) {
-		var item = obj.scripts[script];
-		//$output = $site->executeHook('core.includeScript', $item);
-		var output = '<script type=\"text/javascript\" src=\"' + item['resource'] + '\"></script>';
+
+		var item = obj.scripts[script],
+			output = '',
+			//type = item['cdn'] ? "" : 'type=\"text/javascript\"',
+			resource = item['resource'],
+			isAsync = item['async'] ? ' async' : '',
+			defer = item['defer'] ? ' defer' : '',
+			origin = item['origin'] != '' ? ' crossorigin=\"' + item['origin'] + '\"' : '',
+			integrity = item['integrity'] != '' ? ' integrity=\"' + item['integrity'] + '\"' : '';
+		
+		output = '<script src=\"' + resource + '\"' + defer + isAsync + integrity + origin + '></script>';
+		//console.log(output);
 		return output + "\n";
 	}
 }
@@ -294,6 +335,8 @@ Dipper.prototype.includeStyles = function() {
 	_.each(keys, function(style) {
 		stylesString += obj.includeStyle(style);
 	});
+
+	//console.log(stylesString);
 	//$site->executeHook('core.includeStyles');
 	return stylesString;
 }
@@ -308,8 +351,67 @@ Dipper.prototype.includeScripts = function () {
 	_.each(keys, function(script) {
 		scriptsString += obj.includeScript(script);
 	});
-	//$site->executeHook('core.includeScripts');
 	return scriptsString;
+}
+
+Dipper.prototype.includeManifest = function() {
+
+	var obj = this,
+		url = obj.urlTo('/public/manifest.json'),
+		tagString = '<link rel=\"manifest\" href=\"' + url + '\">';
+	return tagString;
+}
+
+/**
+ * Setup Sentry for error reporting on production and qa environments.
+ */
+Dipper.prototype.includeSentry = function() {
+
+	const obj = this;
+
+	// Falllback report error function on development
+	if (obj.shared.environment === 'development') {
+		return `
+			<script>
+				function reportError(message, data = {}) {
+					console.log(message, data);
+				}
+			</script>`;
+	}
+
+	const releaseString = (typeof process.env.SENTRY_RELEASE === 'undefined')
+		? ''
+		: `<script> var SENTRY_RELEASE = '${ process.env.SENTRY_RELEASE }'; </script>`;
+
+	const tagString = `
+		<script
+			src="https://browser.sentry-cdn.com/${ obj.shared.sentry.bundleVersion }/bundle.tracing.replay.min.js"
+			integrity="${ obj.shared.sentry.bundleSha }"
+			crossorigin="anonymous"
+		></script>`;
+
+	const loadString = `
+		<script>
+			if (window.Sentry) {
+				Sentry.init({
+					dsn: '${ obj.shared.sentry.dsn_js }',
+					environment: '${ obj.shared.environment }',
+					integrations: [new Sentry.BrowserTracing(), new Sentry.Replay()],
+					sampleRate: ${ obj.shared.sentry.sampleRate },
+					tracesSampleRate: ${ obj.shared.sentry.tracesSampleRate }
+				});
+
+				function reportError(message, data = {} ) {
+					Sentry.captureException(new Error(message), { extra: data });
+				}
+			} else {
+				function reportError(message, data = {}) {
+					console.log(message, data);
+				}
+			}
+		</script>`;
+
+	return releaseString + tagString + loadString;
 }
 
 Dipper.prototype.getStyles = function() {
@@ -351,17 +453,70 @@ Dipper.prototype.template = function(template, id, templates_dir, params) {
 
 		  		if (file) {        
 			        
-	  				templateString += '\n';
-	  				templateString += file;
-	  				templateString += '\n\t';
-	  				templateString += '</script>';
-	  				templateString += '\n\n';
-	  				console.log(templateString);
-	  				return templateString;
+			        //console.log(global.render);
+			        var t = '/templates/' + tempTemplate;
+			       	var data = {};
+			        data['app'] = global.dipper;
+			       	global.render.renderString(file, data, function(err, res) {
+
+			       		//console.log(templateStr);
+
+		  				templateString += '\n';
+		  				templateString += '\t' + res;
+		  				templateString += '\n';
+		  				templateString += '</script>';
+		  				templateString += '\n';
+		  				//console.log(templateString);
+		  				return templateString;
+			       	});
 		  		}
 		  	});
     	}
 	});
+}
+
+// -- Method to get a varable from Shared array
+Dipper.prototype.getSharedVar = function(name) {
+
+	var obj = this,
+		ret = obj.shared[name] || '';
+	if (ret != '') { ret = "'" + ret + "'"; }
+	return ret;
+}
+
+Dipper.prototype.get_google_fonts = function(fonts) {
+
+	var obj = this,
+		_ = require('underscore');
+
+	if (fonts != undefined) {
+
+		var parts = [],
+			keys = Object.keys(fonts);
+		_.each(keys, function(font) {
+
+			var font_name = encodeURI(font),
+				font_weight = fonts[font].join(',');
+			parts.push(font_name + ':' + font_weight);
+		});
+
+		var params = parts.join('|'),
+			ret = '//fonts.googleapis.com/css?family=' + params;
+
+		return ret;
+	} 
+}
+
+Dipper.prototype.includeEnvironment = function() {
+
+	const obj = this;
+
+	return `
+		<script>
+			var ENVIRONMENT = '${obj.shared.environment}';
+			var API_URL = '${obj.options.api_url}';
+			var VERSION = '${obj.shared.version}';
+		</script>`;
 }
 
 module.exports = Dipper;
