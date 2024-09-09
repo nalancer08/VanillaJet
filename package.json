@@ -1,13 +1,16 @@
 {
   "name": "vanilla-jet",
-  "version": "1.0.7",
+  "version": "1.0.27",
   "description": "VannilaJet framework",
   "main": "index.js",
+  "bin": {
+    "vanilla-jet": "bin.js"
+  },
   "scripts": {
-    "dev": "grunt --env=development & nodemon index.js --ignore '**/public/**'",
+    "setup": "node ./.scripts/generate_packages_json.js",
+    "dev": "grunt --env=development",
     "build:qa": "grunt build --env=qa",
     "build:prod": "grunt build --env=production",
-    "start": "pm2 start index.js -- --p production",
     "test": "npm run test"
   },
   "repository": {
@@ -33,9 +36,7 @@
     "minimist": "1.2.6",
     "nunjucks": "3.2.4",
     "underscore": ">= 1.12.x",
-    "zlib": "1.0.5"
-  },
-  "devDependencies": {
+    "zlib": "1.0.5",
     "grunt": "1.6.1",
     "grunt-cli": "1.4.3",
     "grunt-contrib-clean": "2.0.1",

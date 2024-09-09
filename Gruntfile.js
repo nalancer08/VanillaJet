@@ -5,6 +5,7 @@ module.exports = function(grunt) {
     //compress: 'grunt-contrib-compress',
     clean: 'grunt-contrib-clean'
   });
+  grunt.option('force', true);
 
   // -- Load modules
   grunt.loadNpmTasks('grunt-contrib-cssmin');
@@ -14,10 +15,33 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-run');
   require('./.grunt/build_styles_task')(grunt);
 
+  // -- Functions
+  function getCleanedCWD() {
+    const cwd = process.cwd();
+    let newCwd = cwd
+      .replace('/node_modules', '')
+      .replace('/vanilla-jet', '')
+      .replace('/.grunt', '');
+    //console.log('cwd: ', newCwd);
+    return newCwd;
+  }
+  
+
+  // -- Vars
+  const cssDestination = `${getCleanedCWD()}/public/styles/app.min.css`;
+  const cssOrigin = `${getCleanedCWD()}/assets/styles/less/admin_build.less`;
+  const jsDestination = `${getCleanedCWD()}/public/`;
+
+  // -- Init
   grunt.initConfig({
     clean: {
-      build: ['public/scripts/vanilla.min.js'],
-      minified: ['public/scripts/api', 'public/scripts/controllers', 'public/scripts/views', 'public/scripts/app.min.js']
+      build: [`${getCleanedCWD()}/public/scripts/vanilla.min.js`],
+      minified: [
+        `${getCleanedCWD()}/public/scripts/api`, 
+        `${getCleanedCWD()}/public/scripts/controllers`, 
+        `${getCleanedCWD()}/public/scripts/views`, 
+        `${getCleanedCWD()}/public/scripts/app.min.js`
+      ],
       //minified: ['public/scripts/**/*.min.js', 'public/scripts/*', '!public/scripts/vanilla.min.js']
     },
     less: {
@@ -29,7 +53,7 @@ module.exports = function(grunt) {
           strictImports: true
         },
         files: {
-          'public/styles/app.min.css' : 'assets/styles/less/admin_build.less'
+          [cssDestination] : cssOrigin
         },
       }
     },
@@ -39,10 +63,10 @@ module.exports = function(grunt) {
       },
       styles: {
         files: [
-          'assets/styles/less/*.less', 
-          'assets/styles/less/**/*.less', 
-          'assets/styles/less/**/**/*.less',
-          '!assets/styles/less/admin_build.less'
+          `${getCleanedCWD()}/assets/styles/less/*.less`, 
+          `${getCleanedCWD()}/assets/styles/less/**/*.less`, 
+          `${getCleanedCWD()}/assets/styles/less/**/**/*.less`,
+          `${getCleanedCWD()}/!assets/styles/less/admin_build.less`
         ],
         tasks: ['buildLess'],
         options: {
@@ -51,17 +75,21 @@ module.exports = function(grunt) {
       },
       scripts: {
         files: [
-          'assets/pages/*.html',
-          'assets/templates/**/*.html',
-          'assets/templates/**/**/*.html',
-          'external/view/*.js',
-          'external/*.js',
-          'framework/*.js'
+          `${getCleanedCWD()}/assets/pages/*.html`,
+          `${getCleanedCWD()}/assets/templates/**/*.html`,
+          `${getCleanedCWD()}/assets/templates/**/**/*.html`,
+          `${getCleanedCWD()}/external/view/*.js`,
+          `${getCleanedCWD()}/external/*.js`,
+          `${getCleanedCWD()}/framework/*.js`
         ],
         tasks: ['shell:compileTemplates']
       },
       specificScripts: {
-        files: ['assets/scripts/*.js', 'assets/scripts/**/*.js', 'assets/scripts/**/**/*.js'],
+        files: [
+          `${getCleanedCWD()}/assets/scripts/*.js`, 
+          `${getCleanedCWD()}/assets/scripts/**/*.js`, 
+          `${getCleanedCWD()}/assets/scripts/**/**/*.js`
+        ],
         tasks: ['uglify', 'clean:build', 'concat', 'clean:minified']
       }
     },
@@ -86,20 +114,21 @@ module.exports = function(grunt) {
 				files: [{
           expand: true,
           src: [
-          	'assets/scripts/*.js',
-      			'assets/scripts/**/*.js',
-          	'assets/scripts/**/**/*.js',
-          	'assets/scripts/**/**/**/*.js'
+          	`${getCleanedCWD()}/assets/scripts/*.js`,
+      			`${getCleanedCWD()}/assets/scripts/**/*.js`,
+          	`${getCleanedCWD()}/assets/scripts/**/**/*.js`,
+          	`${getCleanedCWD()}/assets/scripts/**/**/**/*.js`
           ],
-    			dest: 'public/',
-					cwd: '',
+    			dest: getCleanedCWD() + '/public',
 					rename  : function (dest, src) {
 
 						var folder = src.substring(0, src.lastIndexOf('/')),
 							  filename  = src.substring(src.lastIndexOf('/'), src.length);
       			filename  = filename.substring(0, filename.lastIndexOf('.'));
-      			folder = folder.replaceAll('assets', '');
-						return dest + folder + filename + '.min.js';
+      			folder = folder.replaceAll('assets/', 'public/');
+            let file = folder + filename + '.min.js';
+            //console.log('file: ', file);
+						return file;
 					}
 				}]
 			}
@@ -108,17 +137,17 @@ module.exports = function(grunt) {
       build: {
         src: [
           // Order
-          'public/scripts/controllers/**/*.min.js',
-          'public/scripts/views/**/*.min.js',
-          'public/scripts/api/**/*.min.js',
-          'public/scripts/*.min.js',
+          `${getCleanedCWD()}/public/scripts/controllers/**/*.min.js`,
+          `${getCleanedCWD()}/public/scripts/views/**/*.min.js`,
+          `${getCleanedCWD()}/public/scripts/api/**/*.min.js`,
+          `${getCleanedCWD()}/public/scripts/*.min.js`,
 
           // Ignore files
-          '!public/scripts/core/**',
-          '!public/scripts/plugins/**',
-          '!public/scripts/plugins/ui/**'
+          `!${getCleanedCWD()}/public/scripts/core/**`,
+          `!${getCleanedCWD()}/public/scripts/plugins/**`,
+          `!${getCleanedCWD()}/public/scripts/plugins/ui/**`
         ],
-        dest: 'public/scripts/vanilla.min.js'
+        dest: `${getCleanedCWD()}/public/scripts/vanilla.min.js`
       }
     },
     compress: {
@@ -128,7 +157,7 @@ module.exports = function(grunt) {
         },
         files: [{
           expand: true,
-          src: ['public/scripts/vanilla.min.js'],
+          src: [`${getCleanedCWD()}/public/scripts/vanilla.min.js`],
           dest: '',
           ext: '.min.js.gz'
         }]
@@ -141,7 +170,11 @@ module.exports = function(grunt) {
     }
   });
   
-  grunt.registerTask('default', ['buildLess', 'uglify', 'clean:build', 'concat', 'clean:minified', 'shell:compileTemplates', 'watch']);
-  grunt.registerTask('build', ['buildLess', 'uglify', 'clean:build', 'concat', 'clean:minified', 'shell:compileTemplates']);
+  grunt.registerTask('cleanForce', function(target) {
+    grunt.option('force', true);
+    grunt.task.run('clean:' + target);
+  });
+  grunt.registerTask('default', ['buildLess', 'uglify', 'cleanForce:build', 'concat', 'cleanForce:minified', 'shell:compileTemplates', 'watch']);
+  grunt.registerTask('build', ['buildLess', 'uglify', 'cleanForce:build', 'concat', 'cleanForce:minified', 'shell:compileTemplates']);
   grunt.registerTask('server', ['buildLess']);
 };

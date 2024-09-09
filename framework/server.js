@@ -7,24 +7,27 @@ const path = require('path');
 
 let Router = require('./router.js');
 let Dipper = require('./dipper.js');
+let Functions = require('./functions.js');
 
 class Server {
 
-	constructor(options, functionsModule) {
-
-		console.log(functionsModule);
+	constructor(options, endpoints) {
 
 		this.httpx = null;
 		this.verbose = true;
 		this.router = null;
 		this.functions = null;
 		this.dipper = null;
-		this.init(options, functionsModule);
+		this.init(options, endpoints);
 	}
 
-	init(options, functionsModule) {
+	init(options, endpoints) {
 
-		let obj = this, settings = options.settings, opts = settings[options.profile] || {}, shared = settings['shared'] || {}, security = settings['security'] || {};
+		let obj = this, 
+			settings = options.settings, 
+			opts = settings[options.profile] || {}, 
+			shared = settings['shared'] || {}, 
+			security = settings['security'] || {};
 
 		_.defaults(opts, {
 			base_url: '',
@@ -59,7 +62,7 @@ class Server {
 
 		} else if (/^((https):\/\/)/.test(obj.options.site_url)) {
 
-			certs = {
+			let certs = {
 				key: fs.readFileSync(obj.security.key, 'utf8'),
 				cert: fs.readFileSync(obj.security.cert, 'utf8'),
 				allowHTTP1: true
@@ -74,8 +77,14 @@ class Server {
 		// Initialize router
 		obj.router = new Router(obj);
 
+		// -- Initialize endoints
+		let endpoints_built = {};
+		for (let endpoint of endpoints) {
+			endpoints_built[endpoint.name] = new endpoint(obj.router);
+		}
+
 		// Setting endpoints
-		obj.functions = new functionsModule(obj);
+		obj.functions = new Functions(endpoints_built);
 	}
 
 	start() {

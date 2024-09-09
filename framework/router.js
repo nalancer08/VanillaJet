@@ -139,7 +139,7 @@ class Router {
 								var acceptEncoding = (req.headers['accept-encoding'] != undefined) ? req.headers['accept-encoding'] : '';
 								var fileStream = fs.createReadStream(filename);
 
-								if (ext === 'js' && !route.match(/vanilla\.min\.js$/)) {
+								if (ext === 'js' && !route.match(/(vanilla\.min\.js|vanillaJet\.min\.js)$/)) {
 									extHeader['Cache-Control'] = 'public, max-age=15552000'; 
 									extHeader['Expires'] = new Date(Date.now() + 15552000000).toUTCString();
 								}

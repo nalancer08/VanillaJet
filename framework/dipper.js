@@ -22,7 +22,8 @@ function Dipper(options, shared) {
 		'images'  : '/public/images/',
 		'scripts' : '/public/scripts/',
 		'styles'  : '/public/styles/',
-		'fonts'   : '/public/fonts/'
+		'fonts'   : '/public/fonts/',
+		'anims'   : '/public/anims/'
 	}
 
 	// -- Static content
@@ -32,11 +33,14 @@ function Dipper(options, shared) {
 	this.enqueued_scripts = [];
 	this.enqueued_styles = [];
 
-	// -- Base
-	this.registerScript('modernizr', '//cdnjs.cloudflare.com/ajax/libs/modernizr/2.8.3/modernizr.min.js');
-	this.registerScript('respond', '//cdnjs.cloudflare.com/ajax/libs/respond.js/1.4.2/respond.js');
-	this.registerScript('jquery', '//cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js');
-	this.registerScript('underscore', '//cdnjs.cloudflare.com/ajax/libs/underscore.js/1.13.6/underscore-min.js');
+	// -- Base scripts
+	let vanillaJetJson = this.openJsonFile('vanillaJet.package.json');
+	if (vanillaJetJson) {
+		let coreDependencies = vanillaJetJson.coreDependencies;
+		for (let key in coreDependencies) {
+			this.registerScript(key, coreDependencies[key]);
+		}
+	}
 }
 
 Dipper.prototype.getPageTitle = function() {
@@ -209,6 +213,15 @@ Dipper.prototype.registerScript = function(
 	};
 }
 
+Dipper.prototype.registerAnimation = function(name, url) {
+	
+	let obj = this;
+	obj.anims[name] = {
+		'resource' : url,
+		'requires' : []
+	};
+}
+
 Dipper.prototype.enqueueStyle = function(name) {
 
 	var obj = this,
@@ -325,6 +338,23 @@ Dipper.prototype.includeScript = function(script) {
 	}
 }
 
+Dipper.prototype.includeAnimation = function(anim) {
+
+	let obj = this;
+	if (obj.anims[anim]) {
+
+		let item = obj.anims[anim],
+			output = '',
+			resource = item['resource'];
+
+		if (!/^(https?:\/\/|\/\/)/.test(resource)) {
+			let jsonAnim = obj.openJsonFile(resource);
+			output = `var ${item['name']} = ${JSON.stringify(jsonAnim)};`;
+		}
+		return output + "\n";
+	}
+}
+
 Dipper.prototype.includeStyles = function() {
 	
 	var obj = this,
@@ -352,6 +382,20 @@ Dipper.prototype.includeScripts = function () {
 		scriptsString += obj.includeScript(script);
 	});
 	return scriptsString;
+}
+
+Dipper.prototype.includeAnimations = function() {
+
+	let obj = this,
+		_ = require('underscore'),
+		animsString = '',
+		keys = Object.keys(obj.anims);
+
+	_.each(keys, function(anim) {
+		animsString += obj.includeAnim(anim);
+	});
+	let baseAnimsString = `<script>'${animsString}'</script>`;
+	return baseAnimsString;
 }
 
 Dipper.prototype.includeManifest = function() {
@@ -517,6 +561,31 @@ Dipper.prototype.includeEnvironment = function() {
 			var API_URL = '${obj.options.api_url}';
 			var VERSION = '${obj.shared.version}';
 		</script>`;
+}
+
+// -- Helpers
+Dipper.prototype.processCwd = function() {
+
+	let cwd = process.cwd()
+		.replace('/.grunt', '')
+		.replace('/.scripts', '')
+		.replace('/node_modules', '')
+		.replace('/vanilla-jet', '');
+	return cwd;
+}
+
+Dipper.prototype.openJsonFile = function(fileName) {
+
+	let data = null;
+	const fs = require('fs'),
+		path = require('path'),
+		filePath = path.join(this.processCwd(), '/' + fileName),
+		exists = fs.existsSync(filePath);
+	
+	if (exists) {
+		data = fs.readFileSync(filePath, 'utf8');
+	}
+	return JSON.parse(data);
 }
 
 module.exports = Dipper;

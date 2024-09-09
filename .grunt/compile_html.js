@@ -6,12 +6,17 @@ const path = require("path"),
 	nunjucks = require('nunjucks'),
     identifier = 'templates';
 
-let Functions = require('../core/external/functions.js');
-let Dipper = require('../core/framework/dipper.js');
-let Config = require('../core/external/config.js');
+let Functions = require('../framework/functions.js');
+let Dipper = require('../framework/dipper.js');
+let Config = require(processCwd() + '/config.js');
+
+// -- Get environment
+let env = process.argv[2] || 'development';
+if (env === 'dev') { env = 'development'; }
+if (env === 'build:qa') { env = 'qa'; }
+if (env === 'build:prod') { env = 'production'; }
 
 // -- Init Dipper
-const env = process.argv[2] || 'development';
 let settings = Config.settings;
 settings['shared']['environment'] = env;
 
@@ -31,7 +36,7 @@ nunjucks.configure(nunjucksPath, {
 });
 
 // -- Template directory
-const templatesDirectoryPath = '../assets/templates/';
+const templatesDirectoryPath = '/assets/templates/';
 
 // -- Call main function
 main();
@@ -126,7 +131,7 @@ function getTemplates(directory) {
     }
 
     // -- Main code
-    const templatesPath = path.join(__dirname, directory);
+    const templatesPath = path.join(processCwd(), directory);
     exploreDirectory(templatesPath);
     return results;
 }
@@ -196,7 +201,7 @@ async function createHTMLFile(content, filePath) {
     fs.mkdirSync(publicPath, { recursive: true });
     const absolutePath = path.join(publicPath, filePath);
     fs.writeFileSync(absolutePath, minified, 'utf8');
-    console.log(`Html file created at: ${absolutePath}`);
+    console.log(`Html :) file created at: ${absolutePath}`);
 }
 
 // -- Helpers
@@ -208,5 +213,7 @@ function cleanALine(line) {
 }
 
 function processCwd() {
-    return process.cwd().replace('/.grunt', '');
+    return process.cwd()
+        .replace('/.grunt', '')
+        .replace('/node_modules/vanilla-jet', '');
 }
