@@ -30,11 +30,15 @@ jobs:
         NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
       run: npm publish
 
-    - name: Create GitHub Release
-      uses: softprops/action-gh-release@v1
+    - name: Get version of the project
+      id: project-version
+      uses: 'euberdeveloper/ga-project-version@main'
+
+    - name: Add release
+      uses: "marvinpinto/action-automatic-releases@latest"
       with:
+        repo_token: "${{ secrets.GITHUB_TOKEN }}"
+        automatic_release_tag: "${{ steps.project-version.outputs.version }}"
+        title: "Deploy"
         files: |
-          dist/**
           package.json
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} 
