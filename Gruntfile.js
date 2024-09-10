@@ -16,7 +16,7 @@ module.exports = function(grunt) {
   require('./.grunt/build_styles_task')(grunt);
 
   // -- Functions
-  function getCleanedCWD() {
+  function getCwd() {
     const cwd = process.cwd();
     let newCwd = cwd
       .replace('/node_modules', '')
@@ -28,19 +28,19 @@ module.exports = function(grunt) {
   
 
   // -- Vars
-  const cssDestination = `${getCleanedCWD()}/public/styles/app.min.css`;
-  const cssOrigin = `${getCleanedCWD()}/assets/styles/less/admin_build.less`;
-  const jsDestination = `${getCleanedCWD()}/public/`;
+  const cssDestination = `${getCwd()}/public/styles/app.min.css`;
+  const cssOrigin = `${getCwd()}/assets/styles/less/admin_build.less`;
+  const jsDestination = `${getCwd()}/public/`;
 
   // -- Init
   grunt.initConfig({
     clean: {
-      build: [`${getCleanedCWD()}/public/scripts/vanilla.min.js`],
+      build: [`${getCwd()}/public/scripts/vanilla.min.js`],
       minified: [
-        `${getCleanedCWD()}/public/scripts/api`, 
-        `${getCleanedCWD()}/public/scripts/controllers`, 
-        `${getCleanedCWD()}/public/scripts/views`, 
-        `${getCleanedCWD()}/public/scripts/app.min.js`
+        `${getCwd()}/public/scripts/api`, 
+        `${getCwd()}/public/scripts/controllers`, 
+        `${getCwd()}/public/scripts/views`, 
+        `${getCwd()}/public/scripts/app.min.js`
       ],
       //minified: ['public/scripts/**/*.min.js', 'public/scripts/*', '!public/scripts/vanilla.min.js']
     },
@@ -63,10 +63,10 @@ module.exports = function(grunt) {
       },
       styles: {
         files: [
-          `${getCleanedCWD()}/assets/styles/less/*.less`, 
-          `${getCleanedCWD()}/assets/styles/less/**/*.less`, 
-          `${getCleanedCWD()}/assets/styles/less/**/**/*.less`,
-          `${getCleanedCWD()}/!assets/styles/less/admin_build.less`
+          `${getCwd()}/assets/styles/less/*.less`, 
+          `${getCwd()}/assets/styles/less/**/*.less`, 
+          `${getCwd()}/assets/styles/less/**/**/*.less`,
+          `${getCwd()}/!assets/styles/less/admin_build.less`
         ],
         tasks: ['buildLess'],
         options: {
@@ -75,22 +75,22 @@ module.exports = function(grunt) {
       },
       scripts: {
         files: [
-          `${getCleanedCWD()}/assets/pages/*.html`,
-          `${getCleanedCWD()}/assets/templates/**/*.html`,
-          `${getCleanedCWD()}/assets/templates/**/**/*.html`,
-          `${getCleanedCWD()}/external/view/*.js`,
-          `${getCleanedCWD()}/external/*.js`,
-          `${getCleanedCWD()}/framework/*.js`
+          `${getCwd()}/assets/pages/*.html`,
+          `${getCwd()}/assets/templates/**/*.html`,
+          `${getCwd()}/assets/templates/**/**/*.html`,
+          `${getCwd()}/external/view/*.js`,
+          `${getCwd()}/external/*.js`,
+          `${getCwd()}/framework/*.js`
         ],
         tasks: ['shell:compileTemplates']
       },
       specificScripts: {
         files: [
-          `${getCleanedCWD()}/assets/scripts/*.js`, 
-          `${getCleanedCWD()}/assets/scripts/**/*.js`, 
-          `${getCleanedCWD()}/assets/scripts/**/**/*.js`
+          `${getCwd()}/assets/scripts/*.js`, 
+          `${getCwd()}/assets/scripts/**/*.js`, 
+          `${getCwd()}/assets/scripts/**/**/*.js`
         ],
-        tasks: ['uglify', 'clean:build', 'concat', 'clean:minified']
+        tasks: ['uglify', 'cleanForce:build', 'concat', 'cleanForce:minified']
       }
     },
     uglify: {
@@ -114,12 +114,12 @@ module.exports = function(grunt) {
 				files: [{
           expand: true,
           src: [
-          	`${getCleanedCWD()}/assets/scripts/*.js`,
-      			`${getCleanedCWD()}/assets/scripts/**/*.js`,
-          	`${getCleanedCWD()}/assets/scripts/**/**/*.js`,
-          	`${getCleanedCWD()}/assets/scripts/**/**/**/*.js`
+          	`${getCwd()}/assets/scripts/*.js`,
+      			`${getCwd()}/assets/scripts/**/*.js`,
+          	`${getCwd()}/assets/scripts/**/**/*.js`,
+          	`${getCwd()}/assets/scripts/**/**/**/*.js`
           ],
-    			dest: getCleanedCWD() + '/public',
+    			dest: getCwd() + '/public',
 					rename  : function (dest, src) {
 
 						var folder = src.substring(0, src.lastIndexOf('/')),
@@ -137,17 +137,17 @@ module.exports = function(grunt) {
       build: {
         src: [
           // Order
-          `${getCleanedCWD()}/public/scripts/controllers/**/*.min.js`,
-          `${getCleanedCWD()}/public/scripts/views/**/*.min.js`,
-          `${getCleanedCWD()}/public/scripts/api/**/*.min.js`,
-          `${getCleanedCWD()}/public/scripts/*.min.js`,
+          `${getCwd()}/public/scripts/controllers/**/*.min.js`,
+          `${getCwd()}/public/scripts/views/**/*.min.js`,
+          `${getCwd()}/public/scripts/api/**/*.min.js`,
+          `${getCwd()}/public/scripts/*.min.js`,
 
           // Ignore files
-          `!${getCleanedCWD()}/public/scripts/core/**`,
-          `!${getCleanedCWD()}/public/scripts/plugins/**`,
-          `!${getCleanedCWD()}/public/scripts/plugins/ui/**`
+          `!${getCwd()}/public/scripts/core/**`,
+          `!${getCwd()}/public/scripts/plugins/**`,
+          `!${getCwd()}/public/scripts/plugins/ui/**`
         ],
-        dest: `${getCleanedCWD()}/public/scripts/vanilla.min.js`
+        dest: `${getCwd()}/public/scripts/vanilla.min.js`
       }
     },
     compress: {
@@ -157,7 +157,7 @@ module.exports = function(grunt) {
         },
         files: [{
           expand: true,
-          src: [`${getCleanedCWD()}/public/scripts/vanilla.min.js`],
+          src: [`${getCwd()}/public/scripts/vanilla.min.js`],
           dest: '',
           ext: '.min.js.gz'
         }]
