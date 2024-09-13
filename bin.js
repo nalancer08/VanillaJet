@@ -3,6 +3,7 @@
 const path = require('path');
 const args = process.argv.slice(2);
 const { execSync } = require('child_process');
+const chalk = require('chalk');
 
 const generatePackagesJson = require(path.join(__dirname, './.scripts/generate_packages_json.js'));
 
