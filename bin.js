@@ -6,6 +6,7 @@ const { execSync } = require('child_process');
 
 const generatePackagesJson = require(path.join(__dirname, './.scripts/generate_packages_json.js'));
 
+console.log(args[0]);
 switch (args[0]) {
 
     case 'setup':
@@ -20,17 +21,17 @@ switch (args[0]) {
         }
         break;
 
-    case 'qa':
+    case 'build:qa':
         try {
-            execSync('grunt --env=qa', { stdio: 'inherit', cwd: __dirname });
+            execSync('grunt build --env=qa', { stdio: 'inherit', cwd: __dirname });
         } catch (error) {
             console.error('Error ejecutando grunt:', error.message);
         }
         break;
 
-    case 'prod':
+    case 'build:prod':
         try {
-            execSync('grunt --env=production', { stdio: 'inherit', cwd: __dirname });
+            execSync('grunt build --env=production', { stdio: 'inherit', cwd: __dirname });
         } catch (error) {
             console.error('Error ejecutando grunt:', error.message);
         }

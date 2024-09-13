@@ -89,6 +89,8 @@ function main() {
             const newHtml = lines.join('\n');
             // -- Create HTML file
             createHTMLFile(newHtml, homePageName);
+            // -- Console finish
+            console.log("VanillaJet - Finish build");
         }
     });
 }
@@ -201,7 +203,7 @@ async function createHTMLFile(content, filePath) {
     fs.mkdirSync(publicPath, { recursive: true });
     const absolutePath = path.join(publicPath, filePath);
     fs.writeFileSync(absolutePath, minified, 'utf8');
-    console.log(`Html :) file created at: ${absolutePath}`);
+    //console.log(`Html :) file created at: ${absolutePath}`);
 }
 
 // -- Helpers

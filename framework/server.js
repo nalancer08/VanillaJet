@@ -18,6 +18,7 @@ class Server {
 		this.router = null;
 		this.functions = null;
 		this.dipper = null;
+    this.endpoints = {};
 		this.init(options, endpoints);
 	}
 
@@ -82,9 +83,10 @@ class Server {
 		for (let endpoint of endpoints) {
 			endpoints_built[endpoint.name] = new endpoint(obj.router);
 		}
+    this.endpoints = endpoints_built;
 
 		// Setting endpoints
-		obj.functions = new Functions(endpoints_built);
+		obj.functions = new Functions();
 	}
 
 	start() {
@@ -96,7 +98,7 @@ class Server {
 		obj.httpx.listen(port);
 
 		// Logging
-		obj.log('__________________  Dragonfly server started  ___________________');
+		obj.log('__________________  VanillaJet server started  ___________________');
 		obj.log(` >           Listening on ${obj.options.site_url}:${obj.options.port}${obj.options.base_url}         < `);
 		obj.log('-----------------------------------------------------------------');
 	}

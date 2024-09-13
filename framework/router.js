@@ -181,7 +181,7 @@ class Router {
 
 	validateCallback(clazz, method) {
 
-		var obj = this, endpoints = obj.server.functions.endpoints;
+		var obj = this, endpoints = obj.server.endpoints;
 
 		if (endpoints[clazz] != undefined) {
 
