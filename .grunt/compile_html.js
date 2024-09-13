@@ -4,7 +4,8 @@ console.log("Init Templete Compile/Rendering");
 const path = require("path"),
 	fs = require("fs"),
 	nunjucks = require('nunjucks'),
-    identifier = 'templates';
+  identifier = 'templates',
+  chalk = require('chalk');
 
 let Functions = require('../framework/functions.js');
 let Dipper = require('../framework/dipper.js');
@@ -90,7 +91,7 @@ function main() {
             // -- Create HTML file
             createHTMLFile(newHtml, homePageName);
             // -- Console finish
-            console.log("VanillaJet - Finish build");
+            console.log(chalk.green("\n\nVanillaJet - Finish build"));
         }
     });
 }

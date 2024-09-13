@@ -6,7 +6,6 @@ const { execSync } = require('child_process');
 
 const generatePackagesJson = require(path.join(__dirname, './.scripts/generate_packages_json.js'));
 
-console.log(args[0]);
 switch (args[0]) {
 
     case 'setup':
