@@ -14,8 +14,8 @@ module.exports = function(grunt) {
         // -- Content
         let adminContent = grunt.file.read(`${getCleanedCWD()}/assets/styles/less/admin.less`);
         let sectionFiles = grunt.file.expand([
-            `${getCleanedCWD()}/assets/styles/less/sections/**/*.section.less`,
-            `${getCleanedCWD()}/assets/styles/less/sections/*.section.less`
+            `${getCleanedCWD()}/assets/styles/less/sections/**/*.sectionn.less`,
+            `${getCleanedCWD()}/assets/styles/less/sections/*.sectionn.less`
         ]);
         
         let combinedContent = adminContent + '\n';
