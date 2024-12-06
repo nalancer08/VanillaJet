@@ -11,9 +11,8 @@ let Config = require(processCwd() + '/config.js');
 
 // -- Get environment
 let env = process.argv[2] || 'development';
-if (env === 'dev') { env = 'development'; }
-if (env === 'build:qa') { env = 'qa'; }
-if (env === 'build:prod') { env = 'production'; }
+if (env === 'dev') { env = 'development'; } 
+else { env = env.split(':')[1] || ''; }
 
 // -- Init Dipper
 let settings = Config.settings;
