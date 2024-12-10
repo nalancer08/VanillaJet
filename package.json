@@ -1,6 +1,6 @@
 {
   "name": "vanilla-jet",
-  "version": "1.0.38",
+  "version": "1.0.40",
   "description": "VannilaJet framework",
   "main": "index.js",
   "bin": {
