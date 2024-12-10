@@ -10,6 +10,7 @@
     "setup": "node ./.scripts/generate_packages_json.js",
     "dev": "grunt --env=development",
     "build:qa": "grunt build --env=qa",
+    "build:staging": "grunt build --env=staging",
     "build:prod": "grunt build --env=production",
     "test": "npm run test"
   },
