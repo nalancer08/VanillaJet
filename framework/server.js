@@ -53,26 +53,10 @@ class Server {
 		});
 		global.dipper = new Dipper(opts, shared);
 
-		// Cheking for http or https
-		if (/^((http):\/\/)/.test(obj.options.site_url) || /^((localhost))/.test(obj.options.site_url)) {
+    // -- Create the server
+    obj.httpx = obj.createServer(obj.options, obj.security);
 
-			obj.httpx = http.createServer((req, res) => {
-				//console.log(req.url);
-				obj.router.onRequest.call(obj.router, req, res);
-			});
-
-		} else if (/^((https):\/\/)/.test(obj.options.site_url)) {
-
-			let certs = {
-				key: fs.readFileSync(obj.security.key, 'utf8'),
-				cert: fs.readFileSync(obj.security.cert, 'utf8'),
-				allowHTTP1: true
-			};
-			obj.httpx = http2.createSecureServer(certs, (req, res) => {
-				obj.router.onRequest.call(obj.router, req, res);
-			});
-		}
-
+    // -- Not found callback
 		obj.onNotFound = opts.onNotFound;
 
 		// Initialize router
@@ -102,6 +86,35 @@ class Server {
 		obj.log(` >           Listening on ${obj.options.site_url}:${obj.options.port}${obj.options.base_url}         < `);
 		obj.log('-----------------------------------------------------------------');
 	}
+
+  createServer(options, security) {
+
+    let obj = this;
+    // -- Http server
+    let isHttp = /^((http):\/\/)/.test(options.site_url) || /^((localhost))/.test(options.site_url);
+    if (isHttp) {
+      return http.createServer((req, res) => {
+        obj.router.onRequest(obj.router, req, res);
+      });
+    }
+
+    // -- Https server (self managed certs)
+    if (security.self_managed_certs) {
+      let certs = {
+        key: fs.readFileSync(security.key, 'utf8'),
+        cert: fs.readFileSync(security.cert, 'utf8'),
+        allowHTTP1: true
+      };
+      return http2.createSecureServer(certs, (req, res) => {
+        obj.router.onRequest(obj.router, req, res);
+      });
+    }
+    
+    // -- Certs managed by NGINX, Google Cloud Run, etc.
+    return http2.createServer({ allowHTTP1: true }, (req, res) => {
+      obj.router.onRequest(obj.router, req, res);
+    });
+  }
 
 	log(value) {
 
