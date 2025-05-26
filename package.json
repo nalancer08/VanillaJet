@@ -1,6 +1,6 @@
 {
   "name": "vanilla-jet",
-  "version": "1.1.1",
+  "version": "1.1.2",
   "description": "VannilaJet framework",
   "main": "index.js",
   "bin": {
@@ -30,7 +30,7 @@
   "homepage": "https://github.com/nalancer08/VanillaJet#readme",
   "dependencies": {
     "blueimp-md5": "2.19.0",
-    "chalk": "5.4.1",
+    "chalk": "4.1.2",
     "grunt": "1.6.1",
     "grunt-cli": "1.5.0",
     "grunt-contrib-clean": "2.0.1",
