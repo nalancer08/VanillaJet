@@ -32,90 +32,70 @@ function Dipper(options, shared) {
 	this.anims = [];
 	this.enqueued_scripts = [];
 	this.enqueued_styles = [];
-
-	// -- Base scripts
-	let vanillaJetJson = this.openJsonFile('vanillaJet.package.json');
-	if (vanillaJetJson) {
-		let coreDependencies = vanillaJetJson.coreDependencies;
-		for (let key in coreDependencies) {
-			this.registerScript(key, coreDependencies[key]);
-		}
-	}
 }
 
 Dipper.prototype.getPageTitle = function() {
-
-	var obj = this;
+	let obj = this;
 	return obj.site_title;
 }
 
 Dipper.prototype.getSiteTitle = function() {
-
-	var obj = this;
+	let obj = this;
 	return obj.page_title;
 }
 
 Dipper.prototype.getDescription = function() {
-
-	var obj = this;
+	let obj = this;
 	return obj.description;
 }
 
 Dipper.prototype.getFbAppId = function() {
-
-	var obj = this;
+	let obj = this;
 	return obj.fbAppId;
 }
 
 Dipper.prototype.addMeta = function(name, content, attribute) {
 
-	var obj = this;
+	let obj = this;
 	attribute = attribute || 'name';
 	content = content || '';
-	var meta = [];
-		meta['name'] = name;
-		meta['content'] = content;
-		meta['attribute'] = attribute;
+	let meta = { 'name': name, 'content': content, 'attribute': attribute };
 	obj.metas[name] = meta;
 }
 
 Dipper.prototype.metaTags = function() {
 
-	var obj = this;
-	var _ = require('underscore');
-	var stringMeta = '';
+	let obj = this;
+	let _ = require('underscore');
+	let stringMeta = '';
 
-	var keys = Object.keys(obj.metas);
+	let keys = Object.keys(obj.metas);
 	_.each(keys, function(key) {
 		
-		var name = obj.metas[key]['name'],
+		let name = obj.metas[key]['name'],
 			content = obj.metas[key]['content'],
 			attribute = obj.metas[key]['attribute'];
 
 		stringMeta += obj.metas[key]['content'] != '' ? 
-			'<meta ' + attribute + '=\"' + name + '\" content=\"' + content + '\">\n\t' :
-			'<meta ' + attribute + '=\"' + name + '\">\n\t';
+			'<meta ' + attribute + '="' + name + '" content="' + content + '">\n\t' :
+			'<meta ' + attribute + '="' + name + '">\n\t';
 	});
 	return stringMeta;			
 }
 
 Dipper.prototype.img = function(filename) {
 
-	var obj = this,
-		dir = this.getDir('images', false);
-		ret = this.urlTo(dir + filename);
+	let dir = this.getDir('images', false);
+	let ret = this.urlTo(dir + filename);
 	return ret;
 }
 
 Dipper.prototype.script = function(filename) {
 
-	var obj = this,
-		dir = this.getDir('scripts', false);
-
-	var filenameParts = filename.split('.'),
+	let dir = this.getDir('scripts', false);
+	let filenameParts = filename.split('.'),
 		length = filenameParts.length;
 	if (length > 0) {
-
 		let position = length - 1;
 		filenameParts[position] = 'min.' + filenameParts[position];
 		filename = filenameParts.join('.');
@@ -125,26 +105,22 @@ Dipper.prototype.script = function(filename) {
 
 Dipper.prototype.style = function(filename) {
 
-	var obj = this,
-		dir = this.getDir('styles', false),
-		ret = this.urlTo(dir + filename);
+  let dir = this.getDir('styles', false);
+	let ret = this.urlTo(dir + filename);
 	return ret;
 }
 
 Dipper.prototype.pdf = function(filename) {
 
-	var obj = this,
-		dir = '/assets/pdf/'
-		ret = this.urlTo(dir + filename);
-		//console.log(ret);
+	let dir = '/assets/pdf/';
+	let ret = this.urlTo(dir + filename);
 	return ret;
 }
 
 Dipper.prototype.getDir = function(dir, full) {
 	
-	var obj = this,
-		full = (full == undefined) ? true : full;
-
+	let obj = this;
+	full = (full == undefined) ? true : full;
 	if ( obj.dirs[dir] != undefined ) {
 		return (full == true ? obj.baseDir(obj.dirs[dir]) : obj.dirs[dir]);
 	}
@@ -153,16 +129,14 @@ Dipper.prototype.getDir = function(dir, full) {
 
 Dipper.prototype.baseDir = function(path) {
 
-	var obj = this,
-		path = path || '',
-		ret = obj.base_dir + path;
-	return ret;
+	let obj = this;
+	path = path || '';
+	return obj.base_dir + path;
 }
 
 Dipper.prototype.isSecureRequest = function() {
 
-	var obj = this;
-	// Cheking for http or https
+	let obj = this;
 	if (/^((http):\/\/)/.test(obj.options.site_url) || /^((localhost))/.test(obj.options.site_url)) {
 		return false;
 	} else if (/^((https):\/\/)/.test(obj.options.site_url)) {
@@ -172,11 +146,8 @@ Dipper.prototype.isSecureRequest = function() {
 
 Dipper.prototype.urlTo = function(route, protocol) {
 
-	var obj = this,
-		protocol = protocol || undefined,
-		url = obj.base_url + route;
-		//url = obj.baseUrl(route, protocol);
-	return url;
+	let obj = this;
+	return obj.base_url + route;
 }
 
 Dipper.prototype.registerStyle = function(
@@ -184,7 +155,7 @@ Dipper.prototype.registerStyle = function(
 	cdn = false, async = false,
 	origin = '', integrity = '') {
 	
-	var obj = this;
+	let obj = this;
 	obj.styles[name] = {
 		'resource' : url,
 		'requires' : requires,
@@ -200,7 +171,7 @@ Dipper.prototype.registerScript = function(
 	cdn = false, async = false, defer = false,
 	origin = '', integrity = '') {
 	
-	var obj = this;
+	let obj = this;
 	obj.scripts[name] = {
 
 		'resource' : url,
@@ -224,13 +195,13 @@ Dipper.prototype.registerAnimation = function(name, url) {
 
 Dipper.prototype.enqueueStyle = function(name) {
 
-	var obj = this,
+	let obj = this,
 		_ = require('underscore');
 
 	if (obj.styles[name] != undefined) {
 		if (obj.enqueued_styles[name] == undefined) {
 			
-			var item = obj.styles[name];
+			let item = obj.styles[name];
 			_.each(item.requires, function(dep) {
 				obj.enqueueStyle(dep);
 			});
@@ -241,13 +212,13 @@ Dipper.prototype.enqueueStyle = function(name) {
 
 Dipper.prototype.enqueueScript = function(name) {
 
-	var obj = this,
+	let obj = this,
 		_ = require('underscore');
 
 	if (obj.scripts[name] != undefined) {
 		if (obj.enqueued_scripts[name] == undefined) {
 
-			var item = obj.scripts[name];
+			let item = obj.scripts[name];
 			_.each(item.requires, function(dep) {
 				obj.enqueueScript(dep);
 			});
@@ -258,13 +229,13 @@ Dipper.prototype.enqueueScript = function(name) {
 
 Dipper.prototype.dequeueStyle = function(name, dependencies) {
 
-	var obj = this,
+	let obj = this,
 		_ = require('underscore')
 		dependencies = (dependencies == undefined) ? false : dependencies;
 
 	if (obj.styles[name] != undefined) {
 		if (obj.enqueued_styles[name] != undefined) {
-			var item = obj.styles[name];
+			let item = obj.styles[name];
 			if (dependencies != undefined) {
 				_.each(item.require, function(dep) {
 					obj.dequeueStyle(dep);
@@ -277,13 +248,13 @@ Dipper.prototype.dequeueStyle = function(name, dependencies) {
 
 Dipper.prototype.dequeueScript = function(name, dependencies) {
 
-	var obj = this,
+	let obj = this,
 		_ = require('underscore')
 		dependencies = (dependencies == undefined) ? false : dependencies;
 
 	if (obj.scripts[name] != undefined) {
 		if (obj.enqueued_scripts[name] != undefined) {
-			var item = obj.scripts[name];
+			let item = obj.scripts[name];
 			if (dependencies != undefined) {
 				_.each(item.require, function(dep) {
 					obj.dequeueScript(dep);
@@ -296,23 +267,23 @@ Dipper.prototype.dequeueScript = function(name, dependencies) {
 
 Dipper.prototype.includeStyle = function(style) {
 			
-	var obj = this;
+	let obj = this;
 	if (obj.styles[style]) {
 
-		var item = obj.styles[style],
+		let item = obj.styles[style],
 			output = '',
 			//type = item['cdn'] ? "" : 'type=\"text/javascript\"',
 			resource = item['resource'],
 			isAsync = item['async'] ? 'preload' : 'stylesheet',
-			origin = item['origin'] != '' ? ' crossorigin=\"' + item['origin'] + '\"' : '',
-			integrity = item['integrity'] != '' ? ' integrity=\"' + item['integrity'] + '\"' : '';
+			origin = item['origin'] != '' ? ' crossorigin="' + item['origin'] + '"' : '',
+			integrity = item['integrity'] != '' ? ' integrity="' + item['integrity'] + '"' : '';
 		
 		if (item['async']) {
 
-			var a = " as=\"style\" onload=\"this.onload=null; this.rel='stylesheet'\"";
-			output = '<link rel=\"' + isAsync + '\" type=\"text/css\" href=\"' + resource + '\"' + a + integrity + origin + ">";
+			let a = " as=\"style\" onload=\"this.onload=null; this.rel='stylesheet'\"";
+			output = '<link rel="' + isAsync + '" type="text/css" href="' + resource + '"' + a + integrity + origin + ">";
 		} else {
-			output = '<link rel=\"' + isAsync + '\" type=\"text/css\" href=\"' + resource + '\"' + integrity + origin + ">";
+			output = '<link rel="' + isAsync + '" type="text/css" href="' + resource + '"' + integrity + origin + ">";
 		}
 		return output + "\n";
 	}
@@ -320,20 +291,19 @@ Dipper.prototype.includeStyle = function(style) {
 
 Dipper.prototype.includeScript = function(script) {
 	
-	var obj = this;
+	let obj = this;
 	if (obj.scripts[script]) {
 
-		var item = obj.scripts[script],
+		let item = obj.scripts[script],
 			output = '',
 			//type = item['cdn'] ? "" : 'type=\"text/javascript\"',
 			resource = item['resource'],
 			isAsync = item['async'] ? ' async' : '',
 			defer = item['defer'] ? ' defer' : '',
-			origin = item['origin'] != '' ? ' crossorigin=\"' + item['origin'] + '\"' : '',
-			integrity = item['integrity'] != '' ? ' integrity=\"' + item['integrity'] + '\"' : '';
+			origin = item['origin'] != '' ? ' crossorigin="' + item['origin'] + '"' : '',
+			integrity = item['integrity'] != '' ? ' integrity="' + item['integrity'] + '"' : '';
 		
-		output = '<script src=\"' + resource + '\"' + defer + isAsync + integrity + origin + '></script>';
-		//console.log(output);
+		output = '<script src="' + resource + '"' + defer + isAsync + integrity + origin + '></script>';
 		return output + "\n";
 	}
 }
@@ -357,25 +327,22 @@ Dipper.prototype.includeAnimation = function(anim) {
 
 Dipper.prototype.includeStyles = function() {
 	
-	var obj = this,
-		_ = require('underscore')
-		stylesString = '',
+	let obj = this,
+		_ = require('underscore');
+	let stylesString = '',
 		keys = Object.keys(obj.enqueued_styles);
 
 	_.each(keys, function(style) {
 		stylesString += obj.includeStyle(style);
 	});
-
-	//console.log(stylesString);
-	//$site->executeHook('core.includeStyles');
 	return stylesString;
 }
 
 Dipper.prototype.includeScripts = function () {
 			
-	var obj = this,
+	let obj = this,
 		_ = require('underscore')
-		scriptsString = '',
+	let scriptsString = '',
 		keys = Object.keys(obj.enqueued_scripts);
 
 	_.each(keys, function(script) {
@@ -400,9 +367,9 @@ Dipper.prototype.includeAnimations = function() {
 
 Dipper.prototype.includeManifest = function() {
 
-	var obj = this,
+	let obj = this,
 		url = obj.urlTo('/public/manifest.json'),
-		tagString = '<link rel=\"manifest\" href=\"' + url + '\">';
+		tagString = '<link rel="manifest" href="' + url + '">';
 	return tagString;
 }
 

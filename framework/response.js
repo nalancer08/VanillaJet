@@ -10,31 +10,26 @@ class Response {
 		this.status = 200;
 		this.headers = [];
 		this.autoRespond = true;
-		// Call initialization callback
 		this.init(res);
 	}
 
 	init(res) {
-
-		var obj = this;
+		let obj = this;
 		obj.res = res;
 	}
 
 	setBody(body) {
-
-		var obj = this;
+		let obj = this;
 		obj.body = body;
 	}
 
 	setStatus(status) {
-
-		var obj = this;
+		let obj = this;
 		obj.status = status;
 	}
 
 	setHeader(name, value) {
-
-		var obj = this;
+		let obj = this;
 		obj.headers.push({
 			name: name,
 			value: value
@@ -42,20 +37,18 @@ class Response {
 	}
 
 	getBody() {
-
-		var obj = this;
+		let obj = this;
 		return obj.body;
 	}
 
 	getStatus() {
-
-		var obj = this;
+		let obj = this;
 		return obj.status;
 	}
 
 	getHeader(name) {
-
-		var obj = this, ret = null;
+		let obj = this, 
+        ret = null;
 		ret = _.find(obj.headers, function (header) {
 			return header.name == name;
 		});
@@ -63,8 +56,7 @@ class Response {
 	}
 
 	respond() {
-
-		var obj = this;
+		let obj = this;
 		this.setHeader('Access-Control-Allow-Origin', '*');
 
 		_.each(obj.headers, function (header) {
@@ -75,8 +67,7 @@ class Response {
 	}
 
 	error404() {
-
-		var obj = this;
+		let obj = this;
 		obj.res.writeHead(404, { "Content-Type": "text/plain" });
 		obj.res.write("404 Not Found\n");
 		obj.res.end();
@@ -84,7 +75,10 @@ class Response {
 
 	render(template) {
 
-		var obj = this, path = require("path"), fs = require("fs"), template = 'pages/' + template;
+		let obj = this, 
+        path = require("path"), 
+        fs = require("fs");
+    template = 'pages/' + template;
 
 		const filename = path.join(process.cwd(), 'public/' + template);
 		const fileStream = fs.createReadStream(filename);

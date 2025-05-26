@@ -8,10 +8,10 @@ async function main() {
     // -- Create the object to be write in the file
     const json = {
         coreDependencies: {
-            "modernizr": "//cdnjs.cloudflare.com/ajax/libs/modernizr/2.8.3/modernizr.min.js",
-            "respond": "//cdnjs.cloudflare.com/ajax/libs/respond.js/1.4.2/respond.js",
-            "jquery": "//cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js",
-            "underscore": "//cdnjs.cloudflare.com/ajax/libs/underscore.js/1.13.6/underscore-min.js"
+          "modernizr": "//cdnjs.cloudflare.com/ajax/libs/modernizr/2.8.3/modernizr.min.js",
+          "respond": "//cdnjs.cloudflare.com/ajax/libs/respond.js/1.4.2/respond.js",
+          "jquery": "//cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js",
+          "underscore": "//cdnjs.cloudflare.com/ajax/libs/underscore.js/1.13.6/underscore-min.js"
         },
         dependencies: {},
         styles: {},

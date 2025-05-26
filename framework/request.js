@@ -22,7 +22,10 @@ class Request {
 
 	init(req, options) {
 
-		var obj = this, body = '', options = options || {}, parsed = url.parse(req.url, true);
+		let obj = this, 
+        body = '', 
+        parsed = url.parse(req.url, true);
+    options = options || {};
 
 		// Save callbacks
 		obj.onDataReceived = options.onDataReceived || obj.onDataReceived;
@@ -43,7 +46,7 @@ class Request {
 		}
 
 		// Matches
-		var matches = (obj.id == null) ? null : obj.id.match(/\.([a-z0-9]+)$/);
+		let matches = (obj.id == null) ? null : obj.id.match(/\.([a-z0-9]+)$/);
 		if (matches) {
 			obj.format = matches[1] || 'html';
 			obj.id = obj.id.replace(/\.([a-z0-9]+)$/, '');
@@ -58,7 +61,7 @@ class Request {
 		req.on('end', function (chunk) {
 			obj.params.body = body;
 			obj.params.post = querystring.parse(body);
-			obj.onDataReceived.call(obj);
+			obj.onDataReceived(obj);
 		});
 	}
 
@@ -69,7 +72,8 @@ class Request {
 	**/
 	param(name, value) {
 
-		var obj = this, ret = value || '';
+		let obj = this, 
+        ret = value || '';
 		// Try to retrieve parameter from both, POST and GET objects
 		if (typeof obj.params.post[name] !== 'undefined') {
 			ret = obj.params.post[name];
@@ -81,7 +85,8 @@ class Request {
 
 	post(name, value) {
 
-		var obj = this, ret = value || '';
+		let obj = this, 
+        ret = value || '';
 		// Try to retrieve parameter from POST object
 		if (typeof obj.params.post[name] !== 'undefined') {
 			ret = obj.params.post[name];
@@ -91,7 +96,8 @@ class Request {
 
 	get(name, value) {
 
-		var obj = this, ret = value || '';
+		let obj = this, 
+        ret = value || '';
 		// Try to retrieve parameter from GET object
 		if (typeof obj.params.get[name] !== 'undefined') {
 			ret = obj.params.get[name];
@@ -100,8 +106,7 @@ class Request {
 	}
 
 	body() {
-
-		var obj = this;
+		let obj = this;
 		return obj.params.body;
 	}
 }
