@@ -30,10 +30,10 @@ class Router {
 
 	addRoute(method, route, handler, insert) {
 
-		let obj = this, 
-        insert = insert || false, 
-        method = method.toLowerCase(), 
-        prev = (obj.server.options.base_url && obj.server.options.base_url != '' && obj.server.options.base_url != '/') ? obj.server.options.base_url : '', 
+		let obj = this;
+    insert = insert || false;
+    method = method.toLowerCase();
+    let prev = (obj.server.options.base_url && obj.server.options.base_url != '' && obj.server.options.base_url != '/') ? obj.server.options.base_url : '', 
         instance = {
 			    regexp: obj.routeToRegExp(prev + route),
 			    handler: handler
