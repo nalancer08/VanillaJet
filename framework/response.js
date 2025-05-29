@@ -76,7 +76,7 @@ class Response {
 
 	error404() {
 
-		var obj = this;
+		let obj = this;
 		obj.res.writeHead(404, { "Content-Type": "text/plain" });
 		obj.res.write("404 Not Found\n");
 		obj.res.end();
