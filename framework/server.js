@@ -41,7 +41,8 @@ class Server {
 		_.defaults(security, {
 			pass_salt: '1234567890',
 			token_salt: '0987654321',
-			version: '1.0'
+			version: '1.0',
+      self_managed_certs: false
 		});
 		obj.security = security;
 
