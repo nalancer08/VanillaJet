@@ -43,30 +43,24 @@ class Router {
 		}
 	}
 
-	removeRoute(method, route) {}
-
 	onRequest(req, res) {
 
 		let obj = this;
 		let isMatch = false;
-		let zlib = require('zlib');
 		let response = new Response(res);
 		let request = new Request(req, {
 			onDataReceived: function () {
-
-				//console.log(request.path);
 				if (request.path == obj.server.options.base_url) {
 					request.path = obj.server.options.base_url + obj.defaultRoute;
 				}
-				//console.log(request.path);
-				// Try with the routes for the current method (get or post)
+				// -- Check GET or POST routes
 				_.each(obj.routes[request.type], function (route) {
 					if (request.path.match(route.regexp)) {
-
-						var parts = route.handler.split('.'), clazz = parts[0], method = parts[1], callback = obj.validateCallback(clazz, method);
-
+						let parts = route.handler.split('.'), 
+                clazz = parts[0], 
+                method = parts[1], 
+                callback = obj.validateCallback(clazz, method);
 						if (callback && callback != undefined && callback != '') {
-
 							isMatch = true;
 							handled = callback(request, response, obj.server);
 							return;
@@ -74,92 +68,47 @@ class Router {
 					}
 				});
 
-				// If not handled yet, try with the wildcard ones
-				if (!handled) {
-					_.each(obj.routes['*'], function (route) {
+				// -- Check static files
+				if (!handled && !isMatch) {
 
-						if (request.path.match(route.regexp)) {
-
-							var parts = route.handler.split('.'), clazz = parts[0], method = parts[1], callback = obj.validateCallback(clazz, method);
-
-							if (callback && callback != undefined && callback != '') {
-
-								isMatch = true;
-								handled = callback(request, response, obj.server);
-								return;
-							}
-						}
-					});
-				}
-
-				// No route catched, maybe it's a static content
-				// or not handled? Well, at this point we call 404
-				if (handled == false && isMatch == false) {
-
-					var path = require('path'), ext = path.extname(req.url).replace('.', ''), extHandled = false, extHeader = {};
-					var mimes = {
-						'png': 'image/png',
-						'webp': 'image/webp',
-						'jpg': 'image/jpg',
-						'css': 'text/css',
-						'gz': 'application/x-gzip',
-						'gif': 'image/gif',
-						'js': 'text/javascript',
-						'svg': 'image/svg+xml',
-						'ttf': 'application/x-font-ttf',
-						'otf': 'application/x-font-opentype',
-						'pdf': 'application/pdf',
-						'json': 'application/json'
-					};
-
-					var compressionMimes = {
-						'css': 'text/css',
-						'js': 'text/javascript',
-						'gz': 'application/x-gzip'
-					};
-
-					if (mimes[ext] != undefined && mimes[ext] != 'undefined') {
-
+					let ext = path.extname(req.url).replace('.', ''), 
+            extHandled = false, 
+            extHeader = {};
+					
+					if (obj.mimes[ext] != undefined && obj.mimes[ext] != 'undefined') {
 						extHandled = true;
-						extHeader = { 'Content-Type': mimes[ext] };
+						extHeader = { 'Content-Type': obj.mimes[ext] };
 					}
 
 					if (extHandled) {
 
-						let fs = require('fs'), 
-							rep = obj.cwd.replace('core/framework', ''), 
+						let rep = obj.cwd.replace('core/framework', ''), 
 							route = request.path.replace(obj.server.options.base_url, ''), 
 							filename = path.join(rep, route), 
 							filePrivate = obj.isProtectedFile(route);
 
-						fs.exists(filename, function (exists) {
+            fs.stat(filename, (err, stats) => {
 
-							if (exists && !filePrivate) {
+              if (err || !stats.isFile() || filePrivate) {
+                return obj.onNotFound(response);
+              }
 
-								var acceptEncoding = (req.headers['accept-encoding'] != undefined) ? req.headers['accept-encoding'] : '';
-								var fileStream = fs.createReadStream(filename);
+              const acceptEncoding = req.headers['accept-encoding'] || '';
+              const fileStream = fs.createReadStream(filename);
+              fileStream.on('error', (streamErr) => {
+                //console.error("❌ Error leyendo archivo:", streamErr);
+                res.writeHead(500);
+                res.end('Error interno');
+              });
 
-								if (ext === 'js' && !route.match(/(vanilla\.min\.js|vanillaJet\.min\.js)$/)) {
-									extHeader['Cache-Control'] = 'public, max-age=15552000'; 
-									extHeader['Expires'] = new Date(Date.now() + 15552000000).toUTCString();
-								}
+              extHeader['Content-Length'] = stats.size;
+              res.writeHead(200, extHeader);
+              fileStream.pipe(res);
 
-								if (acceptEncoding.match(/\bgzip\b/) && compressionMimes[ext] != undefined) {
-									extHeader['Content-Encoding'] = 'gzip';
-									res.writeHead(200, extHeader);
-									fileStream.pipe(zlib.createGzip()).pipe(res);
-								} else {
-									res.writeHead(200, extHeader);
-									fileStream.pipe(res);
-								}
-								return;
-
-							} else {
-
-								// Return 404
-								obj.onNotFound(response);
-							}
-						});
+              res.on('close', () => {
+                //console.log("✅ Archivo servido y cerrado:", filename);
+              });
+            });
 					}
 				}
 			}
@@ -176,8 +125,6 @@ class Router {
 		}
 		return true;
 	}
-
-	validateExtension(route) {}
 
 	validateCallback(clazz, method) {
 
@@ -200,19 +147,18 @@ class Router {
 	**/
 	setDefaultRoute(route) {
 
-		var obj = this;
+		let obj = this;
 		obj.defaultRoute = route;
 	}
 
 	getDefaultRoute() {
 
-		var obj = this, prev = (obj.server.options.base_url && obj.server.options.base_url != '' && obj.server.options.base_url != '/') ? obj.server.options.base_url : '';
-
+		let obj = this, 
+      prev = (obj.server.options.base_url && obj.server.options.base_url != '' && obj.server.options.base_url != '/') ? obj.server.options.base_url : '';
 		return (prev + obj.defaultRoute);
 	}
 
 	onNotFound(response) {
-
 		response.setStatus(404);
 		response.respond();
 	}

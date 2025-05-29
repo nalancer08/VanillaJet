@@ -46,13 +46,13 @@ function Dipper(options, shared) {
 Dipper.prototype.getPageTitle = function() {
 
 	var obj = this;
-	return obj.site_title;
+	return obj.page_title;
 }
 
 Dipper.prototype.getSiteTitle = function() {
 
 	var obj = this;
-	return obj.page_title;
+	return obj.site_title;
 }
 
 Dipper.prototype.getDescription = function() {
