@@ -86,8 +86,8 @@ class Response {
 
 		let obj = this, 
       path = require("path"), 
-      fs = require("fs"), 
-      template = 'pages/' + template;
+      fs = require("fs");
+    template = 'pages/' + template;
 
 		const filename = path.join(process.cwd(), 'public/' + template);
 		const fileStream = fs.createReadStream(filename);
