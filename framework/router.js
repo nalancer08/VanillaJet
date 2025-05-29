@@ -16,11 +16,33 @@ class Router {
 		this.defaultRoute = '';
 		this.server = server;
 		this.cwd = process.cwd();
+    this.mimes = {
+      'png': 'image/png',
+      'webp': 'image/webp',
+      'jpg': 'image/jpg',
+      'css': 'text/css',
+      'gz': 'application/x-gzip',
+      'gif': 'image/gif',
+      'js': 'text/javascript',
+      'svg': 'image/svg+xml',
+      'ttf': 'application/x-font-ttf',
+      'otf': 'application/x-font-opentype',
+      'pdf': 'application/pdf',
+      'json': 'application/json'
+    };
+    this.compressionMimes = {
+      'css': 'text/css',
+      'js': 'text/javascript',
+      'gz': 'application/x-gzip'
+    };
 	}
 
 	routeToRegExp(route) {
 
-		var optionalParam = /\((.*?)\)/g, namedParam = /(\(\?)?:\w+/g, splatParam = /\*\w+/g, escapeRegExp = /[\-{}\[\]+?.,\\\^$|#\s]/g;
+		let optionalParam = /\((.*?)\)/g, 
+      namedParam = /(\(\?)?:\w+/g, 
+      splatParam = /\*\w+/g, 
+      escapeRegExp = /[\-{}\[\]+?.,\\\^$|#\s]/g;
 		// Convert route to regular expression, this was taken from Backbone's router
 		route = route.replace(escapeRegExp, '\\$&')
 			.replace(optionalParam, '(?:$1)?')
@@ -95,21 +117,18 @@ class Router {
                 return obj.onNotFound(response);
               }
 
-              const acceptEncoding = req.headers['accept-encoding'] || '';
+              // -- const acceptEncoding = req.headers['accept-encoding'] || '';
               const fileStream = fs.createReadStream(filename);
               fileStream.on('error', (streamErr) => {
-                //console.error("❌ Error leyendo archivo:", streamErr);
+                console.error("Error reading file:", streamErr);
                 res.writeHead(500);
-                res.end('Error interno');
+                res.end('Server Error');
               });
 
               extHeader['Content-Length'] = stats.size;
               res.writeHead(200, extHeader);
               fileStream.pipe(res);
-
-              res.on('close', () => {
-                //console.log("✅ Archivo servido y cerrado:", filename);
-              });
+              res.on('close', () => {});
             });
 					}
 				}
@@ -121,7 +140,7 @@ class Router {
 	isProtectedFile(route) {
 
 		let protectedDirs = ['framework', 'external', 'node_mudules'];
-		var routeParts = route.split('/');
+		let routeParts = route.split('/');
 		if (routeParts[1] != undefined && routeParts.length > 2) {
 			return protectedDirs.includes(routeParts[1]);
 		}
@@ -130,12 +149,11 @@ class Router {
 
 	validateCallback(clazz, method) {
 
-		var obj = this, endpoints = obj.server.endpoints;
+		let obj = this, 
+      endpoints = obj.server.endpoints;
 
 		if (endpoints[clazz] != undefined) {
-
 			clazz = endpoints[clazz];
-
 			if (typeof clazz[method] === 'function') {
 				return clazz[method];
 			}
