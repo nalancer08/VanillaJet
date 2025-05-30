@@ -9,12 +9,7 @@ function Dipper(options, shared) {
 	this.page_title = this.site_title;
 	this.description = shared.description;
 	this.fbAppId = shared.fbAppId;
-
-	this.site_url = ((this.options.site_url == 'localhost')  ? 
-		'http://localhost' : 
-		this.options.site_url) + ':' + this.options.port;
 	this.base_dir = path.join(process.cwd(), '/');
-	this.base_url = this.site_url + this.options.base_url;
 	
 	// Dirs
 	this.dirs = {
@@ -44,27 +39,19 @@ function Dipper(options, shared) {
 }
 
 Dipper.prototype.getPageTitle = function() {
-
-	var obj = this;
-	return obj.page_title;
+	return this.page_title;
 }
 
 Dipper.prototype.getSiteTitle = function() {
-
-	var obj = this;
-	return obj.site_title;
+	return this.site_title;
 }
 
 Dipper.prototype.getDescription = function() {
-
-	var obj = this;
-	return obj.description;
+	return this.description;
 }
 
 Dipper.prototype.getFbAppId = function() {
-
-	var obj = this;
-	return obj.fbAppId;
+	return this.fbAppId;
 }
 
 Dipper.prototype.addMeta = function({name, content, attribute}) {
@@ -100,11 +87,8 @@ Dipper.prototype.metaTags = function() {
 }
 
 Dipper.prototype.img = function(filename) {
-
-	var obj = this,
-		dir = this.getDir('images', false);
-		ret = this.urlTo(dir + filename);
-	return ret;
+	let dir = this.getDir('images', false);
+	return this.urlTo(dir + filename);
 }
 
 Dipper.prototype.script = function(filename) {
@@ -119,17 +103,14 @@ Dipper.prototype.style = function(filename) {
 
 Dipper.prototype.pdf = function(filename) {
 
-	var obj = this,
-		dir = '/assets/pdf/'
-		ret = this.urlTo(dir + filename);
-		//console.log(ret);
-	return ret;
+	let dir = '/assets/pdf/';
+	return this.urlTo(dir + filename);
 }
 
 Dipper.prototype.getDir = function(dir, full) {
 	
-	var obj = this,
-		full = (full == undefined) ? true : full;
+	let obj = this;
+	full = (full == undefined) ? true : full;
 
 	if ( obj.dirs[dir] != undefined ) {
 		return (full == true ? obj.baseDir(obj.dirs[dir]) : obj.dirs[dir]);
@@ -138,32 +119,14 @@ Dipper.prototype.getDir = function(dir, full) {
 }
 
 Dipper.prototype.baseDir = function(path) {
-
-	var obj = this,
-		path = path || '',
-		ret = obj.base_dir + path;
-	return ret;
+	path = path || '';
+	return this.base_dir + path;
 }
 
-Dipper.prototype.isSecureRequest = function() {
-
-	var obj = this;
-	// Cheking for http or https
-	if (/^((http):\/\/)/.test(obj.options.site_url) || /^((localhost))/.test(obj.options.site_url)) {
-		return false;
-	} else if (/^((https):\/\/)/.test(obj.options.site_url)) {
-		return true;
-	}
-}
-
-Dipper.prototype.urlTo = function(route, protocol) {
-
-	var obj = this,
-		protocol = protocol || undefined,
-		url = obj.base_url + route;
-		//url = obj.baseUrl(route, protocol);
-	return url;
-}
+Dipper.prototype.urlTo = function (route) {
+  if (/^(?:[a-z][a-z0-9+.-]*:)?\/\//i.test(route)) return route;
+  return '/' + route.replace(/^\/+/, '');
+};
 
 Dipper.prototype.registerStyle = function(
 	name, url, requires,

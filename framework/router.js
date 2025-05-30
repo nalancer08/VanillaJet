@@ -52,10 +52,13 @@ class Router {
 
 	addRoute(method, route, handler, insert) {
 
-		var obj = this, insert = insert || false, method = method.toLowerCase(), prev = (obj.server.options.base_url && obj.server.options.base_url != '' && obj.server.options.base_url != '/') ? obj.server.options.base_url : '', instance = {
-			regexp: obj.routeToRegExp(prev + route),
-			handler: handler
-		};
+		var obj = this, 
+      insert = insert || false, 
+      method = method.toLowerCase(), 
+      instance = {
+			  regexp: obj.routeToRegExp(route),
+			  handler: handler
+		  };
 		// Add the route, may be at the beginning or at the end
 		if (insert) { // Adding the route at the beginning of the route's array
 			obj.routes[method].unshift(instance);
@@ -71,9 +74,7 @@ class Router {
 		let response = new Response(res);
 		let request = new Request(req, {
 			onDataReceived: function () {
-				if (request.path == obj.server.options.base_url) {
-					request.path = obj.server.options.base_url + obj.defaultRoute;
-				}
+				if (request.path == '') { request.path = obj.defaultRoute; }
 				// -- Check GET or POST routes
 				_.each(obj.routes[request.type], function (route) {
 					if (request.path.match(route.regexp)) {
@@ -104,7 +105,7 @@ class Router {
 					if (extHandled) {
 
 						let rep = obj.cwd.replace('core/framework', ''), 
-							route = request.path.replace(obj.server.options.base_url, ''), 
+							route = request.path,
 							filename = path.join(rep, route), 
 							filePrivate = obj.isProtectedFile(route);
 
@@ -172,10 +173,7 @@ class Router {
 	}
 
 	getDefaultRoute() {
-
-		let obj = this, 
-      prev = (obj.server.options.base_url && obj.server.options.base_url != '' && obj.server.options.base_url != '/') ? obj.server.options.base_url : '';
-		return (prev + obj.defaultRoute);
+		return this.defaultRoute;
 	}
 
 	onNotFound(response) {

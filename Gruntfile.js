@@ -176,7 +176,7 @@ module.exports = function(grunt) {
     grunt.option('force', true);
     grunt.task.run('clean:' + target);
   });
-  grunt.registerTask('default', ['buildLess', 'uglify', 'cleanForce:build', 'concat', 'cleanForce:minified', 'shell:compileTemplates', 'watch']);
-  grunt.registerTask('build', ['buildLess', 'uglify', 'cleanForce:build', 'concat', 'cleanForce:minified', 'shell:compileTemplates']);
+  grunt.registerTask('default', ['buildLess', 'uglify', 'cleanForce:build', 'concat', 'cleanForce:minified', 'shell:compileTemplates', 'compress', 'watch']);
+  grunt.registerTask('build', ['buildLess', 'uglify', 'cleanForce:build', 'concat', 'cleanForce:minified', 'shell:compileTemplates', 'compress']);
   grunt.registerTask('server', ['buildLess']);
 };

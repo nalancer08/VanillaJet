@@ -7,7 +7,6 @@ const path = require('path');
 
 let Router = require('./router.js');
 let Dipper = require('./dipper.js');
-let Functions = require('./functions.js');
 
 class Server {
 
@@ -31,10 +30,8 @@ class Server {
 			security = settings['security'] || {};
 
 		_.defaults(opts, {
-			base_url: '',
-			site_url: '',
-			wsServer: false,
-			onNotFound: obj.onNotFound
+			https_server: false,
+			wsServer: false
 		});
 		obj.options = opts;
 
@@ -57,9 +54,6 @@ class Server {
     // -- Create the server
     obj.createServer();
 
-    // -- Not found callback
-		obj.onNotFound = opts.onNotFound;
-
 		// Initialize router
 		obj.router = new Router(obj);
 
@@ -69,56 +63,35 @@ class Server {
 			endpoints_built[endpoint.name] = new endpoint(obj.router);
 		}
     this.endpoints = endpoints_built;
-
-		// Setting endpoints
-		obj.functions = new Functions();
 	}
 
 	start() {
-
-		let obj = this;
-		let port = (obj.options.port && obj.options.port != '') ? obj.options.port : 8080;
-
-		// Listen on the specified port
-		obj.httpx.listen(port);
-
-		// Logging
-		obj.log('__________________  VanillaJet server started  ___________________');
-		obj.log(` >           Listening on ${obj.options.site_url}:${obj.options.port}${obj.options.base_url}         < `);
-		obj.log('-----------------------------------------------------------------');
+		this.log('__________________  VanillaJet Server started  ___________________');
+		this.log(` >           Running on 0.0.0.0:${this.options.port}/           < `);
+		this.log('------------------------------------------------------------------');
 	}
 
   createServer() {
 
     let obj = this;
-    // -- Http server
-    let isLocalhost = /^((http):\/\/)/.test(obj.options.site_url) || /^((localhost))/.test(obj.options.site_url);
-    if (isLocalhost) {
-      obj.httpx = http.createServer((req, res) => {
-        obj.router.onRequest.call(obj.router, req, res);
-      });
-      return;
-    }
 
     // -- Https server (self managed certs)
     if (obj.security.self_managed_certs) {
-      let certs = {
-        key: fs.readFileSync(obj.security.key, 'utf8'),
-        cert: fs.readFileSync(obj.security.cert, 'utf8'),
-        allowHTTP1: true
-      };
+      console.log('HTTPs server created - Self managed certs');
+      let certs = obj.getCertificates();
       obj.httpx = http2.createSecureServer(certs, (req, res) => {
         obj.router.onRequest.call(obj.router, req, res);
       });
-      return;
+    } else {
+      console.log('HTTP server created - Without self managed certs');
+      obj.httpx = http.createServer((req, res) => {
+        console.log('Request received: ', req.url);
+        obj.router.onRequest.call(obj.router, req, res);
+      });
     }
-    
-    // -- Certs managed by NGINX, Google Cloud Run, etc.
-    console.log('HTTP server created - Without self managed certs');
-    obj.httpx = http.createServer((req, res) => {
-      console.log('Request received: ', req.url);
-      obj.router.onRequest.call(obj.router, req, res);
-    });
+
+    // -- Set the port
+    obj.httpx.listen(obj.options.port || 8080);
   }
 
 	log(value) {
@@ -129,11 +102,15 @@ class Server {
 		}
 	}
 
-	onNotFound(request, response) {
-		
-		response.setStatus(404);
-		response.respond();
-	}
+  getCertificates() {
+
+    let obj = this;
+    return {
+      key: fs.readFileSync(obj.security.key, 'utf8'),
+      cert: fs.readFileSync(obj.security.cert, 'utf8'),
+      allowHTTP1: true
+    }
+  }
 }
 
 module.exports = Server;
