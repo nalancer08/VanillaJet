@@ -76,36 +76,35 @@ class Functions {
     }
     scriptsKeys.push('jquery');
     scriptsKeys.push('underscore');
-    dipper.registerScript('vanillaJet', dipper.script('core/vanillaJet.js'), scriptsKeys);
+    dipper.registerScript('vanillaJet', dipper.script('core/vanillaJet.min.js'), scriptsKeys);
     dipper.enqueueScript('vanillaJet');
 
     // -- Main app
-    dipper.registerScript('vanilla', dipper.script('vanilla.js'));
+    dipper.registerScript('vanilla', dipper.script('vanilla.min.js'));
     dipper.enqueueScript('vanilla');
 
+    // Add basic meta tags
     const basicMeta = [
-      { name: 'charset', content: 'UTF-8' },
-      { name: 'viewport', content: 'width=device-width, minimum-scale=1' },
+      { name: 'charset', attribute: 'UTF-8' },
+      { name: 'viewport', content: 'width=device-width, initial-scale=1.0, maximum-scale=5.0' },
       { name: 'theme-color', content: '#ffffff' }
     ];
-
-    const openGraphMeta = {
-      'title': dipper.getPageTitle(),
-      'site_name': dipper.getSiteTitle(),
-      'description': dipper.getDescription(),
-      'image': dipper.img('logo.png'),
-      'type': 'website',
-      'url': dipper.urlTo('')
-    };
-
-    // Add basic meta tags
     basicMeta.forEach(meta => {
       dipper.addMeta(meta.name, meta.content);
     });
 
     // Add Open Graph meta tags
+    const openGraphMeta = {
+      'og:title': dipper.getPageTitle(),
+      'og:site_name': dipper.getSiteTitle(),
+      'og:description': dipper.getDescription(),
+      'og:image': dipper.img('logo.png'),
+      'og:type': 'website',
+      'og:url': dipper.urlTo(''),
+      'og:locale': 'es_MX',
+    };
     Object.entries(openGraphMeta).forEach(([key, value]) => {
-      dipper.addMeta(`og:${key}`, value, 'property');
+      dipper.addMeta(key, value, 'property');
     });
   }
 }

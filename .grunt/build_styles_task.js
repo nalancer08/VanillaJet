@@ -9,7 +9,6 @@ module.exports = function(grunt) {
                 .replace('/vanilla-jet', '')
                 .replace('/.grunt', '');
         }
-        console.log('cwd 1: ', getCleanedCWD());
 
         // -- Content
         let adminContent = grunt.file.read(`${getCleanedCWD()}/assets/styles/less/admin.less`);

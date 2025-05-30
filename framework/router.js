@@ -20,21 +20,18 @@ class Router {
       'png': 'image/png',
       'webp': 'image/webp',
       'jpg': 'image/jpg',
-      'css': 'text/css',
+      'css': 'text/css; charset=utf-8',
       'gz': 'application/x-gzip',
       'gif': 'image/gif',
-      'js': 'text/javascript',
+      'js': 'text/javascript; charset=utf-8',
       'svg': 'image/svg+xml',
       'ttf': 'application/x-font-ttf',
       'otf': 'application/x-font-opentype',
       'pdf': 'application/pdf',
       'json': 'application/json'
     };
-    this.compressionMimes = {
-      'css': 'text/css',
-      'js': 'text/javascript',
-      'gz': 'application/x-gzip'
-    };
+    this.compressionMimes = [ 'css', 'js' ];
+    this.compressionFiles = [ 'vanilla.min.js', 'app.min.css' ];
 	}
 
 	routeToRegExp(route) {
@@ -111,13 +108,20 @@ class Router {
 							filename = path.join(rep, route), 
 							filePrivate = obj.isProtectedFile(route);
 
+            // -- Check if the file is a gzip file
+            if (request.acceptEncoding.includes('gzip') && 
+              obj.compressionMimes.includes(ext) &&
+              obj.compressionFiles.includes(filename.split('/').pop())
+            ) {
+              filename = filename + '.gz';
+              extHeader['Content-Encoding'] = 'gzip';
+            }
+
             fs.stat(filename, (err, stats) => {
 
               if (err || !stats.isFile() || filePrivate) {
                 return obj.onNotFound(response);
               }
-
-              // -- const acceptEncoding = req.headers['accept-encoding'] || '';
               const fileStream = fs.createReadStream(filename);
               fileStream.on('error', (streamErr) => {
                 console.error("Error reading file:", streamErr);
@@ -138,7 +142,6 @@ class Router {
 	}
 
 	isProtectedFile(route) {
-
 		let protectedDirs = ['framework', 'external', 'node_mudules'];
 		let routeParts = route.split('/');
 		if (routeParts[1] != undefined && routeParts.length > 2) {
@@ -148,7 +151,6 @@ class Router {
 	}
 
 	validateCallback(clazz, method) {
-
 		let obj = this, 
       endpoints = obj.server.endpoints;
 
@@ -166,9 +168,7 @@ class Router {
 	* @param route: String name for the route
 	**/
 	setDefaultRoute(route) {
-
-		let obj = this;
-		obj.defaultRoute = route;
+		this.defaultRoute = route;
 	}
 
 	getDefaultRoute() {

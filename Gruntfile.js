@@ -26,7 +26,6 @@ module.exports = function(grunt) {
     return newCwd;
   }
   
-
   // -- Vars
   const cssDestination = `${getCwd()}/public/styles/app.min.css`;
   const cssOrigin = `${getCwd()}/assets/styles/less/admin_build.less`;
@@ -153,13 +152,16 @@ module.exports = function(grunt) {
     compress: {
       main: {
         options: {
-          mode: 'gzip'
+          mode: 'gzip',
+          compressionLevel: 9
         },
         files: [{
           expand: true,
-          src: [`${getCwd()}/public/scripts/vanilla.min.js`],
+          src: [`${getCwd()}/public/scripts/vanilla.min.js`, `${getCwd()}/public/styles/app.min.css`],
           dest: '',
-          ext: '.min.js.gz'
+          rename: function(dest, src) {
+            return src + '.gz';
+          }
         }]
       }
     },

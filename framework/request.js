@@ -17,6 +17,11 @@ class Request {
 		this.id = '';
 		this.path = '';
 		this.parts = [];
+
+    let acceptEncoding = req.headers['accept-encoding'] || '';
+    acceptEncoding = acceptEncoding.replace(/\s+/g, '');
+    this.acceptEncoding = acceptEncoding.split(',') || [];
+
 		this.init(req, options);
 	}
 
@@ -90,9 +95,8 @@ class Request {
 	}
 
 	get(name, value) {
-
-		var obj = this, ret = value || '';
-		// Try to retrieve parameter from GET object
+		let obj = this, 
+      ret = value || '';
 		if (typeof obj.params.get[name] !== 'undefined') {
 			ret = obj.params.get[name];
 		}
@@ -100,8 +104,7 @@ class Request {
 	}
 
 	body() {
-
-		var obj = this;
+		let obj = this;
 		return obj.params.body;
 	}
 }

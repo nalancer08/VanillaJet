@@ -69,10 +69,10 @@ Dipper.prototype.getFbAppId = function() {
 
 Dipper.prototype.addMeta = function(name, content, attribute) {
 
-	var obj = this;
+	let obj = this;
 	attribute = attribute || 'name';
 	content = content || '';
-	var meta = [];
+	let meta = [];
 		meta['name'] = name;
 		meta['content'] = content;
 		meta['attribute'] = attribute;
@@ -81,20 +81,20 @@ Dipper.prototype.addMeta = function(name, content, attribute) {
 
 Dipper.prototype.metaTags = function() {
 
-	var obj = this;
-	var _ = require('underscore');
-	var stringMeta = '';
+	let obj = this;
+	let _ = require('underscore');
+	let stringMeta = '';
 
-	var keys = Object.keys(obj.metas);
+	let keys = Object.keys(obj.metas);
 	_.each(keys, function(key) {
 		
-		var name = obj.metas[key]['name'],
+		let name = obj.metas[key]['name'],
 			content = obj.metas[key]['content'],
 			attribute = obj.metas[key]['attribute'];
 
-		stringMeta += obj.metas[key]['content'] != '' ? 
-			'<meta ' + attribute + '=\"' + name + '\" content=\"' + content + '\">\n\t' :
-			'<meta ' + attribute + '=\"' + name + '\">\n\t';
+    stringMeta += obj.metas[key]['content'] != '' ? 
+			`<meta ${attribute}="${name}" content="${content}">\n\t` :
+			`<meta ${name}="${attribute}">\n\t`;
 	});
 	return stringMeta;			
 }
@@ -108,27 +108,13 @@ Dipper.prototype.img = function(filename) {
 }
 
 Dipper.prototype.script = function(filename) {
-
-	var obj = this,
-		dir = this.getDir('scripts', false);
-
-	var filenameParts = filename.split('.'),
-		length = filenameParts.length;
-	if (length > 0) {
-
-		let position = length - 1;
-		filenameParts[position] = 'min.' + filenameParts[position];
-		filename = filenameParts.join('.');
-	}
+	let dir = this.getDir('scripts', false);
 	return this.urlTo(dir + filename);
 }
 
 Dipper.prototype.style = function(filename) {
-
-	var obj = this,
-		dir = this.getDir('styles', false),
-		ret = this.urlTo(dir + filename);
-	return ret;
+	let dir = this.getDir('styles', false);
+	return this.urlTo(dir + filename);;
 }
 
 Dipper.prototype.pdf = function(filename) {
@@ -530,21 +516,20 @@ Dipper.prototype.getSharedVar = function(name) {
 
 Dipper.prototype.get_google_fonts = function(fonts) {
 
-	var obj = this,
-		_ = require('underscore');
+	let _ = require('underscore');
 
 	if (fonts != undefined) {
 
-		var parts = [],
+		let parts = [],
 			keys = Object.keys(fonts);
 		_.each(keys, function(font) {
 
-			var font_name = encodeURI(font),
+			let font_name = encodeURI(font),
 				font_weight = fonts[font].join(',');
 			parts.push(font_name + ':' + font_weight);
 		});
 
-		var params = parts.join('|'),
+		let params = parts.join('|'),
 			ret = '//fonts.googleapis.com/css?family=' + params;
 
 		return ret;

@@ -3,7 +3,8 @@ const path = require("path"),
 	fs = require("fs"),
 	nunjucks = require('nunjucks'),
   identifier = 'templates',
-  chalk = require('chalk');
+  chalk = require('chalk'),
+  zlib = require('zlib');
 
 let Functions = require('../framework/functions.js');
 let Dipper = require('../framework/dipper.js');
@@ -182,12 +183,7 @@ function replaceInclude(lines, originalLine, templateCompiled) {
 
 // -- Step 4
 async function createHTMLFile(content, filePath) {
-
-  //const { html } = require('js-beautify');
-  ///content = html(content);
-
   const { minify } = require('html-minifier-terser');
-  //console.log(typeof content);
   const minified = await minify(content, {
     collapseWhitespace: true,
     collapseInlineTagWhitespace: true,
@@ -202,8 +198,16 @@ async function createHTMLFile(content, filePath) {
   const publicPath = path.join(processCwd(), '/public/pages');
   fs.mkdirSync(publicPath, { recursive: true });
   const absolutePath = path.join(publicPath, filePath);
+  
+  // Write the minified HTML file
   fs.writeFileSync(absolutePath, minified, 'utf8');
-  //console.log(`Html :) file created at: ${absolutePath}`);
+
+  // Create gzipped version
+  const gzipped = zlib.gzipSync(minified, { level: 9 }); // Maximum compression level
+  fs.writeFileSync(`${absolutePath}.gz`, gzipped);
+  
+  console.log(chalk.green(`Created HTML file at: ${absolutePath}`));
+  console.log(chalk.green(`Created gzipped version at: ${absolutePath}.gz`));
 }
 
 // -- Helpers
