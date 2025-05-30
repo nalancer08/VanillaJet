@@ -67,7 +67,7 @@ Dipper.prototype.getFbAppId = function() {
 	return obj.fbAppId;
 }
 
-Dipper.prototype.addMeta = function(name, content, attribute) {
+Dipper.prototype.addMeta = function({name, content, attribute}) {
 
 	let obj = this;
 	attribute = attribute || 'name';

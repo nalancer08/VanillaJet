@@ -90,7 +90,11 @@ class Functions {
       { name: 'theme-color', content: '#ffffff' }
     ];
     basicMeta.forEach(meta => {
-      dipper.addMeta(meta.name, meta.content);
+      dipper.addMeta({
+        name: meta.name,
+        content: meta.content || null,
+        attribute: meta.attribute || null
+      });
     });
 
     // Add Open Graph meta tags
@@ -104,7 +108,11 @@ class Functions {
       'og:locale': 'es_MX',
     };
     Object.entries(openGraphMeta).forEach(([key, value]) => {
-      dipper.addMeta(key, value, 'property');
+      dipper.addMeta({
+        name: key,
+        content: value,
+        attribute: 'property'
+      });
     });
   }
 }
