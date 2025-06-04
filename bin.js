@@ -15,7 +15,7 @@ switch (args[0]) {
     
     case 'dev':
       try {
-        execSync('gulp dev --env development', { stdio: 'inherit', cwd: __dirname });
+        execSync('npx gulp dev --env development', { stdio: 'inherit', cwd: __dirname });
       } catch (error) {
         console.error('Error ejecutando gulp:', error.message);
       }
@@ -23,7 +23,7 @@ switch (args[0]) {
 
     case 'build:qa':
       try {
-        execSync('gulp build --env qa', { stdio: 'inherit', cwd: __dirname });
+        execSync('npx gulp build --env qa', { stdio: 'inherit', cwd: __dirname });
       } catch (error) {
         console.error('Error ejecutando gulp:', error.message);
       }
@@ -31,7 +31,7 @@ switch (args[0]) {
 
     case 'build:staging':
       try {
-        execSync('gulp build --env staging', { stdio: 'inherit', cwd: __dirname });
+        execSync('npx gulp build --env staging', { stdio: 'inherit', cwd: __dirname });
       } catch (error) {
         console.error('Error ejecutando gulp:', error.message);
       }
@@ -39,7 +39,7 @@ switch (args[0]) {
 
     case 'build:prod':
       try {
-        execSync('gulp build --env production', { stdio: 'inherit', cwd: __dirname });
+        execSync('npx gulp build --env production', { stdio: 'inherit', cwd: __dirname });
       } catch (error) {
         console.error('Error ejecutando gulp:', error.message);
       }
