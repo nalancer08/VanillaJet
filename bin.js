@@ -15,33 +15,33 @@ switch (args[0]) {
     
     case 'dev':
       try {
-        execSync('grunt --env=development', { stdio: 'inherit', cwd: __dirname });
+        execSync('gulp dev --env development', { stdio: 'inherit', cwd: __dirname });
       } catch (error) {
-        console.error('Error ejecutando grunt:', error.message);
+        console.error('Error ejecutando gulp:', error.message);
       }
       break;
 
     case 'build:qa':
       try {
-        execSync('grunt build --env=qa', { stdio: 'inherit', cwd: __dirname });
+        execSync('gulp build --env qa', { stdio: 'inherit', cwd: __dirname });
       } catch (error) {
-        console.error('Error ejecutando grunt:', error.message);
+        console.error('Error ejecutando gulp:', error.message);
       }
       break;
 
     case 'build:staging':
       try {
-        execSync('grunt build --env=staging', { stdio: 'inherit', cwd: __dirname });
+        execSync('gulp build --env staging', { stdio: 'inherit', cwd: __dirname });
       } catch (error) {
-        console.error('Error ejecutando grunt:', error.message);
+        console.error('Error ejecutando gulp:', error.message);
       }
       break;
 
     case 'build:prod':
       try {
-        execSync('grunt build --env=production', { stdio: 'inherit', cwd: __dirname });
+        execSync('gulp build --env production', { stdio: 'inherit', cwd: __dirname });
       } catch (error) {
-        console.error('Error ejecutando grunt:', error.message);
+        console.error('Error ejecutando gulp:', error.message);
       }
       break;
 }
