@@ -221,5 +221,6 @@ function cleanALine(line) {
 function processCwd() {
   return process.cwd()
     .replace('/.grunt', '')
+    .replace('/gulp', '')
     .replace('/node_modules/vanilla-jet', '');
 }

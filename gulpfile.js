@@ -29,12 +29,10 @@ function getCwd() {
 }
 
 const base = getCwd();
-const cssDestination = `${getCwd()}/public/styles/app.min.css`;
 const cssOrigin = `${getCwd()}/assets/styles/less/admin.less`;
-const jsDestination = `${getCwd()}/public/`;
 
 // Clean tasks
-function cleanBuild() {
+function cleanBuildJS() {
   return del([`${getCwd()}/public/scripts/vanilla.min.js`], { force: true });
 }
 
@@ -51,10 +49,11 @@ function cleanMinified() {
 function buildLess() {
   return gulp.src(cssOrigin)
     .pipe(less({
-      compress: true,
+      //compress: true,
       optimization: 2
     }))
     .pipe(rename('app.min.css'))
+    .pipe(cleanCSS())
     .pipe(gulp.dest(`${getCwd()}/public/styles`))
     .pipe(livereload());
 }
@@ -126,44 +125,39 @@ function compileTemplates() {
 
 // Watch task
 function watchFiles(cb) {
-  if (options.env === 'development') {
-    livereload.listen();
-    
-    // Watch LESS files
-    watch([`${base}/assets/styles/less/**/*.less`], gulp.series(
-      buildLess,
-      'newer:uglifyJs',
-      cleanBuild,
-      concatJs,
-      cleanMinified,
-      compressCss
-    ));
+  livereload.listen();
+  
+  // Watch LESS files
+  watch([`${base}/assets/styles/less/**/*.less`], gulp.series(
+    buildLess,
+    compressCss
+  ));
 
-    // Watch HTML files
-    watch([
-      `${base}/assets/pages/*.html`,
-      `${base}/assets/templates/**/*.html`
-    ], compileTemplates);
+  // Watch HTML files
+  watch([
+    `${base}/assets/pages/*.html`,
+    `${base}/assets/templates/**/*.html`
+  ], compileTemplates);
 
-    // Watch JS files
-    watch([`${base}/assets/scripts/**/*.js`], gulp.series(
-      'newer:uglifyJs',
-      cleanBuild,
-      concatJs,
-      cleanMinified,
-      compressJs
-    ));
-  }
+  // Watch JS files
+  watch([`${base}/assets/scripts/**/*.js`], gulp.series(
+    cleanBuildJS,
+    uglifyJs,
+    concatJs,
+    cleanMinified,
+    compressJs
+  ));
+  
   cb();
 }
 
 // Define complex tasks
 const build = gulp.series(
-  buildLess,
+  cleanBuildJS,
   uglifyJs,
-  cleanBuild,
   concatJs,
   cleanMinified,
+  buildLess,
   compileTemplates,
   gulp.parallel(compressJs, compressCss)
 );
@@ -174,7 +168,7 @@ const dev = gulp.series(
 );
 
 // Export tasks
-exports.cleanBuild = cleanBuild;
+exports.cleanBuildJS = cleanBuildJS;
 exports.cleanMinified = cleanMinified;
 exports.buildLess = buildLess;
 exports.uglifyJs = uglifyJs;

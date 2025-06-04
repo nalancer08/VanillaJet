@@ -85,7 +85,6 @@ class Server {
     } else {
       console.log('HTTP server created - Without self managed certs');
       obj.httpx = http.createServer((req, res) => {
-        console.log('Request received: ', req.url);
         obj.router.onRequest.call(obj.router, req, res);
       });
     }
