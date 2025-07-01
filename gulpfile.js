@@ -13,13 +13,6 @@ const del = require('del');
 const gulpif = require('gulp-if');
 const minimist = require('minimist');
 
-// Parse command line arguments
-const knownOptions = {
-  string: 'env',
-  default: { env: process.env.NODE_ENV || 'development' }
-};
-const options = minimist(process.argv.slice(2), knownOptions);
-
 // Helper functions
 function getCwd() {
   return process.cwd()
@@ -120,7 +113,7 @@ function compressCss() {
 // Template compilation
 function compileTemplates() {
   return gulp.src('.')
-    .pipe(shell([`node .grunt/compile_html.js ${options.env}`]));
+    .pipe(shell([`node .grunt/compile_html.js`]));
 }
 
 // Watch task

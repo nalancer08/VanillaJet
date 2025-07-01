@@ -10,18 +10,9 @@ let Functions = require('../framework/functions.js');
 let Dipper = require('../framework/dipper.js');
 let Config = require(processCwd() + '/config.js');
 
-// -- Get environment
-let env = process.argv[2] || 'development';
-if (env === 'dev') { env = 'development'; }
-if (env === 'build:qa') { env = 'qa'; }
-if (env === 'build:staging') { env = 'staging'; }
-if (env === 'build:prod') { env = 'production'; }
-
 // -- Init Dipper
 let settings = Config.settings;
-settings['shared']['environment'] = env;
-
-let opts = settings[env] || {},
+let opts = settings['profile'] || {},
   shared = settings['shared'] || {};
 const dipper = new Dipper(opts, shared);
 

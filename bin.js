@@ -9,39 +9,23 @@ const generatePackagesJson = require(path.join(__dirname, './.scripts/generate_p
 
 switch (args[0]) {
 
-    case 'setup':
-      generatePackagesJson();
-      break;
-    
-    case 'dev':
-      try {
-        execSync('npx gulp dev --env development', { stdio: 'inherit', cwd: __dirname });
-      } catch (error) {
-        console.error('Error ejecutando gulp:', error.message);
-      }
-      break;
+  case 'setup':
+    generatePackagesJson();
+    break;
 
-    case 'build:qa':
-      try {
-        execSync('npx gulp build --env qa', { stdio: 'inherit', cwd: __dirname });
-      } catch (error) {
-        console.error('Error ejecutando gulp:', error.message);
-      }
-      break;
+  case 'dev':
+    try {
+      execSync('npx gulp dev --env development', { stdio: 'inherit', cwd: __dirname });
+    } catch (error) {
+      console.error('Error executing gulp:', error.message);
+    }
+    break;
 
-    case 'build:staging':
-      try {
-        execSync('npx gulp build --env staging', { stdio: 'inherit', cwd: __dirname });
-      } catch (error) {
-        console.error('Error ejecutando gulp:', error.message);
-      }
-      break;
-
-    case 'build:prod':
-      try {
-        execSync('npx gulp build --env production', { stdio: 'inherit', cwd: __dirname });
-      } catch (error) {
-        console.error('Error ejecutando gulp:', error.message);
-      }
-      break;
+  case 'build':
+    try {
+      execSync('npx gulp build', { stdio: 'inherit', cwd: __dirname });
+    } catch (error) {
+      console.error('Error executing gulp:', error.message);
+    }
+    break;
 }

@@ -25,7 +25,7 @@ class Server {
 
 		let obj = this, 
 			settings = options.settings, 
-			opts = settings[options.profile] || {}, 
+			opts = settings['profile'] || {}, 
 			shared = settings['shared'] || {}, 
 			security = settings['security'] || {};
 
