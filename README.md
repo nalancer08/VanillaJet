@@ -6,7 +6,7 @@ Node.js framework for building SPA applications with a JS/CSS/HTML build pipelin
 
 ## Current version
 
-- Version: `1.3.5`
+- Version: `1.4.0`
 - Changelog: see [`CHANGELOG.md`](./CHANGELOG.md)
 - Improvement plan (performance and backward compatibility): see `ROADMAP_INTEGRAL.md`
 
@@ -67,7 +67,9 @@ new Server(Config, [AppEndpoint]).start();
 From this repository:
 
 - `npm run setup`: generates a base `vanillaJet.package.json` if it does not exist.
-- `npm run dev`: build + watcher for development.
+- `npm run dev`: legacy Gulp build + watcher for development.
+- `npm run dev:vite`: modern Vite dev server for JS/LESS DX (keeps Nunjucks flow unchanged).
+- `npm run build:vite`: modern Vite build for JS/LESS output in `public/`.
 - `npm run build:qa`: build for QA.
 - `npm run build:staging`: build for staging.
 - `npm run build:prod`: build for production.
@@ -77,6 +79,21 @@ As CLI (`bin.js`):
 - `npx vanilla-jet setup`
 - `npx vanilla-jet dev`
 - `npx vanilla-jet build`
+- `npx vanilla-jet dev:vite`
+- `npx vanilla-jet build:vite`
+
+## Legacy vs Vite mode
+
+- Legacy (`npm run dev` / `npx vanilla-jet dev`):
+  - Keeps full historical Gulp pipeline (JS minify+concat, LESS, templates, gzip artifacts).
+  - Recommended when you need 100% historical behavior.
+- Vite (`npm run dev:vite` / `npx vanilla-jet dev:vite`):
+  - Focuses on JS/LESS developer experience with faster feedback.
+  - Does not replace Nunjucks compilation in this stage (HU 2.1), so template flow remains legacy.
+  - Dev helper page: open `http://localhost:5173/__vanillajet__/` to load the Vite entry.
+- Vite build (`npm run build:vite` / `npx vanilla-jet build:vite`):
+  - Generates `public/scripts/vanilla.min.js` and `public/styles/app.min.css`.
+  - Keeps existing legacy build commands available and unchanged.
 
 ## Expected consumer project structure
 

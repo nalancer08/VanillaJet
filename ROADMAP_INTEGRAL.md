@@ -117,7 +117,7 @@ Cada historia incluye su ciclo completo: fases, tareas, entregables, metricas, c
 
 ## EPIC 2 - Vite first (foco actual)
 
-### HU 2.1 - `dev:vite` y `build:vite` sin romper legacy (en progreso)
+### HU 2.1 - `dev:vite` y `build:vite` sin romper legacy (completada `v1.4.0`)
 
 #### Fases
 - F1: baseline.
@@ -126,9 +126,9 @@ Cada historia incluye su ciclo completo: fases, tareas, entregables, metricas, c
 - F4: validacion en consumidor real.
 
 #### Tareas
-- Config Vite (JS/LESS).
-- Mantener Nunjucks en esta etapa.
-- Documentar `dev` legacy vs `dev:vite`.
+- [x] Config Vite (JS/LESS).
+- [x] Mantener Nunjucks en esta etapa.
+- [x] Documentar `dev` legacy vs `dev:vite`.
 
 #### Entregables
 - Config y scripts de Vite.
@@ -244,6 +244,5 @@ Cada historia incluye su ciclo completo: fases, tareas, entregables, metricas, c
 
 ## Estado global
 
-- Completado: HU 1.1, HU 1.2, HU 1.3, HU 1.4.
-- En progreso: HU 2.1.
+- Completado: HU 1.1, HU 1.2, HU 1.3, HU 1.4, HU 2.1.
 - Pendiente: HU 2.2, HU 3.1, HU 4.1, HU 4.2.

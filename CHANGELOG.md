@@ -4,6 +4,15 @@ All notable project changes are documented in this file.
 
 The format follows a structure inspired by Keep a Changelog and semantic versioning.
 
+## [1.4.0] - 2026-02-19
+
+### Highlights
+
+- Added `dev:vite` and `build:vite` scripts to introduce a Vite-first JS/LESS pipeline without removing legacy Gulp commands.
+- Added `vite.config.js` and `.scripts/run_vite.js` to support consumer-root execution, compatibility output in `public/`, and a dev helper route (`/__vanillajet__/`).
+- Added CLI support in `bin.js` for `npx vanilla-jet dev:vite` and `npx vanilla-jet build:vite`.
+- Updated `README.md` to document legacy vs modern workflows for HU 2.1.
+
 ## [1.3.6] - 2026-02-19
 
 ### Highlights (v1.3.6)
@@ -83,3 +92,4 @@ The format follows a structure inspired by Keep a Changelog and semantic version
 [1.3.4]: https://github.com/nalancer08/VanillaJet/releases/tag/v1.3.4
 [1.3.5]: https://github.com/nalancer08/VanillaJet/releases/tag/v1.3.5
 [1.3.6]: https://github.com/nalancer08/VanillaJet/releases/tag/v1.3.6
+[1.4.0]: https://github.com/nalancer08/VanillaJet/releases/tag/v1.4.0
