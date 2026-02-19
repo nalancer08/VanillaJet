@@ -6,7 +6,7 @@ Node.js framework for building SPA applications with a JS/CSS/HTML build pipelin
 
 ## Current version
 
-- Version: `1.3.4`
+- Version: `1.3.5`
 - Changelog: see [`CHANGELOG.md`](./CHANGELOG.md)
 - Improvement plan (performance and backward compatibility): see `ROADMAP.md`
 
@@ -117,6 +117,7 @@ Behavior details:
 - Default (`false`): keeps existing gzip behavior for supported static assets.
 - Enabled (`true`): if client accepts Brotli, server tries `.br` first.
 - Safe fallback: if `.br` or `.gz` does not exist, server serves the original file.
+- HTML rendering (`response.render`) also uses safe runtime fallback for precompressed templates (`.br`/`.gz`/original).
 
 ## Additional documentation
 

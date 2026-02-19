@@ -74,7 +74,7 @@ class Router {
 
 		let obj = this;
 		let isMatch = false;
-		let response = new Response(res);
+		let response = new Response(res, obj.server.options);
 		let request = new Request(req, {
 			onDataReceived: function () {
 				if (request.path == '') { request.path = obj.defaultRoute; }

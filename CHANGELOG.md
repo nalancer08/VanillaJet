@@ -4,6 +4,15 @@ All notable project changes are documented in this file.
 
 The format follows a structure inspired by Keep a Changelog and semantic versioning.
 
+## [1.3.5] - 2026-02-19
+
+### Highlights (v1.3.5)
+
+- Added safe precompressed fallback in `response.render()` for HTML templates: `.br` (when enabled and accepted) -> `.gz` (when accepted) -> original HTML.
+- Wired `Response` to server profile options, so HTML negotiation follows `settings.profile.enable_precompressed_negotiation`.
+- Added `Vary: Accept-Encoding` for negotiated HTML responses and support for `Accept-Encoding` quality params.
+- Updated documentation and roadmap status for HU 1.3.
+
 ## [1.3.4] - 2026-02-19
 
 ### Highlights
@@ -54,3 +63,4 @@ The format follows a structure inspired by Keep a Changelog and semantic version
 [1.3.3]: https://github.com/nalancer08/VanillaJet/releases/tag/v1.3.3
 [1.3.2]: https://github.com/nalancer08/VanillaJet/releases/tag/v1.3.2
 [1.3.4]: https://github.com/nalancer08/VanillaJet/releases/tag/v1.3.4
+[1.3.5]: https://github.com/nalancer08/VanillaJet/releases/tag/v1.3.5

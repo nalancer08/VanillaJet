@@ -3,18 +3,22 @@ let _ = require('underscore');
 
 class Response {
 
-	constructor(res) {
+	constructor(res, options) {
 
 		this.res = null;
 		this.body = '';
 		this.status = 200;
 		this.headers = [];
 		this.autoRespond = true;
-		this.init(res);
+    this.options = {};
+		this.init(res, options);
 	}
 
-	init(res) {
+	init(res, options) {
 		this.res = res;
+    this.options = Object.assign({
+      enable_precompressed_negotiation: false
+    }, options || {});
 	}
 
 	setBody(body) {
@@ -75,20 +79,93 @@ class Response {
 		let obj = this, 
       path = require("path"), 
       fs = require("fs");
-    template = 'pages/' + template;
+    let templatePath = 'pages/' + template;
+    let acceptEncoding = request.acceptEncoding || [];
+    let allowBrotli = Boolean(obj.options.enable_precompressed_negotiation);
+    let baseFilename = path.join(process.cwd(), 'public', templatePath);
+    let candidates = [];
 
-    const acceptEncoding = request.acceptEncoding || [];
-    if (acceptEncoding.includes('gzip')) {
-      template = template + '.gz';
-      obj.res.setHeader('Content-Encoding', 'gzip');
-    } else {
-      obj.res.setHeader('Content-Type', 'text/html');
+    if (allowBrotli && obj.supportsEncoding(acceptEncoding, 'br')) {
+      candidates.push({ filename: baseFilename + '.br', encoding: 'br' });
+    }
+    if (obj.supportsEncoding(acceptEncoding, 'gzip')) {
+      candidates.push({ filename: baseFilename + '.gz', encoding: 'gzip' });
+    }
+    candidates.push({ filename: baseFilename, encoding: '' });
+
+    let hasNegotiation = candidates.some((candidate) => candidate.encoding !== '');
+    obj.resolveFirstAvailableFile(candidates, (err, selectedFile) => {
+      if (err || !selectedFile) {
+        return obj.error404();
+      }
+
+      obj.res.setHeader('Content-Type', 'text/html; charset=utf-8');
+      if (hasNegotiation) {
+        obj.res.setHeader('Vary', 'Accept-Encoding');
+      }
+      if (selectedFile.encoding) {
+        obj.res.setHeader('Content-Encoding', selectedFile.encoding);
+      }
+
+      let fileStream = fs.createReadStream(selectedFile.filename);
+      fileStream.on('error', () => {
+        obj.error404();
+      });
+      fileStream.pipe(obj.res);
+    });
+	}
+
+  resolveFirstAvailableFile(candidates, callback) {
+    let fs = require("fs");
+    let index = 0;
+    function resolveCandidate() {
+      let currentCandidate = candidates[index];
+      if (!currentCandidate) {
+        return callback(new Error('File not found'));
+      }
+
+      fs.stat(currentCandidate.filename, (err, stats) => {
+        if (!err && stats && stats.isFile()) {
+          return callback(null, currentCandidate);
+        }
+        index = index + 1;
+        resolveCandidate();
+      });
     }
 
-		const filename = path.join(process.cwd(), 'public/' + template);
-		const fileStream = fs.createReadStream(filename);
-		fileStream.pipe(obj.res);
-	}
+    resolveCandidate();
+  }
+
+  supportsEncoding(acceptEncoding, encoding) {
+    if (!Array.isArray(acceptEncoding)) {
+      return false;
+    }
+
+    let normalizedEncoding = String(encoding).toLowerCase();
+    return acceptEncoding.some((entry) => {
+      if (entry == null) {
+        return false;
+      }
+      let token = String(entry).toLowerCase();
+      let parts = token.split(';');
+      if (parts[0] !== normalizedEncoding) {
+        return false;
+      }
+
+      let qValue = 1;
+      for (let idx = 1; idx < parts.length; idx = idx + 1) {
+        let part = parts[idx];
+        if (part.startsWith('q=')) {
+          let parsedQValue = parseFloat(part.slice(2));
+          if (!Number.isNaN(parsedQValue)) {
+            qValue = parsedQValue;
+          }
+        }
+      }
+
+      return qValue > 0;
+    });
+  }
 }
 
 module.exports = Response;
