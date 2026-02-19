@@ -325,7 +325,7 @@ class Router {
   }
 
 	isProtectedFile(route) {
-		let protectedDirs = ['framework', 'external', 'node_mudules'];
+		let protectedDirs = ['framework', 'external', 'node_modules'];
 		let routeParts = route.split('/');
 		if (routeParts[1] != undefined && routeParts.length > 2) {
 			return protectedDirs.includes(routeParts[1]);

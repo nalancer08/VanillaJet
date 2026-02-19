@@ -214,8 +214,8 @@ Dipper.prototype.dequeueStyle = function(name, dependencies) {
 	if (obj.styles[name] != undefined) {
 		if (obj.enqueued_styles[name] != undefined) {
 			var item = obj.styles[name];
-			if (dependencies != undefined) {
-				_.each(item.require, function(dep) {
+			if (dependencies === true && Array.isArray(item.requires)) {
+				_.each(item.requires, function(dep) {
 					obj.dequeueStyle(dep);
 				});
 			}
@@ -233,8 +233,8 @@ Dipper.prototype.dequeueScript = function(name, dependencies) {
 	if (obj.scripts[name] != undefined) {
 		if (obj.enqueued_scripts[name] != undefined) {
 			var item = obj.scripts[name];
-			if (dependencies != undefined) {
-				_.each(item.require, function(dep) {
+			if (dependencies === true && Array.isArray(item.requires)) {
+				_.each(item.requires, function(dep) {
 					obj.dequeueScript(dep);
 				});
 			}
@@ -341,7 +341,7 @@ Dipper.prototype.includeAnimations = function() {
 		keys = Object.keys(obj.anims);
 
 	_.each(keys, function(anim) {
-		animsString += obj.includeAnim(anim);
+		animsString += obj.includeAnimation(anim);
 	});
 	let baseAnimsString = `<script>'${animsString}'</script>`;
 	return baseAnimsString;

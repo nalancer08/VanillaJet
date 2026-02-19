@@ -4,6 +4,24 @@ All notable project changes are documented in this file.
 
 The format follows a structure inspired by Keep a Changelog and semantic versioning.
 
+## [1.3.6] - 2026-02-19
+
+### Highlights (v1.3.6)
+
+- Fixed protected directory typo in `framework/router.js`: `node_mudules` -> `node_modules`.
+- Fixed stability issues in `framework/dipper.js`:
+  - `includeAnimations()` now calls the existing `includeAnimation()`.
+  - `dequeueStyle()` and `dequeueScript()` now read `item.requires` correctly.
+  - Dependency dequeue now runs only when explicitly requested (`dependencies === true`).
+- Fixed `package.json` recursive `test` script to avoid infinite loop and keep `npm test` stable.
+- Completed HU 1.4 hardening milestone and updated roadmap tracking.
+
+### Compatibility notes (v1.3.6)
+
+- No public API changes.
+- No route contract changes.
+- This patch only hardens runtime behavior and developer workflow reliability.
+
 ## [1.3.5] - 2026-02-19
 
 ### Highlights (v1.3.5)
@@ -15,7 +33,7 @@ The format follows a structure inspired by Keep a Changelog and semantic version
 
 ## [1.3.4] - 2026-02-19
 
-### Highlights
+### Highlights (v1.3.4)
 
 - Added optional static precompressed negotiation flag: `settings.profile.enable_precompressed_negotiation`.
 - Static files now resolve safely with fallback chain: `.br` (when enabled and accepted) -> `.gz` (when accepted) -> original file.
@@ -64,3 +82,4 @@ The format follows a structure inspired by Keep a Changelog and semantic version
 [1.3.2]: https://github.com/nalancer08/VanillaJet/releases/tag/v1.3.2
 [1.3.4]: https://github.com/nalancer08/VanillaJet/releases/tag/v1.3.4
 [1.3.5]: https://github.com/nalancer08/VanillaJet/releases/tag/v1.3.5
+[1.3.6]: https://github.com/nalancer08/VanillaJet/releases/tag/v1.3.6
