@@ -5,13 +5,14 @@ on:
     branches:
       - main
 
+permissions:
+  id-token: write
+  contents: write
+
 jobs:
   release:
     name: Publish
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
-      id-token: write
 
     steps:
     - name: Check out the repository
@@ -20,19 +21,25 @@ jobs:
     - name: Setup Node.js
       uses: actions/setup-node@v4
       with:
-        node-version: '20'
-        registry-url: 'https://registry.npmjs.org/'
+        node-version: '24'
+        registry-url: 'https://registry.npmjs.org'
 
     - name: Install dependencies
       run: npm ci
 
+    - name: Build
+      run: npm run build --if-present
+
+    - name: Test
+      run: npm test
+
     - name: Publish to npm
-      run: npm publish --provenance
+      run: npm publish
 
     - name: Configure git identity
       run: |
-        git config --global user.email "actions@github.com"
-        git config --global user.name "GitHub Actions"
+        git config user.email "actions@github.com"
+        git config user.name "GitHub Actions"
 
     - name: Get version from package.json
       id: get_version
