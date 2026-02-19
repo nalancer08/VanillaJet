@@ -34,6 +34,7 @@ class Router {
     };
     this.compressionMimes = [ 'css', 'js' ];
     this.compressionFiles = [ 'vanilla.min.js', 'app.min.css' ];
+    this.enablePrecompressedNegotiation = Boolean(server?.options?.enable_precompressed_negotiation);
 	}
 
 	routeToRegExp(route) {
@@ -111,46 +112,47 @@ class Router {
 							filename = path.join(rep, route), 
 							filePrivate = obj.isProtectedFile(route);
 
-            // -- Check if the file is a gzip file
-            if (request.acceptEncoding.includes('gzip') && 
-              obj.compressionMimes.includes(ext) &&
-              obj.compressionFiles.includes(filename.split('/').pop())
-            ) {
-              filename = filename + '.gz';
-              extHeader['Content-Encoding'] = 'gzip';
-            }
-
             if (filePrivate) {
               return obj.onNotFound(response);
             }
 
+            let staticCandidates = obj.getStaticCandidates(request, ext, filename);
             let hasConditionalHeaders = Boolean(req.headers['if-none-match'] || req.headers['if-modified-since']);
-            obj.getStaticFileMetadata(filename, hasConditionalHeaders, (err, metadata) => {
-              if (err || !metadata) {
+            obj.resolveFirstAvailableStaticFile(staticCandidates, hasConditionalHeaders, (err, staticFile) => {
+              if (err || !staticFile) {
                 return obj.onNotFound(response);
               }
 
-              extHeader['Content-Length'] = metadata.size;
-              extHeader['ETag'] = metadata.etag;
-              extHeader['Last-Modified'] = metadata.lastModified;
+              let staticHeaders = Object.assign({}, extHeader);
+              if (staticFile.contentEncoding) {
+                staticHeaders['Content-Encoding'] = staticFile.contentEncoding;
+              }
+              if (staticCandidates.some((candidate) => candidate.contentEncoding)) {
+                staticHeaders['Vary'] = 'Accept-Encoding';
+              }
+
+              let metadata = staticFile.metadata;
+              staticHeaders['Content-Length'] = metadata.size;
+              staticHeaders['ETag'] = metadata.etag;
+              staticHeaders['Last-Modified'] = metadata.lastModified;
               // Force revalidation to keep clients fresh without hard reload.
-              extHeader['Cache-Control'] = 'no-cache, must-revalidate';
+              staticHeaders['Cache-Control'] = 'no-cache, must-revalidate';
 
               if (obj.isNotModified(req, metadata)) {
-                let notModifiedHeaders = Object.assign({}, extHeader);
+                let notModifiedHeaders = Object.assign({}, staticHeaders);
                 delete notModifiedHeaders['Content-Length'];
                 res.writeHead(304, notModifiedHeaders);
                 return res.end();
               }
 
-              const fileStream = fs.createReadStream(filename);
+              const fileStream = fs.createReadStream(staticFile.filename);
               fileStream.on('error', (streamErr) => {
                 console.error("Error reading file:", streamErr);
                 res.writeHead(500);
                 res.end('Server Error');
               });
 
-              res.writeHead(200, extHeader);
+              res.writeHead(200, staticHeaders);
               fileStream.pipe(res);
               res.on('close', () => {});
             });
@@ -183,6 +185,88 @@ class Router {
       obj.staticMetadataCache.set(filename, metadata);
       obj.watchStaticFile(filename);
       callback(null, metadata);
+    });
+  }
+
+  getStaticCandidates(request, ext, filename) {
+    let obj = this;
+    let candidates = [{ filename: filename, contentEncoding: '' }];
+    let isCompressible = obj.compressionMimes.includes(ext) && obj.compressionFiles.includes(path.basename(filename));
+    if (!isCompressible) {
+      return candidates;
+    }
+
+    let compressedCandidates = [];
+    if (obj.enablePrecompressedNegotiation && obj.supportsEncoding(request.acceptEncoding, 'br')) {
+      compressedCandidates.push({
+        filename: filename + '.br',
+        contentEncoding: 'br'
+      });
+    }
+
+    if (obj.supportsEncoding(request.acceptEncoding, 'gzip')) {
+      compressedCandidates.push({
+        filename: filename + '.gz',
+        contentEncoding: 'gzip'
+      });
+    }
+
+    return compressedCandidates.concat(candidates);
+  }
+
+  resolveFirstAvailableStaticFile(candidates, forceRefresh, callback) {
+    let obj = this;
+    let index = 0;
+    function resolveCandidate() {
+      let currentCandidate = candidates[index];
+      if (!currentCandidate) {
+        return callback(new Error('No static file found'));
+      }
+
+      obj.getStaticFileMetadata(currentCandidate.filename, forceRefresh, (err, metadata) => {
+        if (!err && metadata) {
+          return callback(null, {
+            filename: currentCandidate.filename,
+            contentEncoding: currentCandidate.contentEncoding,
+            metadata: metadata
+          });
+        }
+        index = index + 1;
+        resolveCandidate();
+      });
+    }
+
+    resolveCandidate();
+  }
+
+  supportsEncoding(acceptEncoding, encoding) {
+    if (!Array.isArray(acceptEncoding)) {
+      return false;
+    }
+
+    let normalizedEncoding = String(encoding).toLowerCase();
+    return acceptEncoding.some((entry) => {
+      if (entry == null) {
+        return false;
+      }
+      let token = String(entry).toLowerCase();
+      let parts = token.split(';');
+      if (parts[0] !== normalizedEncoding) {
+        return false;
+      }
+
+      let qValue = 1;
+      for (let idx = 1; idx < parts.length; idx = idx + 1) {
+        let part = parts[idx];
+        if (part.startsWith('q=')) {
+          let parsedQValue = parseFloat(part.slice(2));
+          if (!Number.isNaN(parsedQValue)) {
+            qValue = parsedQValue;
+          }
+        }
+      }
+
+      return qValue > 0;
     });
   }
 

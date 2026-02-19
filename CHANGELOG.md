@@ -4,6 +4,15 @@ All notable project changes are documented in this file.
 
 The format follows a structure inspired by Keep a Changelog and semantic versioning.
 
+## [1.3.4] - 2026-02-19
+
+### Highlights
+
+- Added optional static precompressed negotiation flag: `settings.profile.enable_precompressed_negotiation`.
+- Static files now resolve safely with fallback chain: `.br` (when enabled and accepted) -> `.gz` (when accepted) -> original file.
+- Static compression negotiation now handles `Accept-Encoding` values with quality params (for example `gzip;q=1.0`).
+- `Vary: Accept-Encoding` is set for negotiated static responses.
+
 ## [1.3.3] - 2026-02-18
 
 ### Added
@@ -17,7 +26,7 @@ The format follows a structure inspired by Keep a Changelog and semantic version
 - Static files can now return `304 Not Modified` when validators match, reducing transfer for repeated requests.
 - Conditional requests force metadata refresh before deciding `304`, so clients can still see new content without hard reload.
 
-### Compatibility note
+### Compatibility notes
 
 - No route or filename contract changes.
 - No impact on dynamic endpoints behavior.
@@ -44,3 +53,4 @@ The format follows a structure inspired by Keep a Changelog and semantic version
 
 [1.3.3]: https://github.com/nalancer08/VanillaJet/releases/tag/v1.3.3
 [1.3.2]: https://github.com/nalancer08/VanillaJet/releases/tag/v1.3.2
+[1.3.4]: https://github.com/nalancer08/VanillaJet/releases/tag/v1.3.4

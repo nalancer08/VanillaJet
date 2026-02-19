@@ -31,7 +31,8 @@ class Server {
 
 		_.defaults(opts, {
 			https_server: false,
-			wsServer: false
+			wsServer: false,
+      enable_precompressed_negotiation: false
 		});
 		obj.options = opts;
 

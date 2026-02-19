@@ -6,8 +6,8 @@ Node.js framework for building SPA applications with a JS/CSS/HTML build pipelin
 
 ## Current version
 
-- Version: `1.3.3`
-- Changelog: see `CHANGELOG.md`
+- Version: `1.3.4`
+- Changelog: see [`CHANGELOG.md`](./CHANGELOG.md)
 - Improvement plan (performance and backward compatibility): see `ROADMAP.md`
 
 ## Requirements
@@ -97,8 +97,29 @@ VanillaJet expects a structure similar to:
 - Compiles templates and generates `public/pages/home.html`
 - Generates `.gz` versions of JS/CSS/HTML for compressed delivery
 
+## Compression negotiation (optional)
+
+You can enable precompressed static negotiation from `settings.profile`:
+
+```js
+module.exports = {
+  settings: {
+    profile: {
+      // Enables priority: .br -> .gz -> original file
+      enable_precompressed_negotiation: true
+    }
+  }
+};
+```
+
+Behavior details:
+
+- Default (`false`): keeps existing gzip behavior for supported static assets.
+- Enabled (`true`): if client accepts Brotli, server tries `.br` first.
+- Safe fallback: if `.br` or `.gz` does not exist, server serves the original file.
+
 ## Additional documentation
 
 - Router: `docs/router.md`
-- Version history: `CHANGELOG.md`
+- Version history: [`CHANGELOG.md`](./CHANGELOG.md)
 - Roadmap and improvements: `ROADMAP.md`
