@@ -4,6 +4,26 @@ All notable project changes are documented in this file.
 
 The format follows a structure inspired by Keep a Changelog and semantic versioning.
 
+## [1.4.1] - 2026-02-19
+
+### Highlights (v1.4.1)
+
+- Completed HU 2.1 (`Fast path de estaticos en Node`).
+- Optimized static serving in `framework/router.js`:
+  - Added warm-path static resolution cache (`route + accept-encoding`) to avoid repeated candidate resolution work.
+  - Added bounded metadata revalidation window for conditional requests to reduce repeated `fs.stat` pressure.
+  - Consolidated static header assembly and reused mime header maps.
+  - Kept stream-based delivery for large assets and tuned `createReadStream` chunk size.
+- Added reproducible local benchmark:
+  - New script: `npm run benchmark:static`.
+  - New guide: `docs/benchmark-static.md`.
+
+### Compatibility notes (v1.4.1)
+
+- No public API changes.
+- Preserves static conditional caching (`304`) and precompressed negotiation fallback.
+- No intended behavior changes for dynamic routes.
+
 ## [1.3.6] - 2026-02-19
 
 ### Highlights (v1.3.6)
@@ -83,3 +103,4 @@ The format follows a structure inspired by Keep a Changelog and semantic version
 [1.3.4]: https://github.com/nalancer08/VanillaJet/releases/tag/v1.3.4
 [1.3.5]: https://github.com/nalancer08/VanillaJet/releases/tag/v1.3.5
 [1.3.6]: https://github.com/nalancer08/VanillaJet/releases/tag/v1.3.6
+[1.4.1]: https://github.com/nalancer08/VanillaJet/releases/tag/v1.4.1

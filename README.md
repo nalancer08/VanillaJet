@@ -6,7 +6,7 @@ Node.js framework for building SPA applications with a JS/CSS/HTML build pipelin
 
 ## Current version
 
-- Version: `1.3.5`
+- Version: `1.4.1`
 - Changelog: see [`CHANGELOG.md`](./CHANGELOG.md)
 - Improvement plan (performance and backward compatibility): see `ROADMAP_INTEGRAL.md`
 
@@ -71,6 +71,7 @@ From this repository:
 - `npm run build:qa`: build for QA.
 - `npm run build:staging`: build for staging.
 - `npm run build:prod`: build for production.
+- `npm run benchmark:static`: runs reproducible static serving benchmark (cold/warm).
 
 As CLI (`bin.js`):
 
@@ -119,9 +120,23 @@ Behavior details:
 - Safe fallback: if `.br` or `.gz` does not exist, server serves the original file.
 - HTML rendering (`response.render`) also uses safe runtime fallback for precompressed templates (`.br`/`.gz`/original).
 
+## Static performance notes (HU 2.1)
+
+Static serving includes a warm-path optimization focused on Node runtime latency:
+
+- Reuses static resolution for repeated requests (`route + accept-encoding`).
+- Reduces repeated metadata refresh with bounded revalidation windows.
+- Keeps streaming strategy for large assets (`fs.createReadStream`) with tuned chunk size.
+- Preserves conditional cache behavior (`ETag`/`Last-Modified` + `304`) and precompressed fallback contract.
+
+Benchmark guide:
+
+- [`docs/benchmark-static.md`](./docs/benchmark-static.md)
+
 ## Additional documentation
 
 - Router: `docs/router.md`
+- Benchmark: [`docs/benchmark-static.md`](./docs/benchmark-static.md)
 - Version history: [`CHANGELOG.md`](./CHANGELOG.md)
 - Roadmap and improvements: `ROADMAP_INTEGRAL.md`
 - Deployment templates (nginx + docker): `docs/deployment/`

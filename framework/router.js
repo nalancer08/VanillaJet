@@ -16,8 +16,12 @@ class Router {
 		this.defaultRoute = '';
 		this.server = server;
 		this.cwd = process.cwd();
+    this.staticBasePath = this.cwd.replace('core/framework', '');
     this.staticMetadataCache = new Map();
+    this.staticResolutionCache = new Map();
     this.staticFileWatchers = new Map();
+    this.staticMetadataMaxAgeMs = 1000;
+    this.staticStreamChunkSize = 128 * 1024;
     this.mimes = {
       'png': 'image/png',
       'webp': 'image/webp',
@@ -32,6 +36,10 @@ class Router {
       'pdf': 'application/pdf',
       'json': 'application/json'
     };
+    this.mimeHeaders = Object.keys(this.mimes).reduce((headers, ext) => {
+      headers[ext] = { 'Content-Type': this.mimes[ext] };
+      return headers;
+    }, {});
     this.compressionMimes = [ 'css', 'js' ];
     this.compressionFiles = [ 'vanilla.min.js', 'app.min.css' ];
     this.enablePrecompressedNegotiation = Boolean(server?.options?.enable_precompressed_negotiation);
@@ -102,14 +110,13 @@ class Router {
 					
 					if (obj.mimes[ext] != undefined && obj.mimes[ext] != 'undefined') {
 						extHandled = true;
-						extHeader = { 'Content-Type': obj.mimes[ext] };
+						extHeader = obj.mimeHeaders[ext];
 					}
 
 					if (extHandled) {
 
-						let rep = obj.cwd.replace('core/framework', ''), 
-							route = request.path,
-							filename = path.join(rep, route), 
+						let route = request.path,
+							filename = path.join(obj.staticBasePath, route), 
 							filePrivate = obj.isProtectedFile(route);
 
             if (filePrivate) {
@@ -118,25 +125,13 @@ class Router {
 
             let staticCandidates = obj.getStaticCandidates(request, ext, filename);
             let hasConditionalHeaders = Boolean(req.headers['if-none-match'] || req.headers['if-modified-since']);
-            obj.resolveFirstAvailableStaticFile(staticCandidates, hasConditionalHeaders, (err, staticFile) => {
+            obj.resolveFirstAvailableStaticFile(route, request.acceptEncoding, staticCandidates, hasConditionalHeaders, (err, staticFile) => {
               if (err || !staticFile) {
                 return obj.onNotFound(response);
               }
 
-              let staticHeaders = Object.assign({}, extHeader);
-              if (staticFile.contentEncoding) {
-                staticHeaders['Content-Encoding'] = staticFile.contentEncoding;
-              }
-              if (staticCandidates.some((candidate) => candidate.contentEncoding)) {
-                staticHeaders['Vary'] = 'Accept-Encoding';
-              }
-
               let metadata = staticFile.metadata;
-              staticHeaders['Content-Length'] = metadata.size;
-              staticHeaders['ETag'] = metadata.etag;
-              staticHeaders['Last-Modified'] = metadata.lastModified;
-              // Force revalidation to keep clients fresh without hard reload.
-              staticHeaders['Cache-Control'] = 'no-cache, must-revalidate';
+              let staticHeaders = obj.buildStaticHeaders(extHeader, staticCandidates, staticFile.contentEncoding, metadata);
 
               if (obj.isNotModified(req, metadata)) {
                 let notModifiedHeaders = Object.assign({}, staticHeaders);
@@ -145,8 +140,12 @@ class Router {
                 return res.end();
               }
 
-              const fileStream = fs.createReadStream(staticFile.filename);
+              const fileStream = fs.createReadStream(staticFile.filename, {
+                highWaterMark: obj.staticStreamChunkSize
+              });
               fileStream.on('error', (streamErr) => {
+                obj.staticMetadataCache.delete(staticFile.filename);
+                obj.staticResolutionCache.clear();
                 console.error("Error reading file:", streamErr);
                 res.writeHead(500);
                 res.end('Server Error');
@@ -171,6 +170,10 @@ class Router {
       return callback(null, cachedMetadata);
     }
 
+    if (cachedMetadata && forceRefresh && !obj.shouldRefreshConditionalMetadata(cachedMetadata)) {
+      return callback(null, cachedMetadata);
+    }
+
     fs.stat(filename, (err, stats) => {
       if (err || !stats.isFile()) {
         return callback(err || new Error('File not found'));
@@ -179,7 +182,8 @@ class Router {
       let metadata = {
         size: stats.size,
         lastModified: stats.mtime.toUTCString(),
-        etag: `W/"${stats.size}-${Math.floor(stats.mtimeMs)}"`
+        etag: `W/"${stats.size}-${Math.floor(stats.mtimeMs)}"`,
+        cachedAt: Date.now()
       };
 
       obj.staticMetadataCache.set(filename, metadata);
@@ -214,8 +218,24 @@ class Router {
     return compressedCandidates.concat(candidates);
   }
 
-  resolveFirstAvailableStaticFile(candidates, forceRefresh, callback) {
+  resolveFirstAvailableStaticFile(route, acceptEncoding, candidates, forceRefresh, callback) {
     let obj = this;
+    let resolutionKey = obj.getStaticResolutionKey(route, acceptEncoding);
+    let cachedResolution = obj.staticResolutionCache.get(resolutionKey);
+    if (cachedResolution) {
+      return obj.getStaticFileMetadata(cachedResolution.filename, forceRefresh, (cachedErr, cachedMetadata) => {
+        if (!cachedErr && cachedMetadata) {
+          return callback(null, {
+            filename: cachedResolution.filename,
+            contentEncoding: cachedResolution.contentEncoding,
+            metadata: cachedMetadata
+          });
+        }
+        obj.staticResolutionCache.delete(resolutionKey);
+        obj.resolveFirstAvailableStaticFile(route, acceptEncoding, candidates, forceRefresh, callback);
+      });
+    }
+
     let index = 0;
     function resolveCandidate() {
       let currentCandidate = candidates[index];
@@ -225,6 +245,10 @@ class Router {
 
       obj.getStaticFileMetadata(currentCandidate.filename, forceRefresh, (err, metadata) => {
         if (!err && metadata) {
+          obj.staticResolutionCache.set(resolutionKey, {
+            filename: currentCandidate.filename,
+            contentEncoding: currentCandidate.contentEncoding
+          });
           return callback(null, {
             filename: currentCandidate.filename,
             contentEncoding: currentCandidate.contentEncoding,
@@ -237,6 +261,35 @@ class Router {
     }
 
     resolveCandidate();
+  }
+
+  getStaticResolutionKey(route, acceptEncoding) {
+    let normalizedEncodings = Array.isArray(acceptEncoding) ? acceptEncoding.join(',') : '';
+    return `${route}|${normalizedEncodings}`;
+  }
+
+  shouldRefreshConditionalMetadata(metadata) {
+    if (!metadata || !metadata.cachedAt) {
+      return true;
+    }
+    return Date.now() - metadata.cachedAt > this.staticMetadataMaxAgeMs;
+  }
+
+  buildStaticHeaders(extHeader, candidates, contentEncoding, metadata) {
+    let staticHeaders = Object.assign({}, extHeader);
+    if (contentEncoding) {
+      staticHeaders['Content-Encoding'] = contentEncoding;
+    }
+    if (candidates.some((candidate) => candidate.contentEncoding)) {
+      staticHeaders['Vary'] = 'Accept-Encoding';
+    }
+
+    staticHeaders['Content-Length'] = metadata.size;
+    staticHeaders['ETag'] = metadata.etag;
+    staticHeaders['Last-Modified'] = metadata.lastModified;
+    // Force revalidation to keep clients fresh without hard reload.
+    staticHeaders['Cache-Control'] = 'no-cache, must-revalidate';
+    return staticHeaders;
   }
 
   supportsEncoding(acceptEncoding, encoding) {
@@ -279,6 +332,7 @@ class Router {
     try {
       let watcher = fs.watch(filename, (eventType) => {
         obj.staticMetadataCache.delete(filename);
+        obj.staticResolutionCache.clear();
         if (eventType === 'rename') {
           let renamedWatcher = obj.staticFileWatchers.get(filename);
           if (renamedWatcher) {
@@ -290,6 +344,7 @@ class Router {
 
       watcher.on('error', () => {
         obj.staticMetadataCache.delete(filename);
+        obj.staticResolutionCache.clear();
         let activeWatcher = obj.staticFileWatchers.get(filename);
         if (activeWatcher) {
           activeWatcher.close();

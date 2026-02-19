@@ -5,9 +5,9 @@ Cada historia incluye su ciclo completo: fases, tareas, entregables, metricas, c
 
 ## Objetivo
 
-- Modernizar el framework con `Vite` como base de DX.
-- Reducir dependencia de Node para servir frontend.
-- Adoptar `nginx` y Docker al final, con evidencia y sin romper legacy.
+- Maximizar performance de serving estatico sobre Node sin romper compatibilidad.
+- Acelerar el pipeline de compilacion en tiempo real (watch/recompile) para DX diaria.
+- Mejorar flujo `dev` con apertura automatica de navegador y live reload estable.
 
 ## Reglas de ejecucion
 
@@ -115,121 +115,129 @@ Cada historia incluye su ciclo completo: fases, tareas, entregables, metricas, c
 
 ---
 
-## EPIC 2 - Vite first (foco actual)
+## EPIC 2 - Performance Node + DX de compilacion (foco actual)
 
-### HU 2.1 - `dev:vite` y `build:vite` sin romper legacy (en progreso)
+### HU 2.1 - Fast path de estaticos en Node (completada `v1.4.1`)
 
 #### Fases
-- F1: baseline.
-- F2: integrar scripts Vite.
-- F3: coexistencia con legacy.
-- F4: validacion en consumidor real.
+- F1: profiling de request estatico.
+- F2: optimizacion de lectura/respuesta.
+- F3: validacion de no-regresion.
 
 #### Tareas
-- Config Vite (JS/LESS).
-- Mantener Nunjucks en esta etapa.
-- Documentar `dev` legacy vs `dev:vite`.
+- [x] Optimizar resolucion de archivo y headers para evitar trabajo repetido.
+- [x] Revisar estrategia de `fs`/stream para minimizar latencia en assets grandes.
+- [x] Agregar benchmark local reproducible (cold/warm cache).
 
 #### Entregables
-- Config y scripts de Vite.
+- [x] Patch de performance en `framework/router.js`.
+- [x] Script de benchmark local documentado.
 
 #### Metricas
-- Arranque dev >= 40% mas rapido.
-- Rebuild incremental >= 50% mas rapido.
+- p95 de estaticos >= 20% mejor en escenario warm.
+- Menor uso de CPU en serving concurrente.
 
 #### Criterios
-- HMR estable.
-- Legacy intacto.
+- [x] Sin romper cache condicional (`304`) ni negociacion precompressed.
+- [x] Sin impacto en rutas dinamicas.
+
+#### Documentacion
+- [x] `README.md` + `CHANGELOG.md` + guia de benchmark.
+
+### HU 2.2 - Recompile en tiempo real mas rapido (pendiente)
+
+#### Fases
+- F1: baseline de tiempos por tarea de build.
+- F2: optimizacion incremental.
+- F3: validacion en proyecto consumidor.
+
+#### Tareas
+- Reducir trabajo redundante en `gulpfile.js` (globs, minify y concatenacion).
+- Mejorar estrategia de watch para recompilar solo lo tocado.
+- Medir tiempo de recompile por tipo de cambio (JS, LESS, HTML).
+
+#### Entregables
+- Pipeline `dev` optimizado y medido.
+
+#### Metricas
+- Recompile JS >= 35% mas rapido.
+- Recompile LESS >= 30% mas rapido.
+
+#### Criterios
+- Output final equivalente al flujo actual.
+- Sin cambios obligatorios en estructura de proyectos consumidores.
 
 #### Documentacion
 - `README.md` + `CHANGELOG.md`.
 
-### HU 2.2 - Node deja de servir frontend en modo moderno (pendiente)
+---
+
+## EPIC 3 - Developer Experience en `dev`
+
+### HU 3.1 - Runner `dev` con navegador auto-open + live reload estable (pendiente)
 
 #### Fases
-- F1: contrato `legacy` vs `modern`.
-- F2: flag de transicion.
-- F3: validacion de compatibilidad.
+- F1: contrato de ejecucion unificado.
+- F2: implementacion runner.
+- F3: validacion en Mac/Windows/Linux.
 
 #### Tareas
-- Node solo API/dinamico en modo moderno.
-- Frontend servido por Vite (dev) y luego Nginx (prod).
+- Abrir navegador automaticamente al iniciar `dev`.
+- Disparar live reload al terminar recompile de assets/templates.
+- Mantener modo fallback para entornos sin navegador.
 
 #### Entregables
-- Contrato por entorno.
+- Nuevo flujo `npm run dev` mas simple para consumidores.
 
 #### Metricas
-- Menos carga de static serving en Node.
+- Tiempo a primer render local menor.
+- Menos pasos manuales de arranque en onboarding.
 
 #### Criterios
-- Modo moderno sin dependencia de `response.render()`.
-- Modo legacy intacto.
+- Reload confiable tras cada recompile exitoso.
+- Sin romper el modo actual para usuarios legacy.
 
 #### Documentacion
-- Guia de migracion de modo.
+- `README.md` + `CHANGELOG.md` + guia de migracion de scripts.
 
 ---
 
-## EPIC 3 - Benchmark y decision gate
+## EPIC 4 - Hardening operativo del runtime Node
 
-### HU 3.1 - Go/No-Go de Nginx basado en datos (pendiente)
-
-#### Fases
-- F1: dise;o benchmark A/B.
-- F2: ejecucion.
-- F3: analisis.
-- F4: decision.
-
-#### Tareas
-- Medir p50/p95/p99, throughput, CPU, memoria.
-- Definir umbrales minimos de aprobacion.
-
-#### Entregables
-- Reporte benchmark.
-- Decision log Go/No-Go.
-
-#### Criterios
-- Decision trazable con evidencia.
-
-#### Documentacion
-- Documento benchmark + resumen tecnico.
-
----
-
-## EPIC 4 - Adopcion final de infraestructura
-
-### HU 4.1 - Nginx oficial para consumidores (pendiente)
+### HU 4.1 - Observabilidad y protecciones de runtime (pendiente)
 
 #### Fases
-- F1: template.
-- F2: staging.
-- F3: guia de operacion.
+- F1: logging y metricas base.
+- F2: alarmas y limites.
+- F3: guia operativa.
 
 #### Tareas
-- `try_files`, SPA fallback, proxy a Node, cache y precompressed.
+- Estandarizar logs de serving estatico y errores.
+- Exponer metricas clave (latencia/errores/cache hits).
+- Documentar manejo de picos y rollback.
 
 #### Entregables
-- Template y guia.
+- Guia de operacion y checklist de hardening.
 
 #### Documentacion
-- `docs/deployment/` + `README.md`.
+- `docs/` + `README.md`.
 
-### HU 4.2 - Docker de referencia (pendiente)
+### HU 4.2 - Paquete de referencia para despliegue Node (pendiente)
 
 #### Fases
-- F1: Dockerfile.
-- F2: docker-compose.
-- F3: validacion server.
+- F1: templates de entorno.
+- F2: validacion en staging.
+- F3: guia final.
 
 #### Tareas
-- Definir imagenes, puertos y variables.
-- Documentar rollback.
+- Definir variables, puertos y recomendaciones de cache.
+- Incluir ejemplo de despliegue reproducible para consumidores.
 
 #### Entregables
-- Dockerfile y compose de referencia.
+- Template de despliegue y guia de puesta en marcha.
 
 #### Documentacion
-- `docs/deployment/` + `README.md`.
+- `docs/` + `README.md`.
 
 ---
 
@@ -244,6 +252,5 @@ Cada historia incluye su ciclo completo: fases, tareas, entregables, metricas, c
 
 ## Estado global
 
-- Completado: HU 1.1, HU 1.2, HU 1.3, HU 1.4.
-- En progreso: HU 2.1.
+- Completado: HU 1.1, HU 1.2, HU 1.3, HU 1.4, HU 2.1.
 - Pendiente: HU 2.2, HU 3.1, HU 4.1, HU 4.2.
