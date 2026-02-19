@@ -10,24 +10,25 @@ jobs:
     name: Publish
     runs-on: ubuntu-latest
     environment: rep
+    permissions:
+      contents: write
+      id-token: write
 
     steps:
     - name: Check out the repository
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
 
     - name: Setup Node.js
-      uses: actions/setup-node@v3
+      uses: actions/setup-node@v4
       with:
-        node-version: '16'
+        node-version: '20'
         registry-url: 'https://registry.npmjs.org/'
 
     - name: Install dependencies
-      run: npm install
+      run: npm ci
 
     - name: Publish to npm
-      env:
-        NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-      run: npm publish
+      run: npm publish --provenance
 
     - name: Configure git identity
       run: |
@@ -36,7 +37,7 @@ jobs:
 
     - name: Get version from package.json
       id: get_version
-      run: echo "::set-output name=version::$(node -p "require('./package.json').version")"
+      run: echo "version=$(node -p 'require(\"./package.json\").version')" >> "$GITHUB_OUTPUT"
 
     - name: Check if tag exists
       run: |
