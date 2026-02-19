@@ -16,6 +16,8 @@ class Router {
 		this.defaultRoute = '';
 		this.server = server;
 		this.cwd = process.cwd();
+    this.staticMetadataCache = new Map();
+    this.staticFileWatchers = new Map();
     this.mimes = {
       'png': 'image/png',
       'webp': 'image/webp',
@@ -93,7 +95,7 @@ class Router {
 				// -- Check static files
 				if (!handled && !isMatch) {
 
-					let ext = path.extname(req.url).replace('.', ''), 
+					let ext = path.extname(request.path).replace('.', ''), 
             extHandled = false, 
             extHeader = {};
 					
@@ -118,11 +120,29 @@ class Router {
               extHeader['Content-Encoding'] = 'gzip';
             }
 
-            fs.stat(filename, (err, stats) => {
+            if (filePrivate) {
+              return obj.onNotFound(response);
+            }
 
-              if (err || !stats.isFile() || filePrivate) {
+            let hasConditionalHeaders = Boolean(req.headers['if-none-match'] || req.headers['if-modified-since']);
+            obj.getStaticFileMetadata(filename, hasConditionalHeaders, (err, metadata) => {
+              if (err || !metadata) {
                 return obj.onNotFound(response);
               }
+
+              extHeader['Content-Length'] = metadata.size;
+              extHeader['ETag'] = metadata.etag;
+              extHeader['Last-Modified'] = metadata.lastModified;
+              // Force revalidation to keep clients fresh without hard reload.
+              extHeader['Cache-Control'] = 'no-cache, must-revalidate';
+
+              if (obj.isNotModified(req, metadata)) {
+                let notModifiedHeaders = Object.assign({}, extHeader);
+                delete notModifiedHeaders['Content-Length'];
+                res.writeHead(304, notModifiedHeaders);
+                return res.end();
+              }
+
               const fileStream = fs.createReadStream(filename);
               fileStream.on('error', (streamErr) => {
                 console.error("Error reading file:", streamErr);
@@ -130,7 +150,6 @@ class Router {
                 res.end('Server Error');
               });
 
-              extHeader['Content-Length'] = stats.size;
               res.writeHead(200, extHeader);
               fileStream.pipe(res);
               res.on('close', () => {});
@@ -141,6 +160,85 @@ class Router {
 		}), handled = false;
 		isMatch = false;
 	}
+
+  getStaticFileMetadata(filename, forceRefresh, callback) {
+    let obj = this;
+    forceRefresh = forceRefresh || false;
+    let cachedMetadata = obj.staticMetadataCache.get(filename);
+    if (cachedMetadata && !forceRefresh) {
+      return callback(null, cachedMetadata);
+    }
+
+    fs.stat(filename, (err, stats) => {
+      if (err || !stats.isFile()) {
+        return callback(err || new Error('File not found'));
+      }
+
+      let metadata = {
+        size: stats.size,
+        lastModified: stats.mtime.toUTCString(),
+        etag: `W/"${stats.size}-${Math.floor(stats.mtimeMs)}"`
+      };
+
+      obj.staticMetadataCache.set(filename, metadata);
+      obj.watchStaticFile(filename);
+      callback(null, metadata);
+    });
+  }
+
+  watchStaticFile(filename) {
+    let obj = this;
+    if (obj.staticFileWatchers.has(filename)) {
+      return;
+    }
+
+    try {
+      let watcher = fs.watch(filename, (eventType) => {
+        obj.staticMetadataCache.delete(filename);
+        if (eventType === 'rename') {
+          let renamedWatcher = obj.staticFileWatchers.get(filename);
+          if (renamedWatcher) {
+            renamedWatcher.close();
+          }
+          obj.staticFileWatchers.delete(filename);
+        }
+      });
+
+      watcher.on('error', () => {
+        obj.staticMetadataCache.delete(filename);
+        let activeWatcher = obj.staticFileWatchers.get(filename);
+        if (activeWatcher) {
+          activeWatcher.close();
+        }
+        obj.staticFileWatchers.delete(filename);
+      });
+
+      obj.staticFileWatchers.set(filename, watcher);
+    } catch (err) {
+      // If watch cannot be created, keep runtime behavior and continue.
+    }
+  }
+
+  isNotModified(req, metadata) {
+    let ifNoneMatch = req.headers['if-none-match'];
+    if (ifNoneMatch) {
+      let etags = ifNoneMatch.split(',').map((etag) => etag.trim());
+      if (etags.includes(metadata.etag)) {
+        return true;
+      }
+    }
+
+    let ifModifiedSince = req.headers['if-modified-since'];
+    if (ifModifiedSince) {
+      let requestModifiedSince = new Date(ifModifiedSince).getTime();
+      let fileModifiedAt = new Date(metadata.lastModified).getTime();
+      if (!Number.isNaN(requestModifiedSince) && requestModifiedSince >= fileModifiedAt) {
+        return true;
+      }
+    }
+
+    return false;
+  }
 
 	isProtectedFile(route) {
 		let protectedDirs = ['framework', 'external', 'node_mudules'];

@@ -1,6 +1,104 @@
-<p align="center">
-  <img src="https://github.com/nalancer08/App-Builders/blob/master/Logos/logo_monocromatico_horizontal_.png">
-</p>
-
 # VanillaJet
-NodeJS framework to create apps with jQuery or VueJS over a SPA (Single Page Application), the framework helps to create the server and add dependencia, includes router and server side functions as routes (internal API).
+
+Node.js framework for building SPA applications with a JS/CSS/HTML build pipeline, HTTP/HTTPS server, internal router, and template rendering utilities.
+
+![VanillaJet logo](https://github.com/nalancer08/App-Builders/blob/master/Logos/logo_monocromatico_horizontal_.png)
+
+## Current version
+
+- Version: `1.3.3`
+- Changelog: see `CHANGELOG.md`
+- Improvement plan (performance and backward compatibility): see `ROADMAP.md`
+
+## Requirements
+
+- Node.js `>=16` recommended
+- npm `>=8`
+
+## Installation
+
+```bash
+npm install vanilla-jet
+```
+
+If you are working in this local repository:
+
+```bash
+npm install
+```
+
+## Quick start
+
+### 1) Export the server from your project
+
+```js
+const { Server } = require('vanilla-jet');
+```
+
+### 2) Define endpoints (classes)
+
+Each endpoint should expose a `name` and register routes with the router in the constructor.
+
+```js
+class AppEndpoint {
+  constructor(router) {
+    this.name = 'AppEndpoint';
+    router.addRoute('get', '/', 'AppEndpoint.index');
+  }
+
+  index(request, response) {
+    response.setBody('Hello VanillaJet');
+    response.respond();
+  }
+}
+```
+
+### 3) Start the server
+
+```js
+const { Server } = require('vanilla-jet');
+const Config = require('./config');
+
+new Server(Config, [AppEndpoint]).start();
+```
+
+## Available commands
+
+From this repository:
+
+- `npm run setup`: generates a base `vanillaJet.package.json` if it does not exist.
+- `npm run dev`: build + watcher for development.
+- `npm run build:qa`: build for QA.
+- `npm run build:staging`: build for staging.
+- `npm run build:prod`: build for production.
+
+As CLI (`bin.js`):
+
+- `npx vanilla-jet setup`
+- `npx vanilla-jet dev`
+- `npx vanilla-jet build`
+
+## Expected consumer project structure
+
+VanillaJet expects a structure similar to:
+
+- `assets/pages/home.html`
+- `assets/templates/**/*.html`
+- `assets/scripts/**/*.js`
+- `assets/styles/less/admin.less`
+- `public/` (compiled output)
+- `config.js`
+- `vanillaJet.package.json`
+
+## Build pipeline (summary)
+
+- Minifies JS and concatenates into `public/scripts/vanilla.min.js`
+- Compiles LESS and generates `public/styles/app.min.css`
+- Compiles templates and generates `public/pages/home.html`
+- Generates `.gz` versions of JS/CSS/HTML for compressed delivery
+
+## Additional documentation
+
+- Router: `docs/router.md`
+- Version history: `CHANGELOG.md`
+- Roadmap and improvements: `ROADMAP.md`
