@@ -19,7 +19,6 @@ class Router {
     this.staticBasePath = this.cwd.replace('core/framework', '');
     this.staticMetadataCache = new Map();
     this.staticResolutionCache = new Map();
-    this.staticFileWatchers = new Map();
     this.staticStreamChunkSize = 128 * 1024;
     this.mimes = {
       'png': 'image/png',
@@ -149,12 +148,18 @@ class Router {
                 res.writeHead(500);
                 res.end('Server Error');
               });
+              res.on('close', () => {
+                if (!res.writableEnded) {
+                  fileStream.destroy();
+                }
+              });
 
               res.writeHead(200, staticHeaders);
               fileStream.pipe(res);
-              res.on('close', () => {});
             });
-					}
+					} else {
+            return obj.onNotFound(response);
+          }
 				}
 			}
 		}), handled = false;
@@ -181,7 +186,6 @@ class Router {
       };
 
       obj.staticMetadataCache.set(filename, metadata);
-      obj.watchStaticFile(filename);
       callback(null, metadata);
     });
   }
@@ -308,41 +312,6 @@ class Router {
 
       return qValue > 0;
     });
-  }
-
-  watchStaticFile(filename) {
-    let obj = this;
-    if (obj.staticFileWatchers.has(filename)) {
-      return;
-    }
-
-    try {
-      let watcher = fs.watch(filename, (eventType) => {
-        obj.staticMetadataCache.delete(filename);
-        obj.staticResolutionCache.clear();
-        if (eventType === 'rename') {
-          let renamedWatcher = obj.staticFileWatchers.get(filename);
-          if (renamedWatcher) {
-            renamedWatcher.close();
-          }
-          obj.staticFileWatchers.delete(filename);
-        }
-      });
-
-      watcher.on('error', () => {
-        obj.staticMetadataCache.delete(filename);
-        obj.staticResolutionCache.clear();
-        let activeWatcher = obj.staticFileWatchers.get(filename);
-        if (activeWatcher) {
-          activeWatcher.close();
-        }
-        obj.staticFileWatchers.delete(filename);
-      });
-
-      obj.staticFileWatchers.set(filename, watcher);
-    } catch (err) {
-      // If watch cannot be created, keep runtime behavior and continue.
-    }
   }
 
   isNotModified(req, metadata) {

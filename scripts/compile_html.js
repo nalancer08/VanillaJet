@@ -2,7 +2,6 @@
 const path = require("path"),
 	fs = require("fs"),
 	nunjucks = require('nunjucks'),
-  identifier = 'templates',
   chalk = require('chalk'),
   zlib = require('zlib');
 
@@ -43,9 +42,11 @@ function main() {
   // -- Get home.html
   let homePageName = 'home.html';
   getHtmlFromPage(homePageName).then((htmlContent) => {
-    if (htmlContent) {
+    if (htmlContent) {      
+      // -- Compile the htmlContent
+      const compiledHtmlContent = compileTemplate(htmlContent);
       // -- Divide content line by line
-      const htmlContentLines = htmlContent.split('\n');
+      const htmlContentLines = compiledHtmlContent.split('\n');
       let lines = Array.from(htmlContentLines);
       // -- Iterate over each line
       for (let line of htmlContentLines) {
@@ -58,7 +59,7 @@ function main() {
           // -- Get template name
           var templateName = line.replace('include::', '');
           // -- Check if its name "templates" add all templates if not add specific one
-          if (templateName === identifier) {
+          if (templateName === 'templates') {
 
             let allTemplatesCompiled = '';
             for (let templateName in templates) {
@@ -211,7 +212,7 @@ function cleanALine(line) {
 
 function processCwd() {
   return process.cwd()
-    .replace('/.grunt', '')
+    .replace('/scripts', '')
     .replace('/gulp', '')
     .replace('/node_modules/vanilla-jet', '');
 }

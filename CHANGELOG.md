@@ -4,6 +4,32 @@ All notable project changes are documented in this file.
 
 The format follows a structure inspired by Keep a Changelog and semantic versioning.
 
+## [1.4.3] - 2026-02-19
+
+### Removed
+
+- Grunt build artifacts: removed `.grunt/` folder, `build_styles_task.js`, and `compile_html.js`.
+- Build pipeline now uses only Gulp; template compilation moved to `scripts/compile_html.js`.
+
+### Changed
+
+- `gulpfile.js`: `compileTemplates` now invokes `node scripts/compile_html.js` instead of `.grunt/compile_html.js`.
+- `framework/dipper.js`, `.scripts/generate_packages_json.js`: removed `.grunt` references from `processCwd` helpers.
+
+### Fixed
+
+- **Reliability under rapid reloads (F5)**: server no longer stops responding after repeated refreshes.
+  - Removed `fs.watch` per static file (`staticFileWatchers`); could exhaust resources with prolonged use.
+  - Added fallback to `404` for routes without a handled static extension (avoids hanging requests).
+  - Destroy file streams when client disconnects (`res.on('close')`) to avoid orphaned streams.
+  - Applied same stream cleanup in `response.render()` for HTML template delivery.
+- Added defensive server timeouts: `requestTimeout`, `headersTimeout`, `keepAliveTimeout` (configurable via `settings.profile`).
+
+### Compatibility notes
+
+- No public API changes.
+- Build output and route behavior unchanged; only internal reliability improvements.
+
 ## [1.4.2] - 2026-02-19
 
 ### Changed
@@ -112,4 +138,5 @@ The format follows a structure inspired by Keep a Changelog and semantic version
 [1.3.5]: https://github.com/nalancer08/VanillaJet/releases/tag/v1.3.5
 [1.3.6]: https://github.com/nalancer08/VanillaJet/releases/tag/v1.3.6
 [1.4.2]: https://github.com/nalancer08/VanillaJet/releases/tag/v1.4.2
+[1.4.3]: https://github.com/nalancer08/VanillaJet/releases/tag/v1.4.3
 [1.4.1]: https://github.com/nalancer08/VanillaJet/releases/tag/v1.4.1

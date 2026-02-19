@@ -111,6 +111,11 @@ class Response {
       fileStream.on('error', () => {
         obj.error404();
       });
+      obj.res.on('close', () => {
+        if (!obj.res.writableEnded) {
+          fileStream.destroy();
+        }
+      });
       fileStream.pipe(obj.res);
     });
 	}

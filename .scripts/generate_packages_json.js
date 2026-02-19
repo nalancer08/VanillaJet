@@ -41,7 +41,6 @@ async function createFileIfnotExists(content) {
 // -- Helpers
 function processCwd() {
     return process.cwd()
-        .replace('/.grunt', '')
         .replace('/.scripts', '');
 }
 

@@ -32,7 +32,10 @@ class Server {
 		_.defaults(opts, {
 			https_server: false,
 			wsServer: false,
-      enable_precompressed_negotiation: false
+      enable_precompressed_negotiation: false,
+      request_timeout_ms: 30000,
+      headers_timeout_ms: 35000,
+      keep_alive_timeout_ms: 5000
 		});
 		obj.options = opts;
 
@@ -91,6 +94,9 @@ class Server {
     }
 
     // -- Set the port
+    obj.httpx.requestTimeout = Number(obj.options.request_timeout_ms) || 30000;
+    obj.httpx.headersTimeout = Number(obj.options.headers_timeout_ms) || 35000;
+    obj.httpx.keepAliveTimeout = Number(obj.options.keep_alive_timeout_ms) || 5000;
     obj.httpx.listen(obj.options.port || 8080);
   }
 

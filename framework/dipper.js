@@ -545,7 +545,6 @@ Dipper.prototype.includeEnvironment = function() {
 Dipper.prototype.processCwd = function() {
 
 	let cwd = process.cwd()
-		.replace('/.grunt', '')
 		.replace('/.scripts', '')
 		.replace('/node_modules', '')
 		.replace('/vanilla-jet', '');

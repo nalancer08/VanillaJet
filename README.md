@@ -6,7 +6,7 @@ Node.js framework for building SPA applications with a JS/CSS/HTML build pipelin
 
 ## Current version
 
-- Version: `1.4.2`
+- Version: `1.4.3`
 - Changelog: see [`CHANGELOG.md`](./CHANGELOG.md)
 - Improvement plan (performance and backward compatibility): see `ROADMAP_INTEGRAL.md`
 
@@ -92,6 +92,8 @@ VanillaJet expects a structure similar to:
 - `vanillaJet.package.json`
 
 ## Build pipeline (summary)
+
+Gulp-based pipeline (no Grunt):
 
 - Minifies JS and concatenates into `public/scripts/vanilla.min.js`
 - Compiles LESS and generates `public/styles/app.min.css`

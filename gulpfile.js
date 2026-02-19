@@ -113,7 +113,7 @@ function compressCss() {
 // Template compilation
 function compileTemplates() {
   return gulp.src('.')
-    .pipe(shell([`node .grunt/compile_html.js`]));
+    .pipe(shell([`node scripts/compile_html.js`]));
 }
 
 // Watch task
