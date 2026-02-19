@@ -6,7 +6,7 @@ Node.js framework for building SPA applications with a JS/CSS/HTML build pipelin
 
 ## Current version
 
-- Version: `1.4.1`
+- Version: `1.4.2`
 - Changelog: see [`CHANGELOG.md`](./CHANGELOG.md)
 - Improvement plan (performance and backward compatibility): see `ROADMAP_INTEGRAL.md`
 
@@ -125,7 +125,7 @@ Behavior details:
 Static serving includes a warm-path optimization focused on Node runtime latency:
 
 - Reuses static resolution for repeated requests (`route + accept-encoding`).
-- Reduces repeated metadata refresh with bounded revalidation windows.
+- Keeps conditional revalidation (`ETag`/`Last-Modified`) strict so reload reflects changes immediately.
 - Keeps streaming strategy for large assets (`fs.createReadStream`) with tuned chunk size.
 - Preserves conditional cache behavior (`ETag`/`Last-Modified` + `304`) and precompressed fallback contract.
 

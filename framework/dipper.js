@@ -93,12 +93,12 @@ Dipper.prototype.img = function(filename) {
 
 Dipper.prototype.script = function(filename) {
 	let dir = this.getDir('scripts', false);
-	return this.urlTo(dir + filename);
+	return this.versionedUrl(dir + filename);
 }
 
 Dipper.prototype.style = function(filename) {
 	let dir = this.getDir('styles', false);
-	return this.urlTo(dir + filename);;
+	return this.versionedUrl(dir + filename);;
 }
 
 Dipper.prototype.pdf = function(filename) {
@@ -127,6 +127,36 @@ Dipper.prototype.urlTo = function (route) {
   if (/^(?:[a-z][a-z0-9+.-]*:)?\/\//i.test(route)) return route;
   return '/' + route.replace(/^\/+/, '');
 };
+
+Dipper.prototype.versionedUrl = function(route) {
+	const fs = require('fs');
+	const path = require('path');
+	const normalizedUrl = this.urlTo(route);
+
+	// External URLs should remain untouched.
+	if (/^(?:[a-z][a-z0-9+.-]*:)?\/\//i.test(normalizedUrl)) {
+		return normalizedUrl;
+	}
+
+	try {
+		const filePath = path.join(this.processCwd(), normalizedUrl.replace(/^\//, ''));
+		const stats = fs.statSync(filePath);
+		if (!stats.isFile()) {
+			return normalizedUrl;
+		}
+
+		const version = `${stats.size}-${Math.floor(stats.mtimeMs)}`;
+		return this.appendQueryParam(normalizedUrl, 'v', version);
+	} catch (err) {
+		// If file does not exist yet, keep legacy behavior.
+		return normalizedUrl;
+	}
+}
+
+Dipper.prototype.appendQueryParam = function(url, key, value) {
+	const separator = url.includes('?') ? '&' : '?';
+	return `${url}${separator}${key}=${encodeURIComponent(value)}`;
+}
 
 Dipper.prototype.registerStyle = function(
 	name, url, requires,

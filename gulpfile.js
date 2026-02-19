@@ -123,7 +123,8 @@ function watchFiles(cb) {
   // Watch LESS files
   watch([`${base}/assets/styles/less/**/*.less`], gulp.series(
     buildLess,
-    compressCss
+    compressCss,
+    compileTemplates
   ));
 
   // Watch HTML files
@@ -138,7 +139,8 @@ function watchFiles(cb) {
     uglifyJs,
     concatJs,
     cleanMinified,
-    compressJs
+    compressJs,
+    compileTemplates
   ));
   
   cb();

@@ -117,7 +117,7 @@ Cada historia incluye su ciclo completo: fases, tareas, entregables, metricas, c
 
 ## EPIC 2 - Performance Node + DX de compilacion (foco actual)
 
-### HU 2.1 - Fast path de estaticos en Node (completada `v1.4.1`)
+### HU 2.1 - Fast path de estaticos en Node (completada `v1.4.2`)
 
 #### Fases
 - F1: profiling de request estatico.

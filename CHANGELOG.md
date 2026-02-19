@@ -4,6 +4,12 @@ All notable project changes are documented in this file.
 
 The format follows a structure inspired by Keep a Changelog and semantic versioning.
 
+## [1.4.2] - 2026-02-19
+
+### Changed
+
+- Version bump to 1.4.2.
+
 ## [1.4.1] - 2026-02-19
 
 ### Highlights (v1.4.1)
@@ -11,9 +17,11 @@ The format follows a structure inspired by Keep a Changelog and semantic version
 - Completed HU 2.1 (`Fast path de estaticos en Node`).
 - Optimized static serving in `framework/router.js`:
   - Added warm-path static resolution cache (`route + accept-encoding`) to avoid repeated candidate resolution work.
-  - Added bounded metadata revalidation window for conditional requests to reduce repeated `fs.stat` pressure.
+  - Keeps strict conditional metadata revalidation so content changes are visible on reload without stale `304`.
   - Consolidated static header assembly and reused mime header maps.
   - Kept stream-based delivery for large assets and tuned `createReadStream` chunk size.
+- Added asset URL versioning in `framework/dipper.js` (`?v=size-mtime`) for local scripts/styles.
+- Updated `gulp dev` watch flow so JS/CSS recompiles also trigger template compilation and refresh asset URLs in HTML.
 - Added reproducible local benchmark:
   - New script: `npm run benchmark:static`.
   - New guide: `docs/benchmark-static.md`.
@@ -103,4 +111,5 @@ The format follows a structure inspired by Keep a Changelog and semantic version
 [1.3.4]: https://github.com/nalancer08/VanillaJet/releases/tag/v1.3.4
 [1.3.5]: https://github.com/nalancer08/VanillaJet/releases/tag/v1.3.5
 [1.3.6]: https://github.com/nalancer08/VanillaJet/releases/tag/v1.3.6
+[1.4.2]: https://github.com/nalancer08/VanillaJet/releases/tag/v1.4.2
 [1.4.1]: https://github.com/nalancer08/VanillaJet/releases/tag/v1.4.1

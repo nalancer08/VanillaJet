@@ -20,7 +20,6 @@ class Router {
     this.staticMetadataCache = new Map();
     this.staticResolutionCache = new Map();
     this.staticFileWatchers = new Map();
-    this.staticMetadataMaxAgeMs = 1000;
     this.staticStreamChunkSize = 128 * 1024;
     this.mimes = {
       'png': 'image/png',
@@ -170,10 +169,6 @@ class Router {
       return callback(null, cachedMetadata);
     }
 
-    if (cachedMetadata && forceRefresh && !obj.shouldRefreshConditionalMetadata(cachedMetadata)) {
-      return callback(null, cachedMetadata);
-    }
-
     fs.stat(filename, (err, stats) => {
       if (err || !stats.isFile()) {
         return callback(err || new Error('File not found'));
@@ -182,8 +177,7 @@ class Router {
       let metadata = {
         size: stats.size,
         lastModified: stats.mtime.toUTCString(),
-        etag: `W/"${stats.size}-${Math.floor(stats.mtimeMs)}"`,
-        cachedAt: Date.now()
+        etag: `W/"${stats.size}-${Math.floor(stats.mtimeMs)}"`
       };
 
       obj.staticMetadataCache.set(filename, metadata);
@@ -266,13 +260,6 @@ class Router {
   getStaticResolutionKey(route, acceptEncoding) {
     let normalizedEncodings = Array.isArray(acceptEncoding) ? acceptEncoding.join(',') : '';
     return `${route}|${normalizedEncodings}`;
-  }
-
-  shouldRefreshConditionalMetadata(metadata) {
-    if (!metadata || !metadata.cachedAt) {
-      return true;
-    }
-    return Date.now() - metadata.cachedAt > this.staticMetadataMaxAgeMs;
   }
 
   buildStaticHeaders(extHeader, candidates, contentEncoding, metadata) {
