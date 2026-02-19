@@ -1,0 +1,19 @@
+FROM node:20-alpine
+
+WORKDIR /app
+
+# Install dependencies first for better layer cache
+COPY package*.json ./
+RUN npm ci
+
+# Copy app source
+COPY . .
+
+# Build command should generate static output under /app/public
+# Replace with your app build script (for example: npm run build:vite)
+RUN npm run build:vite || npm run build:prod
+
+EXPOSE 8080
+
+# Replace with your actual backend start command
+CMD ["node", "index.js"]

@@ -8,7 +8,7 @@ Node.js framework for building SPA applications with a JS/CSS/HTML build pipelin
 
 - Version: `1.3.5`
 - Changelog: see [`CHANGELOG.md`](./CHANGELOG.md)
-- Improvement plan (performance and backward compatibility): see `ROADMAP.md`
+- Improvement plan (performance and backward compatibility): see `ROADMAP_INTEGRAL.md`
 
 ## Requirements
 
@@ -123,4 +123,5 @@ Behavior details:
 
 - Router: `docs/router.md`
 - Version history: [`CHANGELOG.md`](./CHANGELOG.md)
-- Roadmap and improvements: `ROADMAP.md`
+- Roadmap and improvements: `ROADMAP_INTEGRAL.md`
+- Deployment templates (nginx + docker): `docs/deployment/`

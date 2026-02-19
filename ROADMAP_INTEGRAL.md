@@ -89,7 +89,7 @@ Cada historia incluye su ciclo completo: fases, tareas, entregables, metricas, c
 #### Documentacion
 - `README.md`, `CHANGELOG.md`.
 
-### HU 1.4 - Hardening de bugs conocidos (en progreso)
+### HU 1.4 - Hardening de bugs conocidos (completada `v1.3.6`)
 
 #### Fases
 - F1: correccion.
@@ -244,6 +244,6 @@ Cada historia incluye su ciclo completo: fases, tareas, entregables, metricas, c
 
 ## Estado global
 
-- Completado: HU 1.1, HU 1.2, HU 1.3.
-- En progreso: HU 1.4, HU 2.1.
+- Completado: HU 1.1, HU 1.2, HU 1.3, HU 1.4.
+- En progreso: HU 2.1.
 - Pendiente: HU 2.2, HU 3.1, HU 4.1, HU 4.2.

@@ -76,7 +76,7 @@ The format follows a structure inspired by Keep a Changelog and semantic version
 ### Compatibility note
 
 - This version keeps the historical behavior expected by existing projects.
-- Future improvements are planned with backward compatibility in mind. See `ROADMAP.md`.
+- Future improvements are planned with backward compatibility in mind. See `ROADMAP_INTEGRAL.md`.
 
 [1.3.3]: https://github.com/nalancer08/VanillaJet/releases/tag/v1.3.3
 [1.3.2]: https://github.com/nalancer08/VanillaJet/releases/tag/v1.3.2

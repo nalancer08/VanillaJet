@@ -1,0 +1,23 @@
+version: "3.9"
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: docs/deployment/Dockerfile.app.example
+    container_name: vanillajet-app
+    environment:
+      - PORT=8080
+    expose:
+      - "8080"
+
+  nginx:
+    image: nginx:1.27-alpine
+    container_name: vanillajet-nginx
+    depends_on:
+      - app
+    ports:
+      - "80:80"
+    volumes:
+      - ./public:/app/public:ro
+      - ./docs/deployment/nginx.default.conf.example:/etc/nginx/conf.d/default.conf:ro
