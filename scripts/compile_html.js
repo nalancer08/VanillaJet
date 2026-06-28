@@ -9,9 +9,17 @@ let Functions = require('../framework/functions.js');
 let Dipper = require('../framework/dipper.js');
 let Config = require(processCwd() + '/config.js');
 
+// -- Resolve build environment (passed as argv by gulp). Supports env-keyed configs
+// (settings[env], e.g. 'qa'/'production') and the nested 'profile' shape. This is what
+// injects the correct api_url/environment into the page via the Dipper.
+let env = process.argv[2] || Config.profile || 'development';
+const ENV_ALIASES = { dev: 'development', prod: 'production', 'build:qa': 'qa', 'build:staging': 'staging', 'build:prod': 'production' };
+env = ENV_ALIASES[env] || env;
+
 // -- Init Dipper
 let settings = Config.settings;
-let opts = settings['profile'] || {},
+if (settings['shared']) { settings['shared']['environment'] = env; }
+let opts = settings[env] || settings['profile'] || {},
   shared = settings['shared'] || {};
 const dipper = new Dipper(opts, shared);
 
@@ -42,11 +50,11 @@ function main() {
   // -- Get home.html
   let homePageName = 'home.html';
   getHtmlFromPage(homePageName).then((htmlContent) => {
-    if (htmlContent) {      
-      // -- Compile the htmlContent
-      const compiledHtmlContent = compileTemplate(htmlContent);
-      // -- Divide content line by line
-      const htmlContentLines = compiledHtmlContent.split('\n');
+    if (htmlContent) {
+      // -- Divide the page content line by line. The page itself is NOT rendered through
+      // Nunjucks (it only holds `include::` directives); each included template IS rendered.
+      // Rendering the raw page content as a template name breaks with "template not found".
+      const htmlContentLines = htmlContent.split('\n');
       let lines = Array.from(htmlContentLines);
       // -- Iterate over each line
       for (let line of htmlContentLines) {

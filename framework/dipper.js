@@ -386,6 +386,37 @@ Dipper.prototype.includeManifest = function() {
 }
 
 /**
+ * Inline registration for the VanillaJet service worker.
+ * Returns '' unless settings.profile.enable_service_worker is true.
+ * Web-only by design: a consumer running inside a native WebView can set
+ * `window.__VJ_DISABLE_SW__ = true` before this runs to opt out and tear down
+ * any previously installed worker (WebViews get no benefit and stuck SWs are
+ * hard to recover there).
+ */
+Dipper.prototype.includeServiceWorker = function() {
+
+	const obj = this;
+	if (!obj.options || !obj.options.enable_service_worker) {
+		return '';
+	}
+
+	return `
+		<script>
+			(function () {
+				if (!('serviceWorker' in navigator)) { return; }
+				if (window.__VJ_DISABLE_SW__) {
+					navigator.serviceWorker.getRegistration()
+						.then(function (registration) { if (registration) { registration.unregister(); } })
+						.catch(function (error) { console.error(error); });
+					return;
+				}
+				navigator.serviceWorker.register('/sw.js')
+					.catch(function (error) { console.error(error); });
+			})();
+		</script>`;
+}
+
+/**
  * Setup Sentry for error reporting on production and qa environments.
  */
 Dipper.prototype.includeSentry = function() {

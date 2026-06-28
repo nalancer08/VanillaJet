@@ -23,16 +23,20 @@ class Server {
 
 	init(options, endpoints) {
 
-		let obj = this, 
-			settings = options.settings, 
-			opts = settings['profile'] || {}, 
-			shared = settings['shared'] || {}, 
+		let obj = this,
+			settings = options.settings,
+			// Resolve the active profile. Legacy consumers key settings by the active
+			// profile name (settings[options.profile], e.g. 'qa'); newer ones expose a
+			// single nested 'profile' object. Support both for backward compatibility.
+			opts = settings[options.profile] || settings['profile'] || {},
+			shared = settings['shared'] || {},
 			security = settings['security'] || {};
 
 		_.defaults(opts, {
 			https_server: false,
 			wsServer: false,
       enable_precompressed_negotiation: false,
+      enable_service_worker: false,
       request_timeout_ms: 30000,
       headers_timeout_ms: 35000,
       keep_alive_timeout_ms: 5000
@@ -70,8 +74,11 @@ class Server {
 	}
 
 	start() {
+		let boundPort = (this.httpx && this.httpx.address && this.httpx.address())
+			? this.httpx.address().port
+			: (process.env.PORT || this.options.port || 8080);
 		this.log('__________________  VanillaJet Server started  ___________________');
-		this.log(` >           Running on 0.0.0.0:${this.options.port}/           < `);
+		this.log(` >           Running on 0.0.0.0:${boundPort}/           < `);
 		this.log('------------------------------------------------------------------');
 	}
 
@@ -97,7 +104,13 @@ class Server {
     obj.httpx.requestTimeout = Number(obj.options.request_timeout_ms) || 30000;
     obj.httpx.headersTimeout = Number(obj.options.headers_timeout_ms) || 35000;
     obj.httpx.keepAliveTimeout = Number(obj.options.keep_alive_timeout_ms) || 5000;
-    obj.httpx.listen(obj.options.port || 8080);
+    // Honor process.env.PORT first so PaaS runtimes (Cloud Run, Heroku, …) that
+    // inject the listening port at runtime work without config changes. Use a
+    // nullish check so a deliberate port 0 (ephemeral) is preserved.
+    let port = (process.env.PORT !== undefined && process.env.PORT !== '')
+      ? process.env.PORT
+      : (obj.options.port !== undefined && obj.options.port !== null ? obj.options.port : 8080);
+    obj.httpx.listen(port);
   }
 
 	log(value) {

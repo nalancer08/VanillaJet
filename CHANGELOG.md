@@ -4,6 +4,52 @@ All notable project changes are documented in this file.
 
 The format follows a structure inspired by Keep a Changelog and semantic versioning.
 
+## [1.5.0] - 2026-06-27
+
+### Added
+
+- **Service worker support (opt-in)** — `settings.profile.enable_service_worker`.
+  - `framework/sw.template.js`: generic cache-first worker (precache + on-demand prefixes).
+  - `scripts/generate_sw.js` + Gulp task `generateServiceWorker`: generates `public/sw.js` at build time.
+    - Precache list = core bundles (`app.min.css`, `vanilla.min.js`, `core/vanillaJet.min.js`) + LOCAL resources enqueued by the Dipper + `service_worker.precache` extras (existing files only).
+    - Cache name is content-pinned (md5 of `path:size-mtime`), so any asset change rotates the cache; `activate()` purges stale caches.
+    - Matches use `{ ignoreSearch: true }` to stay compatible with fingerprinted (`?v=`) asset URLs.
+  - `framework/router.js`: serves `/sw.js` from root scope with `Service-Worker-Allowed: /` and `Cache-Control: no-cache` when enabled.
+  - `framework/dipper.js`: `includeServiceWorker()` inline registration helper (web-only; honors `window.__VJ_DISABLE_SW__` to opt out and tear down inside native WebViews).
+  - Config knobs: `service_worker.precache`, `service_worker.on_demand_prefixes`, `service_worker.cache_prefix`.
+
+### Fixed
+
+- **Build-time environment injection regression (backward compatibility):** `scripts/compile_html.js`
+  again resolves the build environment (passed by Gulp via `--env`, forwarded as argv) and reads
+  `settings[env]`, restoring correct `api_url`/`environment` injection (`includeEnvironment()`). The 1.4.x
+  rewrite read a literal `settings['profile']` and also rendered the page content as a template name,
+  producing `API_URL="undefined"` and `template not found` for 1.3.x-shaped configs. `gulpfile.js` now
+  forwards `--env` to both `compile_html.js` and `generate_sw.js`.
+- **Broken dependency removed:** dropped `zlib@1.0.5` from `dependencies`. The framework uses Node's
+  built-in `zlib` (core modules take precedence), and the npm package has a native `node-waf` build step
+  that fails on modern Node — it broke `npm install`/`npm ci` for consumers. Pure dead weight.
+- **CLI build commands regression (backward compatibility):** `bin.js` again handles
+  `build:qa`, `build:staging` and `build:prod` (they map to `gulp build --env <env>`). 1.3.x consumers
+  call `npx vanilla-jet build:<env>`; the 1.4.x CLI had dropped these, so the build silently did nothing.
+- **Profile resolution regression (backward compatibility):** `framework/server.js` now resolves
+  `settings[options.profile] || settings['profile']`. Legacy consumers (1.3.x) that key settings by the
+  active profile name (e.g. `qa`, `production`) again receive their profile options instead of `{}`.
+- **PaaS port binding:** server now honors `process.env.PORT` (Cloud Run / Heroku) before `settings.profile.port`.
+- **Ephemeral port (`port: 0`) preserved:** port selection uses a nullish check instead of `|| 8080`, so a
+  deliberate `0` binds an ephemeral port instead of falling back to `8080`.
+
+### Testing
+
+- Added a real test harness (`test/`, `node --test`, no new deps) wired to `npm test`:
+  router, dipper, config-shape resolution, static serving (`200`/`304`/`404`), and service worker
+  generation + serving.
+
+### Compatibility notes
+
+- Service worker is **off by default**; existing apps are unaffected until they opt in.
+- Profile-resolution fix is backward compatible with both the legacy and the nested config shapes.
+
 ## [1.4.3] - 2026-02-19
 
 ### Removed

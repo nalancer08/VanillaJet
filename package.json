@@ -1,6 +1,6 @@
 {
   "name": "vanilla-jet",
-  "version": "1.4.3",
+  "version": "1.5.0",
   "description": "VannilaJet framework",
   "main": "index.js",
   "bin": {
@@ -12,7 +12,7 @@
     "build:qa": "gulp build --env qa",
     "build:staging": "gulp build --env staging",
     "build:prod": "gulp build --env production",
-    "test": "node -e \"console.log('No automated tests configured yet')\"",
+    "test": "node --test test/*.test.js",
     "benchmark:static": "node ./scripts/benchmark-static.js"
   },
   "repository": {
@@ -40,7 +40,6 @@
     "nodemon": "3.1.10",
     "nunjucks": "3.2.4",
     "underscore": ">= 1.12.x",
-    "zlib": "1.0.5",
     "del": "^6.0.0",
     "gulp": "^4.0.2",
     "gulp-clean-css": "^4.3.0",

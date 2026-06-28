@@ -24,6 +24,11 @@ function getCwd() {
 const base = getCwd();
 const cssOrigin = `${getCwd()}/assets/styles/less/admin.less`;
 
+// Build environment (passed via `gulp build --env <env>`). Forwarded to the
+// HTML/SW generators so they resolve the matching profile (api_url, etc).
+const argv = minimist(process.argv.slice(2));
+const buildEnv = argv.env || 'development';
+
 // Clean tasks
 function cleanBuildJS() {
   return del([`${getCwd()}/public/scripts/vanilla.min.js`], { force: true });
@@ -113,7 +118,13 @@ function compressCss() {
 // Template compilation
 function compileTemplates() {
   return gulp.src('.')
-    .pipe(shell([`node scripts/compile_html.js`]));
+    .pipe(shell([`node scripts/compile_html.js ${buildEnv}`]));
+}
+
+// Service worker generation (opt-in via settings.profile.enable_service_worker)
+function generateServiceWorker() {
+  return gulp.src('.')
+    .pipe(shell([`node scripts/generate_sw.js ${buildEnv}`]));
 }
 
 // Watch task
@@ -124,7 +135,8 @@ function watchFiles(cb) {
   watch([`${base}/assets/styles/less/**/*.less`], gulp.series(
     buildLess,
     compressCss,
-    compileTemplates
+    compileTemplates,
+    generateServiceWorker
   ));
 
   // Watch HTML files
@@ -140,7 +152,8 @@ function watchFiles(cb) {
     concatJs,
     cleanMinified,
     compressJs,
-    compileTemplates
+    compileTemplates,
+    generateServiceWorker
   ));
   
   cb();
@@ -154,7 +167,8 @@ const build = gulp.series(
   cleanMinified,
   buildLess,
   compileTemplates,
-  gulp.parallel(compressJs, compressCss)
+  gulp.parallel(compressJs, compressCss),
+  generateServiceWorker
 );
 
 const dev = gulp.series(
@@ -171,6 +185,7 @@ exports.concatJs = concatJs;
 exports.compressJs = compressJs;
 exports.compressCss = compressCss;
 exports.compileTemplates = compileTemplates;
+exports.generateServiceWorker = generateServiceWorker;
 exports.build = build;
 exports.dev = dev;
 exports.default = dev; 

@@ -41,6 +41,7 @@ class Router {
     this.compressionMimes = [ 'css', 'js' ];
     this.compressionFiles = [ 'vanilla.min.js', 'app.min.css' ];
     this.enablePrecompressedNegotiation = Boolean(server?.options?.enable_precompressed_negotiation);
+    this.enableServiceWorker = Boolean(server?.options?.enable_service_worker);
 	}
 
 	routeToRegExp(route) {
@@ -99,10 +100,15 @@ class Router {
 					}
 				});
 
+				// -- Service worker: served from root scope so it can control the whole origin
+				if (!handled && !isMatch && obj.enableServiceWorker && request.path === '/sw.js') {
+					return obj.serveServiceWorker(res);
+				}
+
 				// -- Check static files
 				if (!handled && !isMatch) {
 
-					let ext = path.extname(request.path).replace('.', ''), 
+					let ext = path.extname(request.path).replace('.', ''),
             extHandled = false, 
             extHeader = {};
 					
@@ -367,6 +373,35 @@ class Router {
 
 	getDefaultRoute() {
 		return this.defaultRoute;
+	}
+
+	serveServiceWorker(res) {
+		let obj = this;
+		let filename = path.join(obj.staticBasePath, 'public', 'sw.js');
+		fs.stat(filename, (err, stats) => {
+			if (err || !stats.isFile()) {
+				res.writeHead(404);
+				return res.end();
+			}
+			res.writeHead(200, {
+				'Content-Type': 'text/javascript; charset=utf-8',
+				// Allow the SW (served at /sw.js) to control the entire origin.
+				'Service-Worker-Allowed': '/',
+				// Keep the SW script itself fresh so updates roll out promptly.
+				'Cache-Control': 'no-cache'
+			});
+			let stream = fs.createReadStream(filename);
+			stream.on('error', () => {
+				res.writeHead(500);
+				res.end('Server Error');
+			});
+			res.on('close', () => {
+				if (!res.writableEnded) {
+					stream.destroy();
+				}
+			});
+			stream.pipe(res);
+		});
 	}
 
 	onNotFound(response) {
