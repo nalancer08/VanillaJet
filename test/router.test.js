@@ -48,6 +48,14 @@ test('isProtectedFile: blocks framework/external/node_modules and top-level file
   assert.equal(router.isProtectedFile('/public/scripts/vanilla.min.js'), false);
 });
 
+test('mimes: serves common web fonts and icons', () => {
+  const router = makeRouter();
+  assert.equal(router.mimes['woff2'], 'font/woff2');
+  assert.equal(router.mimes['woff'], 'font/woff');
+  assert.ok(router.mimes['eot']);
+  assert.ok(router.mimes['ico']);
+});
+
 test('supportsEncoding: honors q-values and array shape', () => {
   const router = makeRouter();
   assert.equal(router.supportsEncoding(['gzip'], 'gzip'), true);

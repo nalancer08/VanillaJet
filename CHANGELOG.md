@@ -4,6 +4,14 @@ All notable project changes are documented in this file.
 
 The format follows a structure inspired by Keep a Changelog and semantic versioning.
 
+## [1.5.4] - 2026-06-28
+
+### Fixed
+
+- Added missing static MIME types so self-hosted web fonts and icons serve correctly:
+  `woff`, `woff2`, `eot`, `ico`. Previously `.woff2`/`.woff` returned 404 (only `ttf` was mapped),
+  forcing font fallbacks and wasted requests.
+
 ## [1.5.3] - 2026-06-28
 
 ### Changed

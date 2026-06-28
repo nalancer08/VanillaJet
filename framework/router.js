@@ -31,6 +31,10 @@ class Router {
       'svg': 'image/svg+xml',
       'ttf': 'application/x-font-ttf',
       'otf': 'application/x-font-opentype',
+      'woff': 'font/woff',
+      'woff2': 'font/woff2',
+      'eot': 'application/vnd.ms-fontobject',
+      'ico': 'image/x-icon',
       'pdf': 'application/pdf',
       'json': 'application/json'
     };
