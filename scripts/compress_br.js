@@ -1,6 +1,8 @@
-// Brotli-precompresses the build outputs so the server can negotiate `.br`
-// (smaller than gzip). Safe + additive: the framework only serves `.br` when the
-// client sends `Accept-Encoding: br`; otherwise it falls back to `.gz`/original.
+// Precompresses build outputs to .gz + .br so the server can serve any self-hosted
+// asset (vendor libs, plugins, bundles, styles, pages) compressed via Accept-Encoding
+// negotiation. Without this, self-hosting a large library would ship it uncompressed.
+// Safe + additive: clients that don't accept br get gzip; those that accept neither
+// get the original (resolveFirstAvailableStaticFile falls back).
 
 const fs = require('fs');
 const path = require('path');
@@ -14,33 +16,44 @@ function processCwd() {
 }
 
 const root = processCwd();
+const DIRS = ['public/scripts', 'public/styles', 'public/pages'];
+const COMPRESSIBLE = new Set(['.js', '.css', '.html']);
+const BROTLI_OPTIONS = { params: { [zlib.constants.BROTLI_PARAM_QUALITY]: 11 } };
 
-// Same files the framework negotiates `.br` for (router static + response.render).
-const TARGETS = [
-	'public/scripts/vanilla.min.js',
-	'public/styles/app.min.css',
-	'public/pages/home.html'
-];
-
-const BROTLI_OPTIONS = {
-	params: {
-		[zlib.constants.BROTLI_PARAM_QUALITY]: 11,
-		[zlib.constants.BROTLI_PARAM_SIZE_HINT]: 0
-	}
-};
-
-TARGETS.forEach((relativePath) => {
-	const filePath = path.join(root, relativePath);
+function walk(dir, out) {
+	let entries;
 	try {
-		const stats = fs.statSync(filePath);
-		if (!stats.isFile()) {
-			return;
-		}
-		const input = fs.readFileSync(filePath);
-		const compressed = zlib.brotliCompressSync(input, BROTLI_OPTIONS);
-		fs.writeFileSync(filePath + '.br', compressed);
-		console.log(`VanillaJet - brotli: ${relativePath}.br (${input.length} -> ${compressed.length} B)`);
+		entries = fs.readdirSync(dir, { withFileTypes: true });
 	} catch (err) {
-		// File not present (feature not built yet) — skip silently.
+		return;
+	}
+	for (const entry of entries) {
+		const full = path.join(dir, entry.name);
+		if (entry.isDirectory()) {
+			walk(full, out);
+		} else if (
+			COMPRESSIBLE.has(path.extname(entry.name)) &&
+			!entry.name.endsWith('.gz') &&
+			!entry.name.endsWith('.br')
+		) {
+			out.push(full);
+		}
+	}
+}
+
+const files = [];
+DIRS.forEach((dir) => walk(path.join(root, dir), files));
+
+let count = 0;
+files.forEach((file) => {
+	try {
+		const input = fs.readFileSync(file);
+		fs.writeFileSync(file + '.gz', zlib.gzipSync(input, { level: 9 }));
+		fs.writeFileSync(file + '.br', zlib.brotliCompressSync(input, BROTLI_OPTIONS));
+		count = count + 1;
+	} catch (err) {
+		// Skip unreadable files; never fail the build over compression.
 	}
 });
+
+console.log(`VanillaJet - precompressed ${count} assets (.gz + .br)`);

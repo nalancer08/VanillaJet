@@ -4,6 +4,22 @@ All notable project changes are documented in this file.
 
 The format follows a structure inspired by Keep a Changelog and semantic versioning.
 
+## [1.5.3] - 2026-06-28
+
+### Changed
+
+- **Static compression now applies to ALL compressible assets, not just the app bundle.**
+  `framework/router.js` negotiates `.br`/`.gz` for any `css`/`js` request that has a precompressed
+  sibling (falling back to the original otherwise) — previously only `vanilla.min.js`/`app.min.css`.
+  This makes self-hosted vendor libraries serve gzip/brotli instead of uncompressed.
+- `scripts/compress_br.js` now walks `public/scripts`, `public/styles`, `public/pages` and emits
+  `.gz` + `.br` for every `.js`/`.css`/`.html` (was: only three named files).
+
+### Why
+
+- Self-hosting third-party libs (to cut CDN origins) only helps if they're served compressed;
+  otherwise a large lib (e.g. a 369 KB bundle) would ship uncompressed and regress vs the CDN.
+
 ## [1.5.2] - 2026-06-28
 
 ### Added

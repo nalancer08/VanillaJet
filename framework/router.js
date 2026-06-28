@@ -199,7 +199,11 @@ class Router {
   getStaticCandidates(request, ext, filename) {
     let obj = this;
     let candidates = [{ filename: filename, contentEncoding: '' }];
-    let isCompressible = obj.compressionMimes.includes(ext) && obj.compressionFiles.includes(path.basename(filename));
+    // Any compressible type can be served precompressed; resolveFirstAvailableStaticFile
+    // falls back to the original when a .br/.gz sibling doesn't exist. This lets ALL
+    // self-hosted assets (vendor libs, plugins, …) be served gzip/brotli, not just the
+    // app bundle — otherwise self-hosting a large lib would ship it uncompressed.
+    let isCompressible = obj.compressionMimes.includes(ext);
     if (!isCompressible) {
       return candidates;
     }
