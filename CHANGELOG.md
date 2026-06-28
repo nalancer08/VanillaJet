@@ -4,6 +4,15 @@ All notable project changes are documented in this file.
 
 The format follows a structure inspired by Keep a Changelog and semantic versioning.
 
+## [1.5.5] - 2026-06-28
+
+### Changed
+
+- **Fingerprinted assets are now cached immutably.** Static requests carrying a `?v=` (the
+  `?v=size-mtime` fingerprint from `dipper.versionedUrl`) are served `Cache-Control: public,
+  max-age=31536000, immutable`; non-versioned assets keep `no-cache, must-revalidate`. This eliminates
+  per-asset revalidation round-trips for clients without the service worker (notably native WebViews).
+
 ## [1.5.4] - 2026-06-28
 
 ### Fixed

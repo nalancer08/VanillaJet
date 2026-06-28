@@ -78,6 +78,17 @@ test('static asset is served with caching validators', async () => {
   assert.ok(res.headers.get('last-modified'), 'Last-Modified should be present');
 });
 
+test('fingerprinted (?v=) asset is cached immutable; plain asset revalidates', async () => {
+  const versioned = await fetch(`${baseUrl}/public/scripts/test.min.js?v=123-456`);
+  await versioned.arrayBuffer();
+  assert.equal(versioned.status, 200);
+  assert.match(versioned.headers.get('cache-control') || '', /immutable/);
+
+  const plain = await fetch(`${baseUrl}/public/scripts/test.min.js`);
+  await plain.arrayBuffer();
+  assert.match(plain.headers.get('cache-control') || '', /no-cache/);
+});
+
 test('conditional request returns 304 when ETag matches', async () => {
   const first = await fetch(`${baseUrl}/public/scripts/test.min.js`);
   const etag = first.headers.get('etag');

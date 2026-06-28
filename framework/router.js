@@ -139,7 +139,10 @@ class Router {
               }
 
               let metadata = staticFile.metadata;
-              let staticHeaders = obj.buildStaticHeaders(extHeader, staticCandidates, staticFile.contentEncoding, metadata);
+              // Fingerprinted assets (requested with ?v=size-mtime) are safe to cache forever:
+              // any content change produces a new URL. Everything else keeps revalidation.
+              let isImmutable = Boolean(request.get('v'));
+              let staticHeaders = obj.buildStaticHeaders(extHeader, staticCandidates, staticFile.contentEncoding, metadata, isImmutable);
 
               if (obj.isNotModified(req, metadata)) {
                 let notModifiedHeaders = Object.assign({}, staticHeaders);
@@ -280,7 +283,7 @@ class Router {
     return `${route}|${normalizedEncodings}`;
   }
 
-  buildStaticHeaders(extHeader, candidates, contentEncoding, metadata) {
+  buildStaticHeaders(extHeader, candidates, contentEncoding, metadata, isImmutable) {
     let staticHeaders = Object.assign({}, extHeader);
     if (contentEncoding) {
       staticHeaders['Content-Encoding'] = contentEncoding;
@@ -292,8 +295,15 @@ class Router {
     staticHeaders['Content-Length'] = metadata.size;
     staticHeaders['ETag'] = metadata.etag;
     staticHeaders['Last-Modified'] = metadata.lastModified;
-    // Force revalidation to keep clients fresh without hard reload.
-    staticHeaders['Cache-Control'] = 'no-cache, must-revalidate';
+    if (isImmutable) {
+      // Fingerprinted URL (?v=): cache for a year and skip revalidation entirely.
+      // This is the big win for clients without the service worker (e.g. native WebViews),
+      // which otherwise revalidate every asset on every load.
+      staticHeaders['Cache-Control'] = 'public, max-age=31536000, immutable';
+    } else {
+      // Non-versioned assets: force revalidation to keep clients fresh without a hard reload.
+      staticHeaders['Cache-Control'] = 'no-cache, must-revalidate';
+    }
     return staticHeaders;
   }
 
