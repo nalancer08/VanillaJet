@@ -4,6 +4,21 @@ All notable project changes are documented in this file.
 
 The format follows a structure inspired by Keep a Changelog and semantic versioning.
 
+## [1.5.1] - 2026-06-28
+
+### Changed
+
+- **Service worker precache is now fully derived from `vanillaJet.package.json`.** `scripts/generate_sw.js`
+  reads the Dipper's full local registry (`coreDependencies` + `dependencies` + `styles` that resolve to
+  `/public/...`) instead of only the enqueued subset, so first-party assets like `coreLib/*` are precached
+  automatically. Consumers no longer need to hardcode a `service_worker.precache` list.
+- Added `service_worker.precache_exclude` (opt-out by path) for declared assets you don't want cached.
+  `service_worker.precache` remains as an optional escape hatch for extras not declared in the package file.
+
+### Compatibility notes
+
+- Backward compatible: an explicit `service_worker.precache` still works (merged with the derived set).
+
 ## [1.5.0] - 2026-06-27
 
 ### Added

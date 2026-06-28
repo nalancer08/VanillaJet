@@ -63,9 +63,11 @@ function isLocalPublicPath(url) {
 	return typeof url === 'string' && url.startsWith('/public/') && !url.startsWith('//');
 }
 
-// Best-effort: read the resources the Dipper enqueues for this app, so consumer
-// plugins/styles get precached automatically. Any failure falls back to core only.
-function deriveEnqueuedAssets(root, opts, shared) {
+// Source of truth = vanillaJet.package.json. We hydrate the Dipper and read its full
+// registry (coreDependencies + dependencies + styles), keeping every LOCAL resource.
+// This way the precache list is derived from the declared deps, with no raw paths in
+// the consumer config. Any failure falls back to core only.
+function deriveLocalAssets(root, opts, shared) {
 	try {
 		const Dipper = require('../framework/dipper.js');
 		const Functions = require('../framework/functions.js');
@@ -73,16 +75,16 @@ function deriveEnqueuedAssets(root, opts, shared) {
 		Functions.hydrate(dipper);
 
 		const assets = [];
-		const collect = (registry, enqueued) => {
-			Object.keys(enqueued || {}).forEach((name) => {
+		const collect = (registry) => {
+			Object.keys(registry || {}).forEach((name) => {
 				const entry = registry[name];
 				if (entry && isLocalPublicPath(entry.resource)) {
 					assets.push(stripQuery(entry.resource));
 				}
 			});
 		};
-		collect(dipper.styles, dipper.enqueued_styles);
-		collect(dipper.scripts, dipper.enqueued_scripts);
+		collect(dipper.styles);
+		collect(dipper.scripts);
 		return assets;
 	} catch (err) {
 		return [];
@@ -90,15 +92,18 @@ function deriveEnqueuedAssets(root, opts, shared) {
 }
 
 function buildPrecacheList(root, opts, shared) {
-	const configured = (opts.service_worker && Array.isArray(opts.service_worker.precache))
-		? opts.service_worker.precache
-		: [];
+	const sw = opts.service_worker || {};
+	// `precache` = optional extras NOT declared in vanillaJet.package.json.
+	const configured = Array.isArray(sw.precache) ? sw.precache : [];
+	// `precache_exclude` = opt-out for declared-but-don't-cache assets (heavy/rare).
+	const exclude = (Array.isArray(sw.precache_exclude) ? sw.precache_exclude : []).map(stripQuery);
 
 	const candidates = CORE_PRECACHE
-		.concat(deriveEnqueuedAssets(root, opts, shared))
+		.concat(deriveLocalAssets(root, opts, shared))
 		.concat(configured)
 		.map(stripQuery)
-		.filter(isLocalPublicPath);
+		.filter(isLocalPublicPath)
+		.filter((assetPath) => !exclude.includes(assetPath));
 
 	const seen = new Set();
 	const precache = [];
