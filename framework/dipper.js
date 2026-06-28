@@ -307,7 +307,9 @@ Dipper.prototype.includeScript = function(script) {
 			//type = item['cdn'] ? "" : 'type=\"text/javascript\"',
 			resource = item['resource'],
 			isAsync = item['async'] ? ' async' : '',
-			defer = item['defer'] ? ' defer' : '',
+			// Honor a per-script defer flag, or the global settings.profile.defer_scripts
+			// (applied to non-async scripts so they don't block parsing; order preserved).
+			defer = (item['defer'] || (obj.options && obj.options.defer_scripts && !item['async'])) ? ' defer' : '',
 			origin = item['origin'] != '' ? ' crossorigin=\"' + item['origin'] + '\"' : '',
 			integrity = item['integrity'] != '' ? ' integrity=\"' + item['integrity'] + '\"' : '';
 		

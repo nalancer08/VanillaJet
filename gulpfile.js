@@ -127,6 +127,12 @@ function generateServiceWorker() {
     .pipe(shell([`node scripts/generate_sw.js ${buildEnv}`]));
 }
 
+// Brotli precompression of build outputs (served via Accept-Encoding negotiation)
+function compressBr() {
+  return gulp.src('.')
+    .pipe(shell([`node scripts/compress_br.js`]));
+}
+
 // Watch task
 function watchFiles(cb) {
   livereload.listen();
@@ -168,7 +174,8 @@ const build = gulp.series(
   buildLess,
   compileTemplates,
   gulp.parallel(compressJs, compressCss),
-  generateServiceWorker
+  generateServiceWorker,
+  compressBr
 );
 
 const dev = gulp.series(
@@ -186,6 +193,7 @@ exports.compressJs = compressJs;
 exports.compressCss = compressCss;
 exports.compileTemplates = compileTemplates;
 exports.generateServiceWorker = generateServiceWorker;
+exports.compressBr = compressBr;
 exports.build = build;
 exports.dev = dev;
 exports.default = dev; 

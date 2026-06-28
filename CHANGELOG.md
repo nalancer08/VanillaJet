@@ -4,6 +4,17 @@ All notable project changes are documented in this file.
 
 The format follows a structure inspired by Keep a Changelog and semantic versioning.
 
+## [1.5.2] - 2026-06-28
+
+### Added
+
+- **Brotli precompression** of build outputs (`scripts/compress_br.js` + Gulp `compressBr`): generates
+  `.br` for `vanilla.min.js`, `app.min.css` and `public/pages/home.html`. The server already negotiates
+  `.br -> .gz -> original` when `settings.profile.enable_precompressed_negotiation` is true and the client
+  sends `Accept-Encoding: br`. Additive and safe: clients that don't accept brotli keep getting gzip.
+- **`settings.profile.defer_scripts`** (default `false`): when enabled, `dipper.includeScript()` adds
+  `defer` to non-async scripts so they don't block HTML parsing (document order preserved). Opt-in.
+
 ## [1.5.1] - 2026-06-28
 
 ### Changed
