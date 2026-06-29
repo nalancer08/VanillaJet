@@ -38,6 +38,7 @@ class Server {
       enable_precompressed_negotiation: false,
       enable_service_worker: false,
       defer_scripts: false,
+      static_cache_max_age: 0,
       request_timeout_ms: 30000,
       headers_timeout_ms: 35000,
       keep_alive_timeout_ms: 5000

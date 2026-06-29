@@ -4,6 +4,21 @@ All notable project changes are documented in this file.
 
 The format follows a structure inspired by Keep a Changelog and semantic versioning.
 
+## [1.6.1] - 2026-06-29
+
+### Security
+
+- **Removed unused dependencies that carried known vulnerabilities:** `jsrsasign` (multiple high/critical
+  crypto advisories), `jwt-simple`, `blueimp-md5`, `js-beautify`, and `nodemon`. None were used by the
+  framework; this drops a large vulnerability + install-size footprint for consumers.
+
+### Added
+
+- **`settings.profile.static_cache_max_age`** (seconds, default `0`): sets `Cache-Control: public, max-age=N`
+  for NON-versioned static assets (images, fonts, animation JSON…), so they are reused across references
+  and reloads instead of revalidating every time. Versioned (`?v=`) assets stay `immutable`; `0` keeps the
+  previous `no-cache` behavior. Pairs with the service worker for clients without it (e.g. WebViews).
+
 ## [1.6.0] - 2026-06-29
 
 ### Added

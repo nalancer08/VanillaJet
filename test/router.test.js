@@ -48,6 +48,18 @@ test('isProtectedFile: blocks framework/external/node_modules and top-level file
   assert.equal(router.isProtectedFile('/public/scripts/vanilla.min.js'), false);
 });
 
+test('buildStaticHeaders: immutable for ?v=, max-age when configured, else no-cache', () => {
+  const meta = { size: 10, etag: 'W/"x"', lastModified: 'Mon, 01 Jan 2024 00:00:00 GMT' };
+  const plain = makeRouter();
+  assert.match(plain.buildStaticHeaders({}, [], '', meta, true)['Cache-Control'], /immutable/);
+  assert.match(plain.buildStaticHeaders({}, [], '', meta, false)['Cache-Control'], /no-cache/);
+
+  const cached = new Router({ options: { static_cache_max_age: 3600 } });
+  assert.match(cached.buildStaticHeaders({}, [], '', meta, false)['Cache-Control'], /max-age=3600/);
+  // Versioned still wins over max-age.
+  assert.match(cached.buildStaticHeaders({}, [], '', meta, true)['Cache-Control'], /immutable/);
+});
+
 test('mimes: serves common web fonts and icons', () => {
   const router = makeRouter();
   assert.equal(router.mimes['woff2'], 'font/woff2');

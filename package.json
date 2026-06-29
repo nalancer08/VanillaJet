@@ -1,6 +1,6 @@
 {
   "name": "vanilla-jet",
-  "version": "1.6.0",
+  "version": "1.6.1",
   "description": "VannilaJet framework",
   "main": "index.js",
   "bin": {
@@ -30,14 +30,9 @@
   },
   "homepage": "https://github.com/nalancer08/VanillaJet#readme",
   "dependencies": {
-    "blueimp-md5": "2.19.0",
     "chalk": "4.1.2",
     "html-minifier-terser": "7.2.0",
-    "js-beautify": "1.15.4",
-    "jsrsasign": "11.1.0",
-    "jwt-simple": "0.5.6",
     "minimist": "1.2.8",
-    "nodemon": "3.1.10",
     "nunjucks": "3.2.4",
     "underscore": ">= 1.12.x",
     "del": "^6.0.0",

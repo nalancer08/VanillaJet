@@ -46,6 +46,10 @@ class Router {
     this.compressionFiles = [ 'vanilla.min.js', 'app.min.css' ];
     this.enablePrecompressedNegotiation = Boolean(server?.options?.enable_precompressed_negotiation);
     this.enableServiceWorker = Boolean(server?.options?.enable_service_worker);
+    // Cache-Control max-age (seconds) for NON-versioned static assets (images, fonts,
+    // animation JSON…). Lets the browser reuse them across references/reloads instead of
+    // revalidating each time. Versioned (?v=) assets stay immutable; 0 keeps no-cache.
+    this.staticCacheMaxAge = Number(server?.options?.static_cache_max_age) || 0;
 	}
 
 	routeToRegExp(route) {
@@ -284,6 +288,7 @@ class Router {
   }
 
   buildStaticHeaders(extHeader, candidates, contentEncoding, metadata, isImmutable) {
+    let obj = this;
     let staticHeaders = Object.assign({}, extHeader);
     if (contentEncoding) {
       staticHeaders['Content-Encoding'] = contentEncoding;
@@ -300,8 +305,13 @@ class Router {
       // This is the big win for clients without the service worker (e.g. native WebViews),
       // which otherwise revalidate every asset on every load.
       staticHeaders['Cache-Control'] = 'public, max-age=31536000, immutable';
+    } else if (obj.staticCacheMaxAge > 0) {
+      // Non-versioned assets (images, fonts, animation JSON…): cache for a while so they
+      // aren't re-fetched on every reference/reload. ETag/Last-Modified still allow a cheap
+      // 304 after expiry. Pick this when assets change rarely (e.g. a few days/weeks).
+      staticHeaders['Cache-Control'] = `public, max-age=${obj.staticCacheMaxAge}`;
     } else {
-      // Non-versioned assets: force revalidation to keep clients fresh without a hard reload.
+      // Default: force revalidation to keep clients fresh without a hard reload.
       staticHeaders['Cache-Control'] = 'no-cache, must-revalidate';
     }
     return staticHeaders;
