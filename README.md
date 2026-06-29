@@ -1,19 +1,23 @@
 # VanillaJet
 
-Node.js framework for building SPA applications with a JS/CSS/HTML build pipeline, HTTP/HTTPS server, internal router, and template rendering utilities.
+Node.js framework for building SPA applications: a Gulp build pipeline (JS/CSS/HTML), a lightweight
+HTTP/HTTPS server, an internal router, and template/resource utilities — with first-class, opt-in
+performance features (Brotli, immutable caching, a generated service worker, deferred scripts, and
+template externalization).
 
 ![VanillaJet logo](https://github.com/nalancer08/App-Builders/blob/master/Logos/logo_monocromatico_horizontal_.png)
 
 ## Current version
 
-- Version: `1.4.3`
-- Changelog: see [`CHANGELOG.md`](./CHANGELOG.md)
-- Improvement plan (performance and backward compatibility): see `ROADMAP_INTEGRAL.md`
+- Version: `1.6.0`
+- Changelog: [`CHANGELOG.md`](./CHANGELOG.md)
+- **Full project docs (architecture, runtime, build, deployment, perf): [`master.md`](./master.md)**
+- Roadmap: [`ROADMAP_INTEGRAL.md`](./ROADMAP_INTEGRAL.md)
 
 ## Requirements
 
-- Node.js `>=16` recommended
-- npm `>=8`
+- Node.js `>= 18` (tested on 24)
+- npm `>= 8`
 
 ## Installation
 
@@ -21,124 +25,110 @@ Node.js framework for building SPA applications with a JS/CSS/HTML build pipelin
 npm install vanilla-jet
 ```
 
-If you are working in this local repository:
-
-```bash
-npm install
-```
-
 ## Quick start
 
-### 1) Export the server from your project
-
 ```js
+// index.js
 const { Server } = require('vanilla-jet');
-```
+const Config = require('./config');
 
-### 2) Define endpoints (classes)
-
-Each endpoint should expose a `name` and register routes with the router in the constructor.
-
-```js
 class AppEndpoint {
   constructor(router) {
     this.name = 'AppEndpoint';
-    router.addRoute('get', '/', 'AppEndpoint.index');
+    router.setDefaultRoute('home');                  // maps "/"
+    router.addRoute('get', '/home', 'AppEndpoint.home');
   }
-
-  index(request, response) {
-    response.setBody('Hello VanillaJet');
-    response.respond();
+  home(request, response) {
+    response.render(request, 'home.html');           // streams public/pages/home.html
+    return true;                                      // <- mark the request as handled
   }
 }
-```
-
-### 3) Start the server
-
-```js
-const { Server } = require('vanilla-jet');
-const Config = require('./config');
 
 new Server(Config, [AppEndpoint]).start();
 ```
 
-## Available commands
+## Configuration (`config.js`)
 
-From this repository:
-
-- `npm run setup`: generates a base `vanillaJet.package.json` if it does not exist.
-- `npm run dev`: build + watcher for development.
-- `npm run build:qa`: build for QA.
-- `npm run build:staging`: build for staging.
-- `npm run build:prod`: build for production.
-- `npm run benchmark:static`: runs reproducible static serving benchmark (cold/warm).
-
-As CLI (`bin.js`):
-
-- `npx vanilla-jet setup`
-- `npx vanilla-jet dev`
-- `npx vanilla-jet build`
-
-## Expected consumer project structure
-
-VanillaJet expects a structure similar to:
-
-- `assets/pages/home.html`
-- `assets/templates/**/*.html`
-- `assets/scripts/**/*.js`
-- `assets/styles/less/admin.less`
-- `public/` (compiled output)
-- `config.js`
-- `vanillaJet.package.json`
-
-## Build pipeline (summary)
-
-Gulp-based pipeline (no Grunt):
-
-- Minifies JS and concatenates into `public/scripts/vanilla.min.js`
-- Compiles LESS and generates `public/styles/app.min.css`
-- Compiles templates and generates `public/pages/home.html`
-- Generates `.gz` versions of JS/CSS/HTML for compressed delivery
-
-## Compression negotiation (optional)
-
-You can enable precompressed static negotiation from `settings.profile`:
+Two shapes are supported (both resolved automatically):
 
 ```js
+// Legacy (keyed by active profile name, selected with `--p qa`)
 module.exports = {
+  profile: process.argv... ,                 // 'development' | 'qa' | 'production'
   settings: {
-    profile: {
-      // Enables priority: .br -> .gz -> original file
-      enable_precompressed_negotiation: true
-    }
+    development: { port: 1234, api_url: '...' },
+    qa:          { port: 443,  api_url: '...' },
+    production:  { port: 443,  api_url: '...' },
+    shared:   { site_name: 'My App', environment: 'qa', sentry: {...} },
+    security: { pass_salt: '...', token_salt: '...' }
   }
 };
+
+// Nested (single profile)
+module.exports = { settings: { profile: { port: 8080, api_url: '...' }, shared: {...}, security: {...} } };
 ```
 
-Behavior details:
+### Profile options (all optional)
 
-- Default (`false`): keeps existing gzip behavior for supported static assets.
-- Enabled (`true`): if client accepts Brotli, server tries `.br` first.
-- Safe fallback: if `.br` or `.gz` does not exist, server serves the original file.
-- HTML rendering (`response.render`) also uses safe runtime fallback for precompressed templates (`.br`/`.gz`/original).
+| Option | Default | What it does |
+|---|---|---|
+| `port` | `8080` | Listen port. `process.env.PORT` wins (Cloud Run/Heroku). |
+| `enable_precompressed_negotiation` | `false` | Serve `.br` → `.gz` → original via `Accept-Encoding`. |
+| `enable_service_worker` | `false` | Generate + serve a cache-first service worker. **Recommended: on in prod/qa, off in dev.** |
+| `service_worker` | — | `{ cache_prefix, on_demand_prefixes, precache, precache_exclude }`. Precache is auto-derived from `vanillaJet.package.json`. |
+| `defer_scripts` | `false` | Add `defer` to non-async scripts so they don't block parsing. |
+| `externalize_templates` | `false` | Move `<script type="text/template">` blocks out of the page into a cacheable `public/scripts/templates.js`. |
+| `request_timeout_ms` / `headers_timeout_ms` / `keep_alive_timeout_ms` | `30000` / `35000` / `5000` | Defensive server timeouts. |
+| `https_server` / `self_managed_certs` | `false` | HTTP/2 with self-managed `key`/`cert`. |
 
-## Static performance notes (HU 2.1)
+## Commands
 
-Static serving includes a warm-path optimization focused on Node runtime latency:
+CLI (`bin.js`): `npx vanilla-jet setup | dev | build | build:qa | build:staging | build:prod`
 
-- Reuses static resolution for repeated requests (`route + accept-encoding`).
-- Keeps conditional revalidation (`ETag`/`Last-Modified`) strict so reload reflects changes immediately.
-- Keeps streaming strategy for large assets (`fs.createReadStream`) with tuned chunk size.
-- Preserves conditional cache behavior (`ETag`/`Last-Modified` + `304`) and precompressed fallback contract.
+From this repo: `npm run dev` · `npm run build:prod` · `npm test` · `npm run benchmark:static`
 
-Benchmark guide:
+## Expected consumer structure
 
-- [`docs/benchmark-static.md`](./docs/benchmark-static.md)
+```
+assets/pages/home.html · assets/templates/**/*.html · assets/scripts/**/*.js · assets/styles/less/admin.less
+config.js · vanillaJet.package.json · public/ (build output)
+```
 
-## Additional documentation
+## Build pipeline (Gulp)
 
-- Router: `docs/router.md`
-- Benchmark: [`docs/benchmark-static.md`](./docs/benchmark-static.md)
-- Version history: [`CHANGELOG.md`](./CHANGELOG.md)
-- Roadmap and improvements: `ROADMAP_INTEGRAL.md`
-- Deployment templates (nginx + docker): `docs/deployment/`
+- Minifies + concatenates JS → `public/scripts/vanilla.min.js`
+- Compiles LESS → `public/styles/app.min.css`
+- Compiles templates → `public/pages/home.html` (+ optional `templates.js`)
+- Precompresses every `.js`/`.css`/`.html` to `.gz` + `.br`
+- Generates the service worker (when enabled)
+
+## Performance features (opt-in)
+
+- **Brotli + gzip** precompression with `Accept-Encoding` negotiation and safe fallback.
+- **Immutable caching**: fingerprinted assets (`?v=size-mtime`) are served `Cache-Control: public,
+  max-age=31536000, immutable`; HTML and unversioned assets stay `no-cache`. Big win for clients
+  without the service worker (e.g. native WebViews).
+- **Service worker** (cache-first), precache auto-derived from `vanillaJet.package.json`, content-pinned
+  cache name, `ignoreSearch` for fingerprinted URLs, and an inline registration helper
+  (`dipper.includeServiceWorker()`, web-only with a `window.__VJ_DISABLE_SW__` opt-out for WebViews).
+- **`defer` scripts** and **template externalization** to shrink the render-blocking critical path.
+
+See [`master.md`](./master.md) §12–§17 and [`docs/benchmark-static.md`](./docs/benchmark-static.md).
+
+## Testing
+
+```bash
+npm test                 # node --test (router, dipper, config, static serving, service worker)
+npm run benchmark:static # reproducible static-serving benchmark (cold/warm)
+```
+
+## Deployment
+
+Templates (nginx + Docker) in [`docs/deployment/`](./docs/deployment/). Honors `process.env.PORT`, so
+PaaS runtimes (Cloud Run, Heroku) work without config changes. Enable caching features in prod/qa
+profiles; keep them off in `development` for fresh iteration.
+
+## More docs
+
+- **[`master.md`](./master.md)** — full architecture, runtime flow, perf playbook, upgrade notes.
+- [`docs/router.md`](./docs/router.md) · [`CHANGELOG.md`](./CHANGELOG.md) · [`ROADMAP_INTEGRAL.md`](./ROADMAP_INTEGRAL.md)

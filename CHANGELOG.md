@@ -4,6 +4,27 @@ All notable project changes are documented in this file.
 
 The format follows a structure inspired by Keep a Changelog and semantic versioning.
 
+## [1.6.0] - 2026-06-29
+
+### Added
+
+- **Template externalization (opt-in):** `settings.profile.externalize_templates`. `compile_html.js`
+  moves `<script type="text/template">` blocks out of the page into a cacheable `public/scripts/templates.js`
+  (loaded `defer` before the app bundle, so views still find their templates in the DOM at boot). Shrinks
+  the initial HTML dramatically; the templates file is brotli + immutable + service-worker cached. The SW
+  precache now includes `templates.js`.
+
+### Fixed
+
+- **Watch keeps precompressed assets fresh:** `compressBr` now runs in the LESS/JS watch series, so `.gz`/`.br`
+  no longer go stale on incremental dev rebuilds.
+
+### Notes
+
+- Recommended: enable caching features (`enable_service_worker`, `externalize_templates`, precompression,
+  immutable) in `qa`/`production`; keep `enable_service_worker` **off in development` so a cache-first SW does
+  not serve stale assets during rapid rebuilds.
+
 ## [1.5.5] - 2026-06-28
 
 ### Changed

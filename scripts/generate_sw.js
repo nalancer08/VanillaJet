@@ -15,7 +15,8 @@ const TEMPLATE_PATH = path.join(__dirname, '..', 'framework', 'sw.template.js');
 const CORE_PRECACHE = [
 	'/public/styles/app.min.css',
 	'/public/scripts/vanilla.min.js',
-	'/public/scripts/core/vanillaJet.min.js'
+	'/public/scripts/core/vanillaJet.min.js',
+	'/public/scripts/templates.js'
 ];
 
 const DEFAULT_ON_DEMAND_PREFIXES = ['/public/animations/', '/public/images/'];

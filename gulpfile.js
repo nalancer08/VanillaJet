@@ -142,7 +142,8 @@ function watchFiles(cb) {
     buildLess,
     compressCss,
     compileTemplates,
-    generateServiceWorker
+    generateServiceWorker,
+    compressBr
   ));
 
   // Watch HTML files
@@ -159,7 +160,8 @@ function watchFiles(cb) {
     cleanMinified,
     compressJs,
     compileTemplates,
-    generateServiceWorker
+    generateServiceWorker,
+    compressBr
   ));
   
   cb();

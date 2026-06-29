@@ -184,7 +184,7 @@ function replaceInclude(lines, originalLine, templateCompiled) {
 // -- Step 4
 async function createHTMLFile(content, filePath) {
   const { minify } = require('html-minifier-terser');
-  const minified = await minify(content, {
+  let minified = await minify(content, {
     collapseWhitespace: true,
     collapseInlineTagWhitespace: true,
     removeComments: true,
@@ -194,6 +194,14 @@ async function createHTMLFile(content, filePath) {
     removeOptionalTags: true,
     minifyJS: true
   });
+
+  // -- Externalize <script type="text/template"> blocks into public/scripts/templates.js
+  // (opt-in via settings.profile.externalize_templates). The page shrinks to ~the shell;
+  // templates load from a separate cacheable file (brotli + SW + immutable) BEFORE the app
+  // bundle (defer + document order), so views still find their templates in the DOM at boot.
+  if (opts.externalize_templates) {
+    minified = externalizeTemplates(minified);
+  }
 
   const publicPath = path.join(processCwd(), '/public/pages');
   fs.mkdirSync(publicPath, { recursive: true });
@@ -208,6 +216,45 @@ async function createHTMLFile(content, filePath) {
   
   console.log(chalk.green(`Created HTML file at: ${absolutePath}`));
   console.log(chalk.green(`Created gzipped version at: ${absolutePath}.gz`));
+}
+
+// -- Move all <script type="text/template"> blocks out of the page into
+// public/scripts/templates.js (a tiny injector that adds them to the DOM). Returns the
+// page HTML with those blocks replaced by a single deferred <script> tag (placed where the
+// first block was — before the app bundle, so it runs first by document order).
+function externalizeTemplates(html) {
+  const templateRegex = /<script\b[^>]*\btype\s*=\s*["']text\/template["'][^>]*>[\s\S]*?<\/script>/gi;
+  const blocks = html.match(templateRegex) || [];
+  if (!blocks.length) {
+    return html;
+  }
+
+  const scriptsDir = path.join(processCwd(), 'public', 'scripts');
+  fs.mkdirSync(scriptsDir, { recursive: true });
+
+  const payload = blocks.join('\n');
+  // External file → a literal </script> inside the payload is harmless (no inline HTML parser).
+  const injector =
+    '(function(){var c=document.createElement("div");c.style.display="none";' +
+    'c.setAttribute("data-vj-templates","");c.innerHTML=' + JSON.stringify(payload) + ';' +
+    'document.body.insertBefore(c,document.body.firstChild);})();';
+
+  const templatesPath = path.join(scriptsDir, 'templates.js');
+  fs.writeFileSync(templatesPath, injector, 'utf8');
+  fs.writeFileSync(templatesPath + '.gz', zlib.gzipSync(injector, { level: 9 }));
+
+  const stats = fs.statSync(templatesPath);
+  const version = `${stats.size}-${Math.floor(stats.mtimeMs)}`;
+  const tag = `<script defer src="/public/scripts/templates.js?v=${version}"></script>`;
+
+  let inserted = false;
+  const result = html.replace(templateRegex, () => {
+    if (!inserted) { inserted = true; return tag; }
+    return '';
+  });
+
+  console.log(chalk.green(`VanillaJet - externalized ${blocks.length} templates to public/scripts/templates.js`));
+  return result;
 }
 
 // -- Helpers
