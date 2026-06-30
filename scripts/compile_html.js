@@ -201,6 +201,10 @@ async function createHTMLFile(content, filePath) {
   // bundle (defer + document order), so views still find their templates in the DOM at boot.
   if (opts.externalize_templates) {
     minified = externalizeTemplates(minified);
+  } else {
+    // Feature off: remove any previously generated templates.js so a stale 749KB file
+    // isn't left behind (and isn't precached by the service worker).
+    removeStaleTemplatesFile();
   }
 
   const publicPath = path.join(processCwd(), '/public/pages');
@@ -216,6 +220,22 @@ async function createHTMLFile(content, filePath) {
   
   console.log(chalk.green(`Created HTML file at: ${absolutePath}`));
   console.log(chalk.green(`Created gzipped version at: ${absolutePath}.gz`));
+}
+
+// -- Remove a previously generated public/scripts/templates.js (+ compressed siblings)
+// when externalization is disabled, so toggling the flag never leaves a stale file behind.
+function removeStaleTemplatesFile() {
+  const base = path.join(processCwd(), 'public', 'scripts', 'templates.js');
+  ['', '.gz', '.br'].forEach((ext) => {
+    try {
+      if (fs.existsSync(base + ext)) {
+        fs.unlinkSync(base + ext);
+        console.log(chalk.green(`VanillaJet - removed stale public/scripts/templates.js${ext}`));
+      }
+    } catch (err) {
+      // Non-fatal: never fail the build over cleanup.
+    }
+  });
 }
 
 // -- Move all <script type="text/template"> blocks out of the page into

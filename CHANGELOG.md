@@ -4,6 +4,21 @@ All notable project changes are documented in this file.
 
 The format follows a structure inspired by Keep a Changelog and semantic versioning.
 
+## [1.6.2] - 2026-06-30
+
+### Fixed
+
+- **Template externalization now self-cleans:** disabling `externalize_templates` (or never enabling it)
+  removes any previously generated `public/scripts/templates.js` (+ `.gz`/`.br`), so toggling the flag
+  never leaves a stale 749 KB file behind (which the service worker would otherwise precache).
+
+### Notes
+
+- **`externalize_templates` caveat (WebView):** it shrinks the initial HTML for web browsers, but it injects
+  all templates via one synchronous `innerHTML`. On slower JS engines (native WebViews — WKWebView /
+  Android WebView) that block can stall the boot. **Prefer it OFF for apps loaded primarily inside a
+  WebView**; keep it ON only for pure-web apps that benefit from a smaller first byte.
+
 ## [1.6.1] - 2026-06-29
 
 ### Security
