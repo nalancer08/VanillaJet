@@ -11,11 +11,18 @@
  * produces a new cache and activate() purges the stale ones. Because VanillaJet
  * fingerprints asset URLs (`?v=size-mtime`), matches use { ignoreSearch: true }
  * so a cache entry keeps serving across version query changes within the cache.
+ *
+ * Precaching fetches the FINGERPRINTED urls (PRECACHE_URLS) with cache: 'no-cache'.
+ * Both guards exist so install never reads a stale copy from the browser's HTTP
+ * cache: bare asset paths may sit there for `static_cache_max_age` seconds, and a
+ * precache that goes through it would pin an outdated bundle into a brand-new
+ * cache — making every deploy invisible until a hard reload or header expiry.
  */
 
 const CACHE_NAME = '__CACHE_NAME__';
 const CACHE_PREFIX = '__CACHE_PREFIX__';
 const PRECACHE_ASSETS = __PRECACHE_ASSETS__;
+const PRECACHE_URLS = __PRECACHE_URLS__;
 const ON_DEMAND_PREFIXES = __ON_DEMAND_PREFIXES__;
 
 const MATCH_OPTIONS = { ignoreSearch: true };
@@ -30,10 +37,12 @@ function isCacheable(pathname) {
 globalThis.addEventListener('install', (event) => {
 	event.waitUntil(
 		caches.open(CACHE_NAME).then((cache) =>
-			Promise.allSettled(PRECACHE_ASSETS.map((asset) => cache.add(asset))).then((results) => {
+			Promise.allSettled(
+				PRECACHE_URLS.map((asset) => cache.add(new Request(asset, { cache: 'no-cache' })))
+			).then((results) => {
 				results.forEach((result, i) => {
 					if (result.status === 'rejected') {
-						console.error('SW precache failed: ' + PRECACHE_ASSETS[i], result.reason);
+						console.error('SW precache failed: ' + PRECACHE_URLS[i], result.reason);
 					}
 				});
 			})

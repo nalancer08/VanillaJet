@@ -4,6 +4,18 @@ All notable project changes are documented in this file.
 
 The format follows a structure inspired by Keep a Changelog and semantic versioning.
 
+## [1.6.3] - 2026-07-16
+
+### Fixed
+
+- **SW precache no longer reads stale bundles from the browser's HTTP cache:** install now fetches
+  the fingerprinted urls (`?v=size-mtime`, guaranteed HTTP-cache miss) with `cache: 'no-cache'` as a
+  second guard. Previously it fetched the bare asset paths through the HTTP cache; with
+  `static_cache_max_age` set, a new SW could pin an outdated bundle into a brand-new cache and —
+  because serving is cache-first with `ignoreSearch` — every deploy became invisible to returning
+  users for up to `static_cache_max_age` seconds unless they hard-reloaded (which bypasses the SW
+  per spec but never rewrites its Cache Storage). Diagnosed in production on a consumer app.
+
 ## [1.6.2] - 2026-06-30
 
 ### Fixed

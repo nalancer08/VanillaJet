@@ -123,6 +123,23 @@ function buildPrecacheList(root, opts, shared) {
 	return precache;
 }
 
+// Fingerprint each precache path (`?v=size-mtime`, same scheme the Dipper uses for
+// asset tags). Install fetches THESE urls: a content change produces a new URL, which
+// guarantees an HTTP-cache miss. Precaching the bare path instead can read a stale
+// copy the HTTP cache is allowed to keep for `static_cache_max_age` seconds, pinning
+// an outdated bundle into the new SW cache (deploys invisible until a hard reload).
+function versionAssets(root, precache) {
+	return precache.map((assetPath) => {
+		const absolute = path.join(root, assetPath.replace(/^\//, ''));
+		try {
+			const stats = fs.statSync(absolute);
+			return `${assetPath}?v=${stats.size}-${Math.floor(stats.mtimeMs)}`;
+		} catch (err) {
+			return assetPath;
+		}
+	});
+}
+
 function computeCacheHash(root, precache) {
 	const hash = crypto.createHash('md5');
 	precache.forEach((assetPath) => {
@@ -161,6 +178,7 @@ function main() {
 		: DEFAULT_ON_DEMAND_PREFIXES;
 
 	const precache = buildPrecacheList(root, opts, shared);
+	const precacheUrls = versionAssets(root, precache);
 	const cacheName = `${baseSlug}-sw-${computeCacheHash(root, precache)}`;
 
 	let template = fs.readFileSync(TEMPLATE_PATH, 'utf8');
@@ -168,6 +186,7 @@ function main() {
 		.replace(/__CACHE_NAME__/g, cacheName)
 		.replace(/__CACHE_PREFIX__/g, cachePrefix)
 		.replace('__PRECACHE_ASSETS__', JSON.stringify(precache, null, '\t'))
+		.replace('__PRECACHE_URLS__', JSON.stringify(precacheUrls, null, '\t'))
 		.replace('__ON_DEMAND_PREFIXES__', JSON.stringify(onDemandPrefixes, null, '\t'));
 
 	const publicDir = path.join(root, 'public');
