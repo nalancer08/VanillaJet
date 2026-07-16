@@ -38,7 +38,12 @@ describe('service worker generation', () => {
       assert.match(sw, /testapp-sw-[a-f0-9]{12}/, 'cache name should be content-pinned');
       assert.match(sw, /\/public\/scripts\/vanilla\.min\.js/);
       assert.match(sw, /\/public\/styles\/app\.min\.css/);
+      // Precache must fetch fingerprinted urls, bypassing any HTTP-cached bare path
+      // (a stale HTTP-cache hit would pin an outdated bundle into the new SW cache).
+      assert.match(sw, /\/public\/scripts\/vanilla\.min\.js\?v=\d+-\d+/, 'precache urls should be fingerprinted');
+      assert.match(sw, /cache: 'no-cache'/, 'precache requests should revalidate against the server');
       assert.ok(!sw.includes('__PRECACHE_ASSETS__'), 'no placeholders should remain');
+      assert.ok(!sw.includes('__PRECACHE_URLS__'), 'no placeholders should remain');
       assert.ok(!sw.includes('__CACHE_NAME__'), 'no placeholders should remain');
     } finally {
       removeWorkspace(ws);
