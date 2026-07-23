@@ -100,6 +100,14 @@ class Response {
       }
 
       obj.res.setHeader('Content-Type', 'text/html; charset=utf-8');
+      // Rendered pages must never be reused without asking the server: with no
+      // Cache-Control, browsers and WebViews apply heuristic caching and can
+      // keep serving an old page after a deploy — its asset references
+      // (`?v=size-mtime`) then resolve to NEWER file contents (the server
+      // ignores the query when reading the file) and the app boots with
+      // mismatched document/assets. WKWebView is the worst offender (no
+      // service worker there to rotate anything).
+      obj.res.setHeader('Cache-Control', 'no-cache, must-revalidate');
       if (hasNegotiation) {
         obj.res.setHeader('Vary', 'Accept-Encoding');
       }

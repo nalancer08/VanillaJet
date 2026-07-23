@@ -1,6 +1,6 @@
 {
   "name": "vanilla-jet",
-  "version": "1.6.3",
+  "version": "1.6.4",
   "description": "VannilaJet framework",
   "main": "index.js",
   "bin": {
@@ -31,10 +31,6 @@
   "homepage": "https://github.com/nalancer08/VanillaJet#readme",
   "dependencies": {
     "chalk": "4.1.2",
-    "html-minifier-terser": "7.2.0",
-    "minimist": "1.2.8",
-    "nunjucks": "3.2.4",
-    "underscore": ">= 1.12.x",
     "del": "^6.0.0",
     "gulp": "^4.0.2",
     "gulp-clean-css": "^4.3.0",
@@ -47,6 +43,10 @@
     "gulp-rename": "^2.0.0",
     "gulp-shell": "^0.8.0",
     "gulp-uglify": "^3.0.2",
-    "gulp-watch": "^5.0.1"
+    "gulp-watch": "^5.0.1",
+    "html-minifier-terser": "7.2.0",
+    "minimist": "1.2.8",
+    "nunjucks": "3.2.4",
+    "underscore": ">= 1.12.x"
   }
 }

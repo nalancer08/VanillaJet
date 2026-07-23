@@ -42,6 +42,9 @@ describe('service worker generation', () => {
       // (a stale HTTP-cache hit would pin an outdated bundle into the new SW cache).
       assert.match(sw, /\/public\/scripts\/vanilla\.min\.js\?v=\d+-\d+/, 'precache urls should be fingerprinted');
       assert.match(sw, /cache: 'no-cache'/, 'precache requests should revalidate against the server');
+      // The fingerprint is the version pin: matching must be by exact url, or a
+      // not-yet-updated worker answers fresh HTML with a previous generation's bundles.
+      assert.ok(!sw.includes('ignoreSearch'), 'cache matches must not ignore the ?v fingerprint');
       assert.ok(!sw.includes('__PRECACHE_ASSETS__'), 'no placeholders should remain');
       assert.ok(!sw.includes('__PRECACHE_URLS__'), 'no placeholders should remain');
       assert.ok(!sw.includes('__CACHE_NAME__'), 'no placeholders should remain');
@@ -50,14 +53,20 @@ describe('service worker generation', () => {
     }
   });
 
-  test('disabled: does not generate sw.js', () => {
+  test('disabled: publishes the kill-switch at public/sw.js', () => {
     const ws = makeTempWorkspace(Object.assign({}, PUBLIC_FIXTURE, {
       'config.js':
         "module.exports = { profile: 'qa', settings: { qa: {}, shared: {}, security: {} } };"
     }));
     try {
       execFileSync('node', [GENERATOR], { cwd: ws, stdio: 'pipe' });
-      assert.ok(!fs.existsSync(path.join(ws, 'public', 'sw.js')), 'sw.js must not exist when disabled');
+      const swPath = path.join(ws, 'public', 'sw.js');
+      assert.ok(fs.existsSync(swPath), 'kill-switch sw.js must exist when disabled');
+      const sw = fs.readFileSync(swPath, 'utf8');
+      assert.match(sw, /skipWaiting/, 'kill-switch must take over immediately');
+      assert.match(sw, /caches\.delete/, 'kill-switch must wipe Cache Storage');
+      assert.match(sw, /registration\.unregister/, 'kill-switch must unregister itself');
+      assert.ok(!sw.includes("addEventListener('fetch'"), 'kill-switch must not intercept requests');
     } finally {
       removeWorkspace(ws);
     }
@@ -94,14 +103,14 @@ describe('service worker serving', () => {
   });
 });
 
-describe('service worker disabled at runtime', () => {
+describe('service worker serving with the feature off', () => {
   let server;
   let ws;
   let previousCwd;
   let baseUrl;
 
   before(async () => {
-    ws = makeTempWorkspace({ 'public/sw.js': '/* sw */' });
+    ws = makeTempWorkspace({ 'public/sw.js': '/* kill-switch */' });
     previousCwd = process.cwd();
     process.chdir(ws);
     server = new Server(serverOptions(0), []); // flag off
@@ -115,7 +124,40 @@ describe('service worker disabled at runtime', () => {
     removeWorkspace(ws);
   });
 
-  test('GET /sw.js is 404 when the feature is off', async () => {
+  // The flag governs GENERATION, not serving: with the feature off the build
+  // publishes the kill-switch at public/sw.js and installed workers must be
+  // able to fetch it to self-destruct. Gating the route on the flag would
+  // hide the kill-switch from the very workers it dismantles.
+  test('GET /sw.js still serves the published file', async () => {
+    const res = await fetch(`${baseUrl}/sw.js`);
+    assert.equal(res.status, 200);
+    assert.match(res.headers.get('content-type') || '', /javascript/);
+    assert.match(await res.text(), /kill-switch/);
+  });
+});
+
+describe('service worker serving with no published file', () => {
+  let server;
+  let ws;
+  let previousCwd;
+  let baseUrl;
+
+  before(async () => {
+    ws = makeTempWorkspace({});
+    previousCwd = process.cwd();
+    process.chdir(ws);
+    server = new Server(serverOptions(0), []);
+    await waitForListening(server);
+    baseUrl = `http://127.0.0.1:${boundPort(server)}`;
+  });
+
+  after(async () => {
+    if (server) await closeServer(server);
+    process.chdir(previousCwd);
+    removeWorkspace(ws);
+  });
+
+  test('GET /sw.js is 404 when public/sw.js does not exist', async () => {
     const res = await fetch(`${baseUrl}/sw.js`);
     await res.arrayBuffer();
     assert.equal(res.status, 404);

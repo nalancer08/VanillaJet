@@ -45,7 +45,6 @@ class Router {
     this.compressionMimes = [ 'css', 'js' ];
     this.compressionFiles = [ 'vanilla.min.js', 'app.min.css' ];
     this.enablePrecompressedNegotiation = Boolean(server?.options?.enable_precompressed_negotiation);
-    this.enableServiceWorker = Boolean(server?.options?.enable_service_worker);
     // Cache-Control max-age (seconds) for NON-versioned static assets (images, fonts,
     // animation JSON…). Lets the browser reuse them across references/reloads instead of
     // revalidating each time. Versioned (?v=) assets stay immutable; 0 keeps no-cache.
@@ -108,8 +107,13 @@ class Router {
 					}
 				});
 
-				// -- Service worker: served from root scope so it can control the whole origin
-				if (!handled && !isMatch && obj.enableServiceWorker && request.path === '/sw.js') {
+				// -- Service worker: served from root scope so it can control the whole
+				// origin. Not gated on `enable_service_worker`: the build decides WHICH
+				// worker sits at public/sw.js (caching worker when enabled, kill-switch
+				// when disabled) and serveServiceWorker 404s when the file is absent.
+				// Gating here would hide the kill-switch from the installed workers it
+				// exists to dismantle.
+				if (!handled && !isMatch && request.path === '/sw.js') {
 					return obj.serveServiceWorker(res);
 				}
 

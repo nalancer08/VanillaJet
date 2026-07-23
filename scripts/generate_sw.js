@@ -1,6 +1,10 @@
 // Generates public/sw.js from framework/sw.template.js.
 //
-// Opt-in: only runs when the active profile sets `enable_service_worker: true`.
+// Opt-in: the caching worker is only generated when the active profile sets
+// `enable_service_worker: true`. With the flag OFF, the build publishes the
+// kill-switch worker (framework/sw.kill.template.js) at the same path instead
+// of deleting the file: previously installed workers pick it up on their next
+// update check and self-destruct (wipe caches, unregister, reload clients).
 // The precache list is derived from the compiled core assets, any LOCAL resources
 // the Dipper has enqueued, and the explicit `service_worker.precache` config.
 // The cache name is pinned to a content hash so any asset change rotates the cache.
@@ -10,6 +14,7 @@ const path = require('path');
 const crypto = require('crypto');
 
 const TEMPLATE_PATH = path.join(__dirname, '..', 'framework', 'sw.template.js');
+const KILL_TEMPLATE_PATH = path.join(__dirname, '..', 'framework', 'sw.kill.template.js');
 
 // Core bundles that every VanillaJet app ships; precached when present.
 const CORE_PRECACHE = [
@@ -159,12 +164,17 @@ function main() {
 	const { opts, shared } = loadConfig(root);
 
 	if (!opts.enable_service_worker) {
-		// Feature disabled: remove any previously generated SW so it stops controlling clients.
-		const existing = path.join(root, 'public', 'sw.js');
-		if (fs.existsSync(existing)) {
-			fs.unlinkSync(existing);
-			console.log('VanillaJet - service worker disabled; removed public/sw.js');
-		}
+		// Feature disabled: publish the kill-switch worker instead of deleting the
+		// file. Deleting only produces a 404, which browsers act on solely during a
+		// full navigation's update check — it never repairs the session already
+		// painting from a frozen cache, and page-side teardown code can't reach
+		// clients whose stale bundle is served by the old worker itself. The
+		// kill-switch reaches every zombie through the one channel the old worker
+		// cannot poison: the /sw.js byte-diff.
+		const publicDir = path.join(root, 'public');
+		fs.mkdirSync(publicDir, { recursive: true });
+		fs.copyFileSync(KILL_TEMPLATE_PATH, path.join(publicDir, 'sw.js'));
+		console.log('VanillaJet - service worker disabled; kill-switch published at public/sw.js');
 		return;
 	}
 

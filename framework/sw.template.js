@@ -8,9 +8,17 @@
  * Strategy: cache-first for a pinned set of local bundles/styles/plugins and an
  * on-demand cache for prefixes (animations, images). The cache name is pinned to
  * a content hash of the precached assets, so a rebuild that changes any asset
- * produces a new cache and activate() purges the stale ones. Because VanillaJet
- * fingerprints asset URLs (`?v=size-mtime`), matches use { ignoreSearch: true }
- * so a cache entry keeps serving across version query changes within the cache.
+ * produces a new cache and activate() purges the stale ones.
+ *
+ * Matching is by EXACT url, fingerprint included. VanillaJet fingerprints asset
+ * URLs (`?v=size-mtime`), so the query string IS the version pin: a fresh page
+ * that references new fingerprints must never be answered with a previous
+ * generation's bundle. Ignoring the query here (as earlier versions did) breaks
+ * that pin — after a deploy, a client whose worker hasn't updated yet serves its
+ * frozen bundles against the new HTML and the app boots with mismatched
+ * document/assets (missing templates, undefined views). With exact matching that
+ * client simply misses its cache and falls through to the network: the SW update
+ * lag costs bandwidth, never correctness.
  *
  * Precaching fetches the FINGERPRINTED urls (PRECACHE_URLS) with cache: 'no-cache'.
  * Both guards exist so install never reads a stale copy from the browser's HTTP
@@ -24,8 +32,6 @@ const CACHE_PREFIX = '__CACHE_PREFIX__';
 const PRECACHE_ASSETS = __PRECACHE_ASSETS__;
 const PRECACHE_URLS = __PRECACHE_URLS__;
 const ON_DEMAND_PREFIXES = __ON_DEMAND_PREFIXES__;
-
-const MATCH_OPTIONS = { ignoreSearch: true };
 
 function isCacheable(pathname) {
 	return (
@@ -71,12 +77,13 @@ globalThis.addEventListener('fetch', (event) => {
 	const url = new URL(request.url);
 	if (url.origin !== globalThis.location.origin || !isCacheable(url.pathname)) return;
 
-	// Cache-first: assets are immutable within a version (CACHE_NAME is content-pinned
-	// and activate() purges old caches on bump), so a cache hit never needs
-	// revalidation — skip the network entirely to save bandwidth on slow links.
+	// Cache-first on the EXACT url: a hit means the same fingerprint the page
+	// asked for, so it never needs revalidation — skip the network entirely to
+	// save bandwidth on slow links. A different fingerprint is a different url:
+	// it misses and goes to the network (correct by construction after deploys).
 	event.respondWith(
 		caches.open(CACHE_NAME).then((cache) =>
-			cache.match(request, MATCH_OPTIONS).then((cached) => {
+			cache.match(request).then((cached) => {
 				if (cached) return cached;
 
 				return fetch(request).then((response) => {

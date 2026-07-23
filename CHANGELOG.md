@@ -4,6 +4,32 @@ All notable project changes are documented in this file.
 
 The format follows a structure inspired by Keep a Changelog and semantic versioning.
 
+## [1.6.4] - 2026-07-23
+
+### Fixed
+
+- **Disabling the service worker now publishes a kill-switch instead of deleting `public/sw.js`:**
+  a deletion only produces a 404, which browsers act on solely during a full navigation's update
+  check — it never repairs a session already painting from a frozen cache, and page-side teardown
+  code cannot reach clients whose stale bundle is served by the old worker itself. The kill-switch
+  (`framework/sw.kill.template.js`) reaches every such client through the one channel the old worker
+  cannot poison — the `/sw.js` byte-diff — then wipes Cache Storage, unregisters and reloads the
+  windows the old worker controlled. It never claims uncontrolled clients, so a consumer that keeps
+  registering `/sw.js` by mistake cannot enter a reload loop. Diagnosed in production on a consumer
+  app (stale bundles against fresh HTML → "template not found" boot crashes).
+- **`/sw.js` is served whenever `public/sw.js` exists, regardless of `enable_service_worker`:** the
+  flag governs which worker the build publishes (caching worker on, kill-switch off), not the route.
+  Gating the route on the flag hid the kill-switch from the very workers it exists to dismantle.
+- **SW cache matching is now by exact url (fingerprint included):** `ignoreSearch: true` neutralized
+  the `?v=size-mtime` version pin, so after a deploy a not-yet-updated worker answered the fresh HTML
+  with the previous generation's bundles (mismatched document/assets, missing templates). With exact
+  matching that client just misses and falls through to the network: SW update lag now costs
+  bandwidth, never correctness.
+- **Rendered pages send `Cache-Control: no-cache, must-revalidate`:** with no header, browsers and
+  WebViews apply heuristic caching and can reuse an old page after a deploy; its `?v=` references
+  then resolve to newer file contents and the app boots mismatched. WKWebView (no SW support) was
+  the worst offender.
+
 ## [1.6.3] - 2026-07-16
 
 ### Fixed
