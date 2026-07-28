@@ -4,6 +4,21 @@ All notable project changes are documented in this file.
 
 The format follows a structure inspired by Keep a Changelog and semantic versioning.
 
+## [1.7.1] - 2026-07-28
+
+### Fixed
+
+- **Core dependencies (`coreDependencies` in `vanillaJet.package.json`) now register with the
+  `?v=size-mtime` fingerprint**, like every other asset. They were registered bare, so with
+  `static_cache_max_age` set they were cached for the full TTL with no revalidation — while the view
+  bundle (`vanilla.min.js`, fingerprinted) updated instantly on every deploy. Result in production:
+  every client who had visited within the TTL window ran a FRESH view bundle against a STALE
+  `domain`/`api`/`utils` and crashed on any new cross-file API
+  (`Domain.product.isEdoMexAddress is not a function`) until the entry expired. Fingerprinting makes
+  the fix self-healing: the rendered page is `no-cache`, so on their next visit every affected
+  client sees a new script url, misses their poisoned cache entry, and downloads the current file.
+  External urls and not-yet-built files keep the legacy bare url.
+
 ## [1.7.0] - 2026-07-27
 
 ### Added

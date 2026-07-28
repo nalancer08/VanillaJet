@@ -33,7 +33,15 @@ function Dipper(options, shared) {
 	if (vanillaJetJson) {
 		let coreDependencies = vanillaJetJson.coreDependencies;
 		for (let key in coreDependencies) {
-			this.registerScript(key, coreDependencies[key]);
+			// Fingerprint local core dependencies exactly like every other
+			// registered asset (?v=size-mtime → immutable, and a NEW url on
+			// every deploy). Registered bare, they fell under the
+			// `static_cache_max_age` bucket: clients kept a stale domain/api/
+			// utils for up to that TTL while the fingerprinted view bundle
+			// updated instantly — mismatched generations in production
+			// ("Domain.product.isEdoMexAddress is not a function").
+			// versionedUrl leaves external urls and missing files untouched.
+			this.registerScript(key, this.versionedUrl(coreDependencies[key]));
 		}
 	}
 }

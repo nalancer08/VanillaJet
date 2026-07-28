@@ -8,7 +8,7 @@ performance features (Brotli, immutable caching, deferred scripts, and template 
 
 ## Current version
 
-- Version: `1.7.0`
+- Version: `1.7.1`
 - Changelog: [`CHANGELOG.md`](./CHANGELOG.md)
 - **Full project docs (architecture, runtime, build, deployment, perf): [`master.md`](./master.md)**
 - Roadmap: [`ROADMAP_INTEGRAL.md`](./ROADMAP_INTEGRAL.md)
