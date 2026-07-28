@@ -4,6 +4,36 @@ All notable project changes are documented in this file.
 
 The format follows a structure inspired by Keep a Changelog and semantic versioning.
 
+## [1.7.0] - 2026-07-27
+
+### Removed
+
+- **The caching service worker is gone.** After repeated production incidents on a consumer app —
+  not-yet-updated workers ("zombies") answering fresh HTML with a previous generation's bundles
+  (missing templates, missing functions such as `Domain.product.isEdoMexAddress`) — the cache-first
+  worker and its generation path (`framework/sw.template.js`, the precache derivation, the
+  content-pinned cache name) are removed entirely. Asset freshness now relies on plain HTTP
+  semantics, which the framework already enforces: rendered pages are `no-cache, must-revalidate`,
+  fingerprinted (`?v=size-mtime`) assets are immutable, and non-versioned statics honor
+  `static_cache_max_age`. `enable_service_worker` and `service_worker` are ignored (the build warns
+  if the flag is still set); this is a behavior removal, not an API break — builds and servers keep
+  working without config changes.
+
+### Changed
+
+- **Every build publishes the kill-switch at `public/sw.js`, unconditionally** (before: only when
+  `enable_service_worker` was off). Any client still running a leftover worker byte-diffs `/sw.js`
+  on its next update check, installs the kill-switch and self-destructs: wipes Cache Storage,
+  unregisters, and reloads the windows it controlled. The file must keep shipping indefinitely — a
+  404 never repairs a session already painting from a frozen cache.
+- **`dipper.includeServiceWorker()` now emits a teardown snippet instead of a registration.** Placed
+  in the rendered HTML (`no-cache` — the one asset a stale worker cannot poison), it unregisters
+  every registration on the origin, wipes Cache Storage, and reloads once when the page was actually
+  painted through a worker, with a `sessionStorage` guard that makes a reload loop impossible.
+  Consumers that already call it in their page header upgrade from "registers the worker" to "heals
+  the client" with no template change; the `window.__VJ_DISABLE_SW__` opt-out is gone (there is
+  nothing left to opt out of).
+
 ## [1.6.4] - 2026-07-23
 
 ### Fixed

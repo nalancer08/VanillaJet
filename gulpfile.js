@@ -121,7 +121,8 @@ function compileTemplates() {
     .pipe(shell([`node scripts/compile_html.js ${buildEnv}`]));
 }
 
-// Service worker generation (opt-in via settings.profile.enable_service_worker)
+// Kill-switch publication: every build publishes the self-destructing worker
+// at public/sw.js so leftover workers from the removed caching feature heal.
 function generateServiceWorker() {
   return gulp.src('.')
     .pipe(shell([`node scripts/generate_sw.js ${buildEnv}`]));

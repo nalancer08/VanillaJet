@@ -2,14 +2,13 @@
 
 Node.js framework for building SPA applications: a Gulp build pipeline (JS/CSS/HTML), a lightweight
 HTTP/HTTPS server, an internal router, and template/resource utilities — with first-class, opt-in
-performance features (Brotli, immutable caching, a generated service worker, deferred scripts, and
-template externalization).
+performance features (Brotli, immutable caching, deferred scripts, and template externalization).
 
 ![VanillaJet logo](https://github.com/nalancer08/App-Builders/blob/master/Logos/logo_monocromatico_horizontal_.png)
 
 ## Current version
 
-- Version: `1.6.0`
+- Version: `1.7.0`
 - Changelog: [`CHANGELOG.md`](./CHANGELOG.md)
 - **Full project docs (architecture, runtime, build, deployment, perf): [`master.md`](./master.md)**
 - Roadmap: [`ROADMAP_INTEGRAL.md`](./ROADMAP_INTEGRAL.md)
@@ -74,8 +73,7 @@ module.exports = { settings: { profile: { port: 8080, api_url: '...' }, shared: 
 |---|---|---|
 | `port` | `8080` | Listen port. `process.env.PORT` wins (Cloud Run/Heroku). |
 | `enable_precompressed_negotiation` | `false` | Serve `.br` → `.gz` → original via `Accept-Encoding`. |
-| `enable_service_worker` | `false` | Generate + serve a cache-first service worker. **Recommended: on in prod/qa, off in dev.** |
-| `service_worker` | — | `{ cache_prefix, on_demand_prefixes, precache, precache_exclude }`. Precache is auto-derived from `vanillaJet.package.json`. |
+| `enable_service_worker` | — | **Removed in 1.7.0** (ignored, build warns if set). The caching worker is gone; every build publishes a kill-switch at `/sw.js` that self-destructs leftover workers. |
 | `defer_scripts` | `false` | Add `defer` to non-async scripts so they don't block parsing. |
 | `externalize_templates` | `false` | Move `<script type="text/template">` blocks out of the page into a cacheable `public/scripts/templates.js`. |
 | `request_timeout_ms` / `headers_timeout_ms` / `keep_alive_timeout_ms` | `30000` / `35000` / `5000` | Defensive server timeouts. |
@@ -100,18 +98,18 @@ config.js · vanillaJet.package.json · public/ (build output)
 - Compiles LESS → `public/styles/app.min.css`
 - Compiles templates → `public/pages/home.html` (+ optional `templates.js`)
 - Precompresses every `.js`/`.css`/`.html` to `.gz` + `.br`
-- Generates the service worker (when enabled)
+- Publishes the service-worker kill-switch at `public/sw.js` (always)
 
 ## Performance features (opt-in)
 
 - **Brotli + gzip** precompression with `Accept-Encoding` negotiation and safe fallback.
 - **Immutable caching**: fingerprinted assets (`?v=size-mtime`) are served `Cache-Control: public,
-  max-age=31536000, immutable`; HTML and unversioned assets stay `no-cache`. Big win for clients
-  without the service worker (e.g. native WebViews).
-- **Service worker** (cache-first), precache auto-derived from `vanillaJet.package.json`, content-pinned
-  cache name, `ignoreSearch` for fingerprinted URLs, and an inline registration helper
-  (`dipper.includeServiceWorker()`, web-only with a `window.__VJ_DISABLE_SW__` opt-out for WebViews).
+  max-age=31536000, immutable`; HTML and unversioned assets stay `no-cache`.
 - **`defer` scripts** and **template externalization** to shrink the render-blocking critical path.
+- **No service worker** (removed in 1.7.0 after zombie-cache incidents in production): freshness is
+  plain HTTP semantics. Every build still publishes a kill-switch at `/sw.js`, and
+  `dipper.includeServiceWorker()` now emits a page-side teardown snippet — both heal clients that
+  still run a leftover worker, and both must keep shipping indefinitely.
 
 See [`master.md`](./master.md) §12–§17 and [`docs/benchmark-static.md`](./docs/benchmark-static.md).
 

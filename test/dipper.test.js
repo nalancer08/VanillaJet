@@ -47,15 +47,13 @@ test('registerStyle + includeStyle: renders a stylesheet link', () => {
   assert.match(tag, /href="\/public\/styles\/app\.min\.css"/);
 });
 
-test('includeServiceWorker: empty when disabled, registers when enabled', () => {
-  const disabled = new Dipper({}, {});
-  assert.equal(disabled.includeServiceWorker(), '');
-
-  const enabled = new Dipper({ enable_service_worker: true }, {});
-  const tag = enabled.includeServiceWorker();
-  assert.match(tag, /serviceWorker/);
-  assert.match(tag, /register\('\/sw\.js'\)/);
-  assert.match(tag, /__VJ_DISABLE_SW__/);
+test('includeServiceWorker: emits the teardown snippet, never a registration', () => {
+  // The caching worker was removed in 1.7.0: the include heals leftover
+  // workers regardless of options (full assertions in service-worker.test.js).
+  const tag = new Dipper({}, {}).includeServiceWorker();
+  assert.match(tag, /getRegistrations/);
+  assert.match(tag, /unregister/);
+  assert.ok(!tag.includes(".register("), 'must never register a worker again');
 });
 
 test('enqueue/dequeue: dependencies resolve and clear correctly', () => {

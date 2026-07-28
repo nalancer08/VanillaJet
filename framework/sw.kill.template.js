@@ -1,17 +1,19 @@
 /**
  * VanillaJet kill-switch service worker.
  *
- * Published at /sw.js when `enable_service_worker` is OFF. A client still
- * running a previously installed worker byte-diffs /sw.js on its next update
- * check, installs this one and self-destructs: every Cache Storage entry on
- * the origin is deleted, the registration is unregistered and every window
- * the old worker was controlling reloads once, so no page keeps painting
- * from a frozen cache.
+ * Published at /sw.js on EVERY build — the caching service worker was removed
+ * in 1.7.0, so any worker still installed on the origin is a leftover. A
+ * client running a previously installed worker byte-diffs /sw.js on its next
+ * update check, installs this one and self-destructs: every Cache Storage
+ * entry on the origin is deleted, the registration is unregistered and every
+ * window the old worker was controlling reloads once, so no page keeps
+ * painting from a frozen cache.
  *
  * A 404 at /sw.js cannot do this reliably: browsers only unregister on a
  * full navigation's update check, the already-broken session stays broken
  * until a second manual reload, and page-side teardown code never reaches
  * clients whose stale bundle is itself served by the old worker's cache.
+ * Keep publishing this file indefinitely.
  */
 
 globalThis.addEventListener('install', () => {

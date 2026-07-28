@@ -388,32 +388,55 @@ Dipper.prototype.includeManifest = function() {
 }
 
 /**
- * Inline registration for the VanillaJet service worker.
- * Returns '' unless settings.profile.enable_service_worker is true.
- * Web-only by design: a consumer running inside a native WebView can set
- * `window.__VJ_DISABLE_SW__ = true` before this runs to opt out and tear down
- * any previously installed worker (WebViews get no benefit and stuck SWs are
- * hard to recover there).
+ * Inline service-worker teardown. VanillaJet no longer ships a caching
+ * service worker (removed in 1.7.0 after production incidents where
+ * not-yet-updated workers kept answering fresh HTML with a previous
+ * generation's bundles), so any worker found on the origin is a leftover
+ * that must go.
+ *
+ * This snippet is the page-side healing channel: it lives in the rendered
+ * HTML (served with no-cache, the one asset a stale worker never poisons),
+ * unregisters every registration, wipes Cache Storage, and — only when the
+ * page was actually painted through a worker — reloads once so document and
+ * assets come from the same (network) generation. A sessionStorage guard
+ * makes the reload impossible to repeat within the tab session, so a client
+ * whose worker refuses to die can never enter a reload loop.
+ *
+ * It complements the kill-switch published at /sw.js (scripts/generate_sw.js),
+ * which reaches clients through the other channel a zombie cannot poison:
+ * the service-worker script byte-diff on its update check.
  */
 Dipper.prototype.includeServiceWorker = function() {
-
-	const obj = this;
-	if (!obj.options || !obj.options.enable_service_worker) {
-		return '';
-	}
 
 	return `
 		<script>
 			(function () {
 				if (!('serviceWorker' in navigator)) { return; }
-				if (window.__VJ_DISABLE_SW__) {
-					navigator.serviceWorker.getRegistration()
-						.then(function (registration) { if (registration) { registration.unregister(); } })
-						.catch(function (error) { console.error(error); });
-					return;
-				}
-				navigator.serviceWorker.register('/sw.js')
-					.catch(function (error) { console.error(error); });
+				var controlled = Boolean(navigator.serviceWorker.controller);
+				var guard = 'vj-sw-teardown-reload';
+				navigator.serviceWorker.getRegistrations().then(function (registrations) {
+					return Promise.all(registrations.map(function (registration) {
+						return registration.unregister();
+					}));
+				}).then(function () {
+					if (!('caches' in window)) { return; }
+					return caches.keys().then(function (keys) {
+						return Promise.all(keys.map(function (key) { return caches.delete(key); }));
+					});
+				}).then(function () {
+					if (!controlled) {
+						try { sessionStorage.removeItem(guard); } catch (error) { /* storage blocked */ }
+						return;
+					}
+					var alreadyReloaded = null;
+					try { alreadyReloaded = sessionStorage.getItem(guard); } catch (error) { return; }
+					if (alreadyReloaded) { return; }
+					// If the guard cannot be persisted (blocked storage), skip the
+					// reload: healing falls back to the /sw.js kill-switch rather
+					// than risking a loop.
+					try { sessionStorage.setItem(guard, '1'); } catch (error) { return; }
+					location.reload();
+				}).catch(function (error) { console.error(error); });
 			})();
 		</script>`;
 }
