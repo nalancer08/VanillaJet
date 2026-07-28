@@ -105,6 +105,9 @@ config.js · vanillaJet.package.json · public/ (build output)
 - **Brotli + gzip** precompression with `Accept-Encoding` negotiation and safe fallback.
 - **Immutable caching**: fingerprinted assets (`?v=size-mtime`) are served `Cache-Control: public,
   max-age=31536000, immutable`; HTML and unversioned assets stay `no-cache`.
+- **Rendered-page 304s**: `render()` sends a strong content-hash `ETag` per encoding
+  representation, so repeat boots cost a header-only revalidation (`304`) and download the page
+  only when a deploy changed it.
 - **`defer` scripts** and **template externalization** to shrink the render-blocking critical path.
 - **No service worker** (removed in 1.7.0 after zombie-cache incidents in production): freshness is
   plain HTTP semantics. Every build still publishes a kill-switch at `/sw.js`, and

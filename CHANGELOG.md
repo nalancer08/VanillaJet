@@ -6,6 +6,19 @@ The format follows a structure inspired by Keep a Changelog and semantic version
 
 ## [1.7.0] - 2026-07-27
 
+### Added
+
+- **Rendered pages revalidate with a strong content-hash `ETag` (304).** `render()` streams
+  pre-compiled files, so each representation (identity/.gz/.br) now carries a sha1-of-content
+  validator, cached in memory per `(size, mtime)` generation. Combined with the existing
+  `Cache-Control: no-cache, must-revalidate`, every boot becomes a header-only round-trip: `304 Not
+  Modified` while the page is unchanged, a full `200` the instant a deploy lands. This replaces the
+  removed service worker's repeat-visit win without its failure mode — a 304 is only possible when
+  the client's stored bytes hash-match the exact bytes the server would stream, so revalidation can
+  never pin a stale page; every failure path (no validator, hash error, encoding switch, multi-node
+  skew) degrades to a full 200, i.e. the previous behavior. `If-None-Match` handles lists, `W/`
+  prefixes and `*` per RFC 9110; 304s carry `ETag`/`Cache-Control`/`Vary` and no entity headers.
+
 ### Removed
 
 - **The caching service worker is gone.** After repeated production incidents on a consumer app —

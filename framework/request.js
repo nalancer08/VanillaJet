@@ -21,6 +21,9 @@ class Request {
     let acceptEncoding = req.headers['accept-encoding'] || '';
     acceptEncoding = acceptEncoding.replace(/\s+/g, '');
     this.acceptEncoding = acceptEncoding.split(',') || [];
+    // Validator for conditional requests: lets render() answer 304 instead of
+    // re-streaming a page the client already holds byte-identical.
+    this.ifNoneMatch = req.headers['if-none-match'] || '';
 
 		this.init(req, options);
 	}

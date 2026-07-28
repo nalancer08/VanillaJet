@@ -1,6 +1,16 @@
 const nunjucks = require('nunjucks');
 let _ = require('underscore');
 
+// Strong content-hash ETags for rendered pages, keyed by absolute filename.
+// render() streams PRE-COMPILED files (no per-request templating), so a
+// representation's bytes only change on deploy: hash once per (size, mtime)
+// generation and reuse. Hashing the content — instead of a stat signature —
+// is what makes the 304 path safe by construction: it can only fire when the
+// client's stored bytes are identical to what would be streamed, so
+// revalidation can never pin a stale page. Any failure falls back to a full
+// 200, which is exactly the pre-ETag behavior.
+const renderEtagCache = new Map();
+
 class Response {
 
 	constructor(res, options) {
@@ -94,39 +104,99 @@ class Response {
     candidates.push({ filename: baseFilename, encoding: '' });
 
     let hasNegotiation = candidates.some((candidate) => candidate.encoding !== '');
-    obj.resolveFirstAvailableFile(candidates, (err, selectedFile) => {
+    obj.resolveFirstAvailableFile(candidates, (err, selectedFile, stats) => {
       if (err || !selectedFile) {
         return obj.error404();
       }
 
-      obj.res.setHeader('Content-Type', 'text/html; charset=utf-8');
-      // Rendered pages must never be reused without asking the server: with no
-      // Cache-Control, browsers and WebViews apply heuristic caching and can
-      // keep serving an old page after a deploy — its asset references
-      // (`?v=size-mtime`) then resolve to NEWER file contents (the server
-      // ignores the query when reading the file) and the app boots with
-      // mismatched document/assets. WKWebView is the worst offender (no
-      // service worker there to rotate anything).
-      obj.res.setHeader('Cache-Control', 'no-cache, must-revalidate');
-      if (hasNegotiation) {
-        obj.res.setHeader('Vary', 'Accept-Encoding');
-      }
-      if (selectedFile.encoding) {
-        obj.res.setHeader('Content-Encoding', selectedFile.encoding);
-      }
+      obj.renderEtag(selectedFile.filename, stats, (etagErr, etag) => {
+        let hasEtag = !etagErr && Boolean(etag);
 
-      let fileStream = fs.createReadStream(selectedFile.filename);
-      fileStream.on('error', () => {
-        obj.error404();
-      });
-      obj.res.on('close', () => {
-        if (!obj.res.writableEnded) {
-          fileStream.destroy();
+        // Rendered pages must never be reused without asking the server: with
+        // no Cache-Control, browsers and WebViews apply heuristic caching and
+        // can keep serving an old page after a deploy — its asset references
+        // (`?v=size-mtime`) then resolve to NEWER file contents (the server
+        // ignores the query when reading the file) and the app boots with
+        // mismatched document/assets. WKWebView is the worst offender.
+        // `no-cache` + the ETag turn every boot into a cheap revalidation:
+        // 304 while the page is unchanged, a full 200 the moment a deploy
+        // lands. 304s carry the headers RFC 9110 asks for and no entity
+        // headers (there is no entity).
+        if (hasEtag && obj.etagMatches(request.ifNoneMatch, etag)) {
+          let notModifiedHeaders = {
+            'Cache-Control': 'no-cache, must-revalidate',
+            'ETag': etag
+          };
+          if (hasNegotiation) {
+            notModifiedHeaders['Vary'] = 'Accept-Encoding';
+          }
+          obj.res.writeHead(304, notModifiedHeaders);
+          return obj.res.end();
         }
+
+        obj.res.setHeader('Content-Type', 'text/html; charset=utf-8');
+        obj.res.setHeader('Cache-Control', 'no-cache, must-revalidate');
+        if (hasEtag) {
+          obj.res.setHeader('ETag', etag);
+        }
+        if (hasNegotiation) {
+          obj.res.setHeader('Vary', 'Accept-Encoding');
+        }
+        if (selectedFile.encoding) {
+          obj.res.setHeader('Content-Encoding', selectedFile.encoding);
+        }
+
+        let fileStream = fs.createReadStream(selectedFile.filename);
+        fileStream.on('error', () => {
+          obj.error404();
+        });
+        obj.res.on('close', () => {
+          if (!obj.res.writableEnded) {
+            fileStream.destroy();
+          }
+        });
+        fileStream.pipe(obj.res);
       });
-      fileStream.pipe(obj.res);
     });
 	}
+
+  // Strong ETag of the exact representation being streamed (the .br/.gz file
+  // when negotiated): each encoding hashes to its own tag, so a client that
+  // switches encodings can never false-match a different body. sha1 here is a
+  // cache validator, not a security boundary. Hash errors fall back to
+  // serving without a validator (the pre-1.7.0 behavior).
+  renderEtag(filename, stats, callback) {
+    let fs = require("fs"),
+      crypto = require("crypto");
+    let cached = renderEtagCache.get(filename);
+    if (cached && stats && cached.size === stats.size && cached.mtimeMs === stats.mtimeMs) {
+      return callback(null, cached.etag);
+    }
+    fs.readFile(filename, (readErr, contents) => {
+      if (readErr) {
+        return callback(readErr);
+      }
+      let etag = `"${crypto.createHash('sha1').update(contents).digest('hex')}"`;
+      if (stats) {
+        renderEtagCache.set(filename, { size: stats.size, mtimeMs: stats.mtimeMs, etag: etag });
+      }
+      callback(null, etag);
+    });
+  }
+
+  // If-None-Match per RFC 9110: comma-separated list, weak comparison
+  // (`W/` prefixes ignored on both sides), `*` matches any representation.
+  etagMatches(ifNoneMatch, etag) {
+    if (!ifNoneMatch || !etag) {
+      return false;
+    }
+    if (ifNoneMatch.trim() === '*') {
+      return true;
+    }
+    let normalize = (value) => value.trim().replace(/^W\//, '');
+    let target = normalize(etag);
+    return ifNoneMatch.split(',').some((candidate) => normalize(candidate) === target);
+  }
 
   resolveFirstAvailableFile(candidates, callback) {
     let fs = require("fs");
@@ -139,7 +209,7 @@ class Response {
 
       fs.stat(currentCandidate.filename, (err, stats) => {
         if (!err && stats && stats.isFile()) {
-          return callback(null, currentCandidate);
+          return callback(null, currentCandidate, stats);
         }
         index = index + 1;
         resolveCandidate();
