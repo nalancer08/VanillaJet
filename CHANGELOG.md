@@ -4,6 +4,21 @@ All notable project changes are documented in this file.
 
 The format follows a structure inspired by Keep a Changelog and semantic versioning.
 
+## [1.8.0] - 2026-07-29
+
+### Added
+
+- **The browser-side client core ships inside the package (`client/vanillaJet.js`).** Until now every
+  consumer app carried its own copy of the frontend framework and they drifted (one app ran a version
+  four minor lines behind; another had a reverted performance fix silently restored). The build now
+  minifies the packaged core to `public/scripts/core/vanillaJet.min.js` — same pipeline as any app
+  script: fingerprinted (`?v=`), immutable, brotli/gzip precompressed. Migration is opt-in and
+  non-breaking: an app-local `assets/scripts/core/vanillaJet.js` still wins (with a loud build
+  warning) — delete it to adopt the packaged core and upgrade the frontend with the npm dependency.
+- The packaged core swaps views instantly: the legacy velocity exit/enter choreography (~1s of
+  artificial latency per navigation, and broken navigation whenever the velocity plugin failed to
+  load) is gone, and a regression test keeps it gone.
+
 ## [1.7.1] - 2026-07-28
 
 ### Fixed

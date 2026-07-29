@@ -57,6 +57,20 @@ function buildLess() {
 }
 
 // JavaScript tasks
+const UGLIFY_OPTIONS = {
+  compress: {
+    drop_console: false,
+    sequences: true,
+    dead_code: true,
+    conditionals: true,
+    booleans: true,
+    unused: true,
+    if_return: true,
+    join_vars: true
+  },
+  output: { ascii_only: true }
+};
+
 function uglifyJs() {
   return gulp.src([
     `${getCwd()}/assets/scripts/*.js`,
@@ -68,23 +82,34 @@ function uglifyJs() {
       dest: `${getCwd()}/public`,
       ext: '.min.js'
     }))
-    .pipe(uglify({
-      compress: {
-        drop_console: false,
-        sequences: true,
-        dead_code: true,
-        conditionals: true,
-        booleans: true,
-        unused: true,
-        if_return: true,
-        join_vars: true
-      },
-      output: { ascii_only: true }
-    }))
+    .pipe(uglify(UGLIFY_OPTIONS))
     .pipe(rename(function(path) {
       path.basename += '.min';
     }))
     .pipe(gulp.dest(`${getCwd()}/public/scripts`));
+}
+
+// Client core: the browser-side framework (Application, controllers/views
+// base classes, router glue) ships INSIDE this package so every consumer
+// runs the same core and upgrades with the npm dependency — no more drift
+// between per-app copies. Same output pipeline as any app script: minified
+// to public/scripts/core/vanillaJet.min.js, fingerprinted (?v=), immutable
+// and precompressed. An app-local assets/scripts/core/vanillaJet.js still
+// wins (legacy override) with a loud warning — delete it to adopt the
+// packaged core.
+function buildClientCore(done) {
+  const fs = require('fs');
+  const localCore = `${getCwd()}/assets/scripts/core/vanillaJet.js`;
+  if (fs.existsSync(localCore)) {
+    console.warn('VanillaJet - legacy local core detected (assets/scripts/core/vanillaJet.js): using it INSTEAD of the packaged client core. Delete the local file to adopt the packaged one.');
+    return done();
+  }
+  return gulp.src(`${__dirname}/client/vanillaJet.js`)
+    .pipe(uglify(UGLIFY_OPTIONS))
+    .pipe(rename(function(path) {
+      path.basename += '.min';
+    }))
+    .pipe(gulp.dest(`${getCwd()}/public/scripts/core`));
 }
 
 // Concatenation task
@@ -172,6 +197,7 @@ function watchFiles(cb) {
 const build = gulp.series(
   cleanBuildJS,
   uglifyJs,
+  buildClientCore,
   concatJs,
   cleanMinified,
   buildLess,
@@ -196,6 +222,7 @@ exports.compressJs = compressJs;
 exports.compressCss = compressCss;
 exports.compileTemplates = compileTemplates;
 exports.generateServiceWorker = generateServiceWorker;
+exports.buildClientCore = buildClientCore;
 exports.compressBr = compressBr;
 exports.build = build;
 exports.dev = dev;
