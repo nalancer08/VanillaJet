@@ -4,6 +4,22 @@ All notable project changes are documented in this file.
 
 The format follows a structure inspired by Keep a Changelog and semantic versioning.
 
+## [1.8.1] - 2026-07-30
+
+### Removed
+
+- **`gulp-shell` dependency.** Its `lodash.template` transitive dependency carries a Command
+  Injection advisory with no patched release. Build scripts now run through a small
+  `spawn`-based helper with inherited cwd/stdio — identical behavior, no vulnerable chain.
+- **`gulp-watch` dependency.** Unmaintained; dragged the vulnerable micromatch 2.x/3.x + braces 1.x
+  chain into every consumer app. The dev watch task now uses native `gulp.watch` (chokidar), which
+  has the same `(globs, task)` signature.
+
+### Security
+
+- Consumer apps drop their lodash.template / micromatch / braces / anymatch Dependabot alerts
+  by upgrading to this release.
+
 ## [1.8.0] - 2026-07-29
 
 ### Added

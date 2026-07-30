@@ -6,8 +6,7 @@ const gzip = require('gulp-gzip');
 const cleanCSS = require('gulp-clean-css');
 const rename = require('gulp-rename');
 const newer = require('gulp-newer');
-const shell = require('gulp-shell');
-const watch = require('gulp-watch');
+const { spawn } = require('child_process');
 const livereload = require('gulp-livereload');
 const del = require('del');
 const gulpif = require('gulp-if');
@@ -140,31 +139,40 @@ function compressCss() {
     .pipe(gulp.dest(`${getCwd()}/public/styles`));
 }
 
+// Runs a repo script as a child process, streaming its output. Replaces
+// gulp-shell (whose lodash.template dependency has no patched release);
+// cwd is inherited, matching gulp-shell's default resolution.
+function execScript(command) {
+  return new Promise((resolve, reject) => {
+    const child = spawn(command, { shell: true, stdio: 'inherit' });
+    child.on('exit', code => code === 0 ? resolve() : reject(new Error(`${command} exited with code ${code}`)));
+    child.on('error', reject);
+  });
+}
+
 // Template compilation
 function compileTemplates() {
-  return gulp.src('.')
-    .pipe(shell([`node scripts/compile_html.js ${buildEnv}`]));
+  return execScript(`node scripts/compile_html.js ${buildEnv}`);
 }
 
 // Kill-switch publication: every build publishes the self-destructing worker
 // at public/sw.js so leftover workers from the removed caching feature heal.
 function generateServiceWorker() {
-  return gulp.src('.')
-    .pipe(shell([`node scripts/generate_sw.js ${buildEnv}`]));
+  return execScript(`node scripts/generate_sw.js ${buildEnv}`);
 }
 
 // Brotli precompression of build outputs (served via Accept-Encoding negotiation)
 function compressBr() {
-  return gulp.src('.')
-    .pipe(shell([`node scripts/compress_br.js`]));
+  return execScript('node scripts/compress_br.js');
 }
 
-// Watch task
+// Watch task — native gulp.watch (chokidar); replaces the unmaintained
+// gulp-watch and its vulnerable micromatch 2.x/3.x chain.
 function watchFiles(cb) {
   livereload.listen();
-  
+
   // Watch LESS files
-  watch([`${base}/assets/styles/less/**/*.less`], gulp.series(
+  gulp.watch([`${base}/assets/styles/less/**/*.less`], gulp.series(
     buildLess,
     compressCss,
     compileTemplates,
@@ -173,13 +181,13 @@ function watchFiles(cb) {
   ));
 
   // Watch HTML files
-  watch([
+  gulp.watch([
     `${base}/assets/pages/*.html`,
     `${base}/assets/templates/**/*.html`
   ], compileTemplates);
 
   // Watch JS files
-  watch([`${base}/assets/scripts/**/*.js`], gulp.series(
+  gulp.watch([`${base}/assets/scripts/**/*.js`], gulp.series(
     cleanBuildJS,
     uglifyJs,
     concatJs,
@@ -189,7 +197,7 @@ function watchFiles(cb) {
     generateServiceWorker,
     compressBr
   ));
-  
+
   cb();
 }
 
