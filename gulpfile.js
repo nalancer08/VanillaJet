@@ -7,6 +7,7 @@ const cleanCSS = require('gulp-clean-css');
 const rename = require('gulp-rename');
 const newer = require('gulp-newer');
 const { spawn } = require('child_process');
+const fs = require('fs');
 const livereload = require('gulp-livereload');
 const del = require('del');
 const gulpif = require('gulp-if');
@@ -113,11 +114,17 @@ function buildClientCore(done) {
 
 // Concatenation task
 function concatJs() {
-  return gulp.src([
+  // gulp 5 errors on globs whose base directory does not exist (gulp 4
+  // silently skipped them) — consumer apps don't all share the same layout.
+  const sources = [
     `${getCwd()}/public/scripts/controllers/**/*.min.js`,
     `${getCwd()}/public/scripts/views/**/*.min.js`,
     `${getCwd()}/public/scripts/api/**/*.min.js`,
-    `${getCwd()}/public/scripts/*.min.js`,
+    `${getCwd()}/public/scripts/*.min.js`
+  ].filter(pattern => fs.existsSync(pattern.slice(0, pattern.indexOf('*') - 1)));
+
+  return gulp.src([
+    ...sources,
     `!${getCwd()}/public/scripts/core/**`,
     `!${getCwd()}/public/scripts/plugins/**`,
     `!${getCwd()}/public/scripts/plugins/ui/**`

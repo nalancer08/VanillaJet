@@ -4,6 +4,25 @@ All notable project changes are documented in this file.
 
 The format follows a structure inspired by Keep a Changelog and semantic versioning.
 
+## [1.9.0] - 2026-07-31
+
+### Changed
+
+- **gulp 4 → gulp 5.** Modernizes the whole build chain: the vulnerable micromatch 2.x/3.x +
+  braces 1.x/2.x lineage (ReDoS advisories, dismissed as tolerable in consumer apps) leaves the
+  dependency tree entirely. Verified end-to-end in a consumer app: full build, byte-identical
+  .gz/.br output (gulp 5's stream-encoding change does not corrupt the compression tasks),
+  dev watch unchanged.
+- `concatJs` now skips glob roots whose base directory does not exist — gulp 5 errors on them,
+  gulp 4 silently ignored them, and consumer apps don't all share the same layout.
+
+### Fixed
+
+- **The CLI now propagates gulp's exit code.** `vanilla-jet build*`/`dev` swallowed failures and
+  exited 0, letting Docker/CI ship a broken build as success.
+- Unknown or empty CLI commands (e.g. `build:` from an unset NODE_ENV) error out instead of
+  silently no-op'ing.
+
 ## [1.8.1] - 2026-07-30
 
 ### Removed
